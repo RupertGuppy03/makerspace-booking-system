@@ -10,8 +10,8 @@ user.ts          → User
 
 ## Rules
 
-- These must match the backend. If someone changes a C# model in
-  `backend/src/ToolBooking.Api/Models/`, the matching type here changes in the same PR.
+- These must match the backend. If someone changes a C# model, the matching type here changes in
+  the same PR.
 - C# `PascalCase` properties usually serialise to `camelCase` JSON — type what the API actually
   sends, not what the C# class looks like.
 - Use `type` for object shapes, `interface` only when you need to extend.

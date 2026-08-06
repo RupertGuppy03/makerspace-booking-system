@@ -50,7 +50,14 @@ src/ToolBooking.Api/
 tests/ToolBooking.Api.Tests/   xUnit tests
 ```
 
-Each folder has its own README.
+These folders don't exist yet — the `dotnet new` commands above create them.
+
+- **Controllers** — HTTP endpoints, kept thin. No business logic, no database queries.
+- **Models** — `Tool`, `Reservation`, `User`. Keep them in step with `frontend/src/types/`.
+- **Data** — `AppDbContext` and EF Core migrations.
+- **Services** — the actual rules: is this tool free, is this user allowed to book it. This is the
+  layer worth unit testing.
+- **Auth** — validates the JWT that Supabase issued. We never handle passwords ourselves.
 
 ## Config
 
@@ -59,5 +66,6 @@ Copy `.env.example` → `.env`. Connection strings and the JWT signing key never
 
 ## TODO
 
+- Install the .NET 8 SDK.
 - Scaffold the projects with the commands above.
-- Add a `backend.yml` GitHub Actions workflow (build + test) once there's something to build.
+- Add CI (build + test on push) once there's something to build.

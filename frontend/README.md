@@ -15,8 +15,10 @@ npm install react-router-dom @tanstack/react-query \
             @mui/material @mui/icons-material @emotion/react @emotion/styled \
             recharts @supabase/supabase-js
 
-npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom @playwright/test
+npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
 ```
+
+(Playwright for end-to-end tests comes later, if we need it — it's a big install.)
 
 ## Running it (once scaffolded)
 
@@ -25,7 +27,6 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # production build
 npm run test       # Vitest
-npx playwright test
 ```
 
 ## Folder layout
@@ -38,7 +39,6 @@ npx playwright test
 | `src/types/` | Shared TypeScript types mirroring the backend models |
 | `src/lib/` | Supabase client, helpers, formatting utils |
 | `src/tests/` | Vitest + React Testing Library unit tests |
-| `e2e/` | Playwright end-to-end tests |
 
 ## Environment
 

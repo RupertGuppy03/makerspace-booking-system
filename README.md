@@ -13,7 +13,7 @@ A web app for booking tools in a university makerspace.
 | Backend | C# ASP.NET Core Web API (.NET 8), EF Core, Npgsql |
 | Database | Supabase (Postgres) |
 | Auth | Supabase Auth — JWTs issued by Supabase, validated by the backend |
-| Testing | xUnit (backend), Vitest + React Testing Library (frontend), Playwright (E2E) |
+| Testing | Vitest + React Testing Library (frontend), xUnit (backend), Playwright for E2E later |
 | CI | GitHub Actions |
 
 ## Who owns what
@@ -34,14 +34,21 @@ files that cause merge conflicts.
 ## Folder map
 
 ```
-docs/        design notes — architecture, API, DB schema, auth, dev setup
-database/    Supabase schema + seed data (SQL)
 frontend/    React app (see frontend/README.md)
-backend/     ASP.NET Core Web API + xUnit tests (see backend/README.md)
-.github/     CI workflows
+backend/     ASP.NET Core Web API (see backend/README.md)
 ```
 
 Every folder has a `README.md` explaining what belongs in it. Read it before adding files there.
+
+### Deliberately not here yet
+
+We cut `docs/`, `database/`, `.github/workflows/` (CI) and `e2e/` (Playwright) to keep the repo
+small while we're only building pages. They're all in the first commit, so add any of them back
+with:
+
+```bash
+git checkout 3f586f5 -- docs database .github
+```
 
 ## Getting set up
 
@@ -73,9 +80,8 @@ dotnet run
 ## Testing
 
 ```bash
-cd frontend && npm run test      # Vitest unit tests
-cd frontend && npx playwright test  # E2E
-cd backend && dotnet test        # xUnit
+cd frontend && npm run test   # Vitest unit tests
+cd backend && dotnet test     # xUnit
 ```
 
 ## Secrets
@@ -87,6 +93,7 @@ Never commit real keys. Each half has a `.env.example` listing the variables it 
 
 1. **Frontend scaffold** — `npm create vite`, install dependencies, add the four page stubs and the
    router so everyone has a URL that renders their own file.
-2. Backend scaffold — `dotnet new webapi` + xUnit test project.
-3. Supabase project + schema.
-4. CI workflows.
+2. Build the pages.
+3. Backend scaffold — `dotnet new webapi` + xUnit test project.
+4. Supabase project + schema (bring `database/` back).
+5. CI workflows (bring `.github/` back).

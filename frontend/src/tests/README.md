@@ -17,4 +17,5 @@ npm run test -- --run  # single pass, what CI does
 - Components using TanStack Query need a `QueryClientProvider` wrapper — write one shared render
   helper here rather than repeating it in every test.
 
-Full user journeys across pages go in `e2e/` (Playwright), not here.
+This covers single components and hooks. Whole user journeys across pages (log in → book a tool →
+see it listed) would need Playwright — we've left that out for now.
