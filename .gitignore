@@ -37,11 +37,6 @@ x86/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
-*.user
-*.userosscache
-*.suo
-*.sln.docstates
-*.userprefs
 project.lock.json
 project.fragment.lock.json
 artifacts/
@@ -50,31 +45,80 @@ artifacts/
 **/[Pp]ackages/*
 !**/[Pp]ackages/build/
 
-# .NET test results
+# ---------- Test output (Visual Studio Test Explorer, dotnet test, coverage) ----------
+# These are generated every time anyone runs the tests. Never commit them.
 [Tt]est[Rr]esult*/
-[Bb]uild[Ll]og.*
+[Tt]est[Rr]esults/
 *.trx
-*.coverage
-*.coveragexml
+*.testlog
 *.VisualState.xml
 TestResult.xml
+[Bb]uild[Ll]og.*
+
+# Code coverage — coverlet, dotCover, VS coverage
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+*.dotCover
+BenchmarkDotNet.Artifacts/
+
+# NCrunch (continuous test runner some VS installs ship with)
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
 
 # ---------- Visual Studio ----------
+# .vs/ is the big one — per-developer window layout, editor state and the
+# SQLite database VS uses for IntelliSense. It changes constantly and is the
+# usual cause of "conflict in a file I never opened".
 .vs/
 *.rsuser
 *.suo
+*.user
+*.userosscache
+*.userprefs
+*.sln.docstates
 *.sln.ide/
-*.ncrunch*
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+*.cachefile
+*.dbmdl
+*.jfm
+.vshistory/
+.localhistory/
+*.svclog
+*.scc
+
+# MSBuild / profiler output
+msbuild.log
+msbuild.err
+msbuild.wrn
+*.binlog
+*.tlog
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ReSharper / Rider plugins inside VS
 _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
+.sonarqube/
 
 # ---------- VS Code ----------
+# Ignore everything personal, but keep the four files worth sharing so the
+# whole team gets the same formatting and debug config.
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.history/
+.ionide/
 *.code-workspace
 
 # ---------- JetBrains (Rider / WebStorm) ----------
