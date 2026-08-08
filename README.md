@@ -2,8 +2,7 @@
 
 A web app for booking tools in a university makerspace.
 
-> **Status: skeleton only.** This commit is the folder structure and documentation. There is no
-> code yet — nothing builds or runs. See [What's next](#whats-next).
+> **Status: Default Template.** This commit is the project immediately after being made in visual studio, with only minor changes in folder structure
 
 ## Stack
 
@@ -25,5 +24,8 @@ You need:
 - **.NET 8 SDK** — for the backend. Note .NET 9 is *not* a substitute; the project targets `net8.0`.
 - **git**
 
-Nothing to install yet — there's no `package.json` or `.csproj` in this commit.
+
+In visual studio, you should simply be able to press "start" to run the asp.net server and react frontend
+
+In VSCode, you need to open program.cs in the server, then F5 or "Run and Debug". Then select C# then C#: Launch startup project. From then on, pressing F5 or debug should start it as usual.
 
