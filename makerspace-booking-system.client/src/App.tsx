@@ -1,39 +1,46 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
+interface Tool {
+    Id: number;
+    CreatedAt: Date;
+    Name: string;
+    IsTakenOut: boolean;
+    MaintenancePeriod: number;
+    LastMaintained: Date;
 }
 
 function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+    const [tools, setTools] = useState<String[]>();
 
     useEffect(() => {
         populateWeatherData();
     }, []);
 
-    const contents = forecasts === undefined
+    const contents = tools === undefined
         ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
         : <table className="table table-striped" aria-labelledby="tableLabel">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Is Taken Out</th>
+                    <th>Maintenance Period</th>
+                    <th>Last Maintained</th>
                 </tr>
             </thead>
             <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
+                {tools.map((name, idx) =>
+                    <tr key={idx}>
+                        <td>{name}</td>
                     </tr>
+                    // <tr key={tools.Id}>
+                    //     <td>{tools.Id}</td>
+                    //     <td>{tools.Name}</td>
+                    //     <td>{tools.IsTakenOut}</td>
+                    //     <td>{tools.MaintenancePeriod}</td>
+                    //     <td>{tools.LastMaintained.toDateString()}</td>
+                    // </tr>
                 )}
             </tbody>
         </table>;
@@ -50,7 +57,7 @@ function App() {
         const response = await fetch('weatherforecast');
         if (response.ok) {
             const data = await response.json();
-            setForecasts(data);
+            setTools(data);
         }
     }
 }

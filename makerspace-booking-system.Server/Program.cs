@@ -1,3 +1,5 @@
+using makerspace_booking_system.Server.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,25 +21,60 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// ####################
+// ## Supabase Setup ##
+// ####################
 
-app.MapGet("/weatherforecast", () =>
+var url = Environment.GetEnvironmentVariable("SUPABASE_URL");
+var key = builder.Configuration["SUPABASE_KEY:ServiceApiKey"];
+
+var options = new Supabase.SupabaseOptions
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    AutoConnectRealtime = true
+};
+var supabase = new Supabase.Client(url, key, options);
+await supabase.InitializeAsync();
+
+
+// ################################
+// ## Minimal API endpoints here ##
+// ################################
+
+
+
+
+
+app.MapGet("/weatherforecast", async () =>
+{
+    var result = await supabase.From<Tool>().Get();
+    var tools = result.Models;
+    return tools.Select(t => t.Name);
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
+
+//var summaries = new[]
+//{
+//    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+//};
+
+//app.MapGet("/weatherforecastexample", () =>
+//{
+//    var forecast = Enumerable.Range(1, 5).Select(index =>
+//        new WeatherForecast
+//        (
+//            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+//            Random.Shared.Next(-20, 55),
+//            summaries[Random.Shared.Next(summaries.Length)]
+//        ))
+//        .ToArray();
+//    return forecast;
+//})
+//.WithName("GetWeatherForecastExample")
+//.WithOpenApi();
+
+
+
 
 app.MapFallbackToFile("/index.html");
 
