@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
+
+//Attritubes of Tool here must be in camelCase, even though in the server they are in PascalCase
 interface Tool {
-    Id: number;
-    CreatedAt: Date;
-    Name: string;
-    IsTakenOut: boolean;
-    MaintenancePeriod: number;
-    LastMaintained: Date;
+    id: number;
+    createdAt: Date;
+    name: string;
+    isTakenOut: boolean;
+    maintenancePeriod: number;
+    lastMaintained: Date;
 }
 
 function App() {
-    const [tools, setTools] = useState<String[]>();
+    const [tools, setTools] = useState<Tool[]>();
 
     useEffect(() => {
         populateWeatherData();
@@ -19,7 +21,8 @@ function App() {
 
     const contents = tools === undefined
         ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
+        : <div>
+            <table className="table table-striped" aria-labelledby="tableLabel">
             <thead>
                 <tr>
                     <th>Id</th>
@@ -30,20 +33,20 @@ function App() {
                 </tr>
             </thead>
             <tbody>
-                {tools.map((name, idx) =>
+                {tools.map((tool, idx) =>
                     <tr key={idx}>
-                        <td>{name}</td>
+                        <td>{tool.id}</td>
+                        <td>{tool.name}</td>
+                        <td>{tool.isTakenOut ? "true" : "false"}</td>
+                        <td>{tool.maintenancePeriod}</td>
+                        <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
                     </tr>
-                    // <tr key={tools.Id}>
-                    //     <td>{tools.Id}</td>
-                    //     <td>{tools.Name}</td>
-                    //     <td>{tools.IsTakenOut}</td>
-                    //     <td>{tools.MaintenancePeriod}</td>
-                    //     <td>{tools.LastMaintained.toDateString()}</td>
-                    // </tr>
                 )}
             </tbody>
-        </table>;
+        </table>
+            <p>
+        </p>
+        </div>;
 
     return (
         <div>

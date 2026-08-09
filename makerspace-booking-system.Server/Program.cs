@@ -40,38 +40,29 @@ await supabase.InitializeAsync();
 // ## Minimal API endpoints here ##
 // ################################
 
-
-
-
-
 app.MapGet("/weatherforecast", async () =>
 {
     var result = await supabase.From<Tool>().Get();
-    var tools = result.Models;
-    return tools.Select(t => t.Name);
+    var supaTools = result.Models;
+
+    // Project to simple object so it can be serialized and read by React
+    var tools = supaTools.Select(t => new
+    {
+        t.Id,
+        t.CreatedAt,
+        t.Name,
+        t.IsTakenOut,
+        t.MaintenancePeriod,
+        t.LastMaintained
+    });
+    return tools;
+
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
-//var summaries = new[]
-//{
-//    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-//};
 
-//app.MapGet("/weatherforecastexample", () =>
-//{
-//    var forecast = Enumerable.Range(1, 5).Select(index =>
-//        new WeatherForecast
-//        (
-//            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//            Random.Shared.Next(-20, 55),
-//            summaries[Random.Shared.Next(summaries.Length)]
-//        ))
-//        .ToArray();
-//    return forecast;
-//})
-//.WithName("GetWeatherForecastExample")
-//.WithOpenApi();
+
 
 
 
