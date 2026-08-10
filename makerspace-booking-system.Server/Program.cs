@@ -1,4 +1,6 @@
 using makerspace_booking_system.Server.Models;
+using Supabase.Gotrue;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,11 +38,13 @@ var supabase = new Supabase.Client(url, key, options);
 await supabase.InitializeAsync();
 
 
+
+
 // ################################
 // ## Minimal API endpoints here ##
 // ################################
 
-app.MapGet("/weatherforecast", async () =>
+app.MapGet("/api/tools", async () =>
 {
     var result = await supabase.From<Tool>().Get();
     var supaTools = result.Models;
@@ -57,9 +61,38 @@ app.MapGet("/weatherforecast", async () =>
     });
     return tools;
 
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+});
+
+app.MapGet("/api/user", async () =>
+{
+    //This really needs to be improved to use proper https 
+    var session = supabase.Auth.CurrentSession;
+    if (session == null) return Results.Ok(new {Email = "No active session" });
+    var user = session.User;
+    if (user == null) return Results.Ok(new {Email = "No session user" });
+    var email = user.Email;
+    return Results.Ok(new {Email = email });
+
+});
+
+// TODO: make the login/signup use the JWT from the client instead of being server-side logged in
+// For both Get and Post apis above and below
+
+app.MapPost("/api/signup", async (AuthDetails authDetails) =>
+{
+    //var options = new SignUpOptions { RedirectTo = "https://example.com/welcome" };
+    var options = new SignUpOptions { };
+    var session = await supabase.Auth.SignUp(authDetails.Email, authDetails.Password, options);
+    return "good";
+});
+
+app.MapPost("/api/login", async (AuthDetails authDetails) =>
+{
+    //var options = new SignInOptions { RedirectTo = "https://example.com/welcome" };
+    var options = new SignInOptions { };
+    var session = await supabase.Auth.SignIn(authDetails.Email, authDetails.Password);
+    return "good";
+});
 
 
 
@@ -70,8 +103,3 @@ app.MapGet("/weatherforecast", async () =>
 app.MapFallbackToFile("/index.html");
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

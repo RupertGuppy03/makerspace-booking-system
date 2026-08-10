@@ -14,9 +14,11 @@ interface Tool {
 
 function App() {
     const [tools, setTools] = useState<Tool[]>();
+    const [userEmail, setUserEmail] = useState<string>();
 
     useEffect(() => {
         populateWeatherData();
+        populateUserEmail();
     }, []);
 
     const contents = tools === undefined
@@ -44,25 +46,34 @@ function App() {
                 )}
             </tbody>
         </table>
-            <p>
-        </p>
+         
         </div>;
 
     return (
         <div>
             <h1 id="tableLabel">Weather forecast</h1>
+            <p>Current User Email: {userEmail}</p>
             <p>This component demonstrates fetching data from the server.</p>
-            {contents}
+             {contents}
         </div>
     );
 
     async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
+        const response = await fetch('/api/tools');
         if (response.ok) {
             const data = await response.json();
             setTools(data);
         }
     }
+
+    async function populateUserEmail() {
+        const response = await fetch('/api/user');
+        if (response.ok) {
+            const data = await response.json();
+            setUserEmail(data.email);
+        }
+    }
+
 }
 
 export default App;
