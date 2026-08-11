@@ -16,7 +16,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",
-        "SUPABASE_URL": "https://lgdibgzpiizbpdnryefb.supabase.co",
+        "SUPABASE_URL": "https://lgdibgzpiizbpdnryefb.supabase.co"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7249;http://localhost:5047"
