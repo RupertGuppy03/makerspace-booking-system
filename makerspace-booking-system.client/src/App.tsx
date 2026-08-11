@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { supabase } from "./lib/supabaseClient"
 import './App.css';
 
 
@@ -67,11 +68,9 @@ function App() {
     }
 
     async function populateUserEmail() {
-        const response = await fetch('/api/user');
-        if (response.ok) {
-            const data = await response.json();
-            setUserEmail(data.email);
-        }
+        const { data: { user } } = await supabase.auth.getUser()
+        const email = user?.email || "not logged in";
+        setUserEmail(email);
     }
 
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './Signup.css'
+import { supabase } from '../../lib/supabaseClient'
 
 interface AuthDetails {
     email: string,
@@ -17,28 +18,16 @@ function Signup() {
 
 
     //TODO: combine login and signup into a shared component
-    const handleLogin = async (/*event*/) => {
-        //event.preventDefault()
+    //TODO: have it return to user page on success
+    const handleSignup = async (event : any) => {
+        event.preventDefault()
         setLoading(true)
-
-        var authDetails : AuthDetails = {
-            email: email,
-            password: password
+        const { error } = await supabase.auth.signUp({ email, password })
+        if (error) {
+            alert(error.message)
+        } else {
+            alert('Signup successful')
         }
-
-        const response = await fetch('/api/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(authDetails)
-
-        });
-
-        if (!response.ok) {
-            alert("response failed");
-        }
-        alert("Successful signup");
 
 
         setLoading(false)
@@ -49,7 +38,7 @@ function Signup() {
             <div className="col-6 form-widget">
                 <h1 className="header">Supabase + React</h1>
                 <p className="description">Sign up with email and password</p>
-                <form className="form-widget" onSubmit={handleLogin}>
+                <form className="form-widget" onSubmit={handleSignup}>
                     <div>
                         <input
                             className="inputField"
