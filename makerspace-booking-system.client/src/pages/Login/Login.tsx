@@ -2,11 +2,6 @@ import { useState } from 'react'
 import { supabase } from "../../lib/supabaseClient"
 import './Login.css'
 
-interface AuthDetails {
-    email: string,
-    password: string
-}
-
 export default function Login() {
 
     const [loading, setLoading] = useState(false)

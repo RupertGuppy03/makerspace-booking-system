@@ -2,11 +2,6 @@ import { useState } from 'react'
 import './Signup.css'
 import { supabase } from '../../lib/supabaseClient'
 
-interface AuthDetails {
-    email: string,
-    password: string
-}
-
 
 function Signup() {
 
@@ -19,7 +14,7 @@ function Signup() {
 
     //TODO: combine login and signup into a shared component
     //TODO: have it return to user page on success
-    const handleSignup = async (event : any) => {
+    const handleSignup = async (event: any) => {
         event.preventDefault()
         setLoading(true)
         const { error } = await supabase.auth.signUp({ email, password })

@@ -1,4 +1,6 @@
 using makerspace_booking_system.Server.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Supabase.Gotrue;
 using System.Text.Json;
 
@@ -69,6 +71,21 @@ app.MapGet("/api/user", async () =>
     //return data related to user
     //return Results.Ok(new {Email = email });
 
+});
+
+app.MapPost("/api/reservation", async (ReservationDto reservationDto) =>
+{
+    // test if Reservation can be pulled directly out instead of reservationDetails
+    var reservation = new Reservation
+    {
+        StartDay = reservationDto.StartDay,
+        EndDay = reservationDto.EndDay,
+        ToolId = reservationDto.ToolId,
+        UserId = reservationDto.UserId
+    };
+
+    await supabase.From<Reservation>().Insert(reservation);
+    return "good"; //TODO not sure what to return here
 });
 
 
