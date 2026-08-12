@@ -1,58 +1,65 @@
 import { useEffect, useState } from 'react';
-import './App.css';
+import './../../App.css';
 
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
+interface Tool {
+    id: number;
+    createdAt: Date;
+    name: string;
+    isTakenOut: boolean;
+    maintenancePeriod: number;
+    lastMaintained: Date;
 }
 
-function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+function AdminPage() {
+    const [tools, setTools] = useState<Tool[]>();
 
     useEffect(() => {
         populateWeatherData();
     }, []);
 
-    const contents = forecasts === undefined
+    const contents = tools === undefined
         ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
+        : <div>
+            <table className="table table-striped" aria-labelledby="tableLabel">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Is Taken Out</th>
+                        <th>Maintenance Period</th>
+                        <th>Last Maintained</th>
                     </tr>
-                )}
-            </tbody>
-        </table>;
+                </thead>
+                <tbody>
+                    {tools.map((tool, idx) =>
+                        <tr key={idx}>
+                            <td>{tool.id}</td>
+                            <td>{tool.name}</td>
+                            <td>{tool.isTakenOut ? "true" : "false"}</td>
+                            <td>{tool.maintenancePeriod}</td>
+                            <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+
+        </div>;
 
     return (
         <div>
-            <h1 id="tableLabel">Admin Page</h1>
+            <h1 id="tableLabel">Weather forecast</h1>
             <p>This component demonstrates fetching data from the server.</p>
             {contents}
         </div>
     );
 
     async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
+        const response = await fetch('/api/tools');
         if (response.ok) {
             const data = await response.json();
-            setForecasts(data);
+            setTools(data);
         }
     }
 }
 
-export default App;
+export default AdminPage;

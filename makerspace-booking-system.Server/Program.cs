@@ -1,4 +1,6 @@
 using makerspace_booking_system.Server.Models;
+using Supabase.Gotrue;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,11 +38,13 @@ var supabase = new Supabase.Client(url, key, options);
 await supabase.InitializeAsync();
 
 
+
+
 // ################################
 // ## Minimal API endpoints here ##
 // ################################
 
-app.MapGet("/weatherforecast", async () =>
+app.MapGet("/api/tools", async () =>
 {
     var result = await supabase.From<Tool>().Get();
     var supaTools = result.Models;
@@ -57,9 +61,16 @@ app.MapGet("/weatherforecast", async () =>
     });
     return tools;
 
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+});
+
+app.MapGet("/api/user", async () =>
+{
+    //receive JWT
+    //return data related to user
+    //return Results.Ok(new {Email = email });
+
+});
+
 
 
 
@@ -70,8 +81,3 @@ app.MapGet("/weatherforecast", async () =>
 app.MapFallbackToFile("/index.html");
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
