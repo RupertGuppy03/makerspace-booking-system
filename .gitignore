@@ -133,3 +133,13 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# ---------- Claude Code / AI assistant ----------
+# Personal AI working files. CLAUDE.md is an individual working agreement with
+# the assistant (how I want to be taught and helped), not a team standard — so
+# it stays local rather than being imposed on everyone else's setup.
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+# If the team later wants shared permissions or hooks, un-ignore just that file:
+# !.claude/settings.json
