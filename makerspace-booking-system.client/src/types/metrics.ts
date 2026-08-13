@@ -22,10 +22,12 @@ export type RevenueMetrics = {
 
 export type UserMetrics = {
     onTimeReturnRate: number;
+    averageOverdueDays: number;
     cancellationRate: number;
     noShowRate: number;
 
     onTimeReturnTrend: MonthlyRate[];
+    averageOverdueTrend: MonthlyDuration[];
     cancellationTrend: MonthlyRate[];
     noShowTrend: MonthlyRate[];
 };
@@ -41,13 +43,13 @@ export type ToolUtilisation = {
 export type ToolDamage = {
     toolId: number;
     toolName: string;
-    damageRate: number;
+    damageCount: number;
 }
 
 export type ToolDemand = {
     toolId: number;
     toolName: string;
-    demandRate: number;
+    requestCount: number;
 }
 
 export type ToolMetrics = {
