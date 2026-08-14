@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="makerspace-booking-system.client/makerspace-booking-system.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="makerspace-booking-system.Server/makerspace-booking-system.Server.csproj" />
+</Solution>

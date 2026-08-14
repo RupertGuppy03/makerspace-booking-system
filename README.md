@@ -2,8 +2,26 @@
 
 A web app for booking tools in a university makerspace.
 
-> **Status: skeleton only.** This commit is the folder structure and documentation. There is no
-> code yet — nothing builds or runs. See [What's next](#whats-next).
+> **Status: Default Template.** This commit is the project immediately after being made in visual studio, with only minor changes in folder structure
+
+## Getting set up
+
+You need:
+
+- **Node 20+** (we're on 24) — for the frontend
+- **.NET 8 SDK** — for the backend. Note .NET 9 is *not* a substitute; the project targets `net8.0`.
+- **git**
+
+
+The first time you need to set the Supabase API secret key:
+- in the terminal, navigate to makerspace-booking-service.Server
+- run `dotnet user-secrets init`
+- run `dotnet user-secrets set "SUPABASE_KEY:ServiceApiKey" "<secret key>"`
+
+In visual studio, you should simply be able to press "start" to run the asp.net server and react frontend
+
+In VSCode, you need the C# Dev Kit extension. To run it, open program.cs in the server folder and press F5 or "Run and Debug". Then select C# then C#: Launch startup project. From then on, pressing F5 or debug should start it as usual.
+
 
 ## Stack
 
@@ -16,14 +34,4 @@ A web app for booking tools in a university makerspace.
 | Testing | Vitest + React Testing Library (frontend), xUnit (backend), Playwright for E2E later |
 | CI | GitHub Actions |
 
-
-## Getting set up
-
-You need:
-
-- **Node 20+** (we're on 24) — for the frontend
-- **.NET 8 SDK** — for the backend. Note .NET 9 is *not* a substitute; the project targets `net8.0`.
-- **git**
-
-Nothing to install yet — there's no `package.json` or `.csproj` in this commit.
 
