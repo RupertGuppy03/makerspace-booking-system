@@ -15,10 +15,10 @@ namespace makerspace_booking_system.Server.Models
         [Column("end_day")]
         public DateTime EndDay { get; set; }
 
-        [Column("equipment_id")]
-        public int EquipmentId { get; set; }
+        [Column("tool_id")]
+        public int ToolId { get; set; }
 
         [Column("user_id")]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
     }
 }
