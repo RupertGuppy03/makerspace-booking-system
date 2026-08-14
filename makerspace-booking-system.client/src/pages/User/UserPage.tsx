@@ -82,7 +82,7 @@ function UserPage() {
 
     async function populateUserEmailNew() {
         const email = user?.email || "not logged in";
-        setUserEmailNew(email);
+        setUserEmail(email);
     }
 
     async function handleReserve(toolId : number) {
