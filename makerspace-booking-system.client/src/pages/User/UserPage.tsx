@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from "../../lib/supabaseClient"
-import type { User } from '@supabase/supabase-js';
 import './UserPage.css';
 import type { Tool } from "../../types/tool";
 import type { Reservation } from "../../types/reservation";
 import { useAuth } from '../../lib/authProvider';
 import type { NewReservation } from '../../types/newReservasion';
+import AccountBanner from '../../components/accountBanner'
 
 
 function UserPage() {
@@ -14,11 +14,13 @@ function UserPage() {
     const [tools, setTools] = useState<Tool[]>();
     const [userEmail, setUserEmail] = useState<string>();
     const { user } = useAuth();
+    const userEmailNew = user?.email ?? 'not logged in';
     
 
     useEffect(() => {
         populateWeatherData();
         populateUserEmail();
+        populateUserEmailNew();
     }, []);
 
     const table = tools === undefined
@@ -51,8 +53,8 @@ function UserPage() {
 
     return (
         <div>
+            <AccountBanner />
             <h1 id="tableLabel">User Tool View</h1>
-            <p>Current User Email: {userEmail}</p>
             <p>This page shows all tools from the database and allows you to reverse one if logged in</p>
             <br />
             <div>
@@ -76,6 +78,11 @@ function UserPage() {
         const { data: { user } } = await supabase.auth.getUser()
         const email = user?.email || "not logged in";
         setUserEmail(email);
+    }
+
+    async function populateUserEmailNew() {
+        const email = user?.email || "not logged in";
+        setUserEmailNew(email);
     }
 
     async function handleReserve(toolId : number) {

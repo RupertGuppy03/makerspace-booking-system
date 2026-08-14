@@ -1,22 +1,14 @@
 import { useEffect, useState } from 'react';
-import { supabase } from "./lib/supabaseClient"
+import { supabase } from "./lib/supabaseClient";
 import './App.css';
+import AccountBanner from './components/accountBanner';
 
-
-//Attritubes of Tool here must be in camelCase, even though in the server they are in PascalCase
-interface Tool {
-    id: number;
-    createdAt: Date;
-    name: string;
-    isTakenOut: boolean;
-    maintenancePeriod: number;
-    lastMaintained: Date;
-}
 
 function App() {
 
     return (
         <div>
+        <AccountBanner />
             <h1 id="tableLabel">Available Pages</h1>
             <p>/signup</p>
             <p>/login</p>
