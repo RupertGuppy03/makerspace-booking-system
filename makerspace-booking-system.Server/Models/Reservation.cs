@@ -20,5 +20,22 @@ namespace makerspace_booking_system.Server.Models
 
         [Column("user_id")]
         public string UserId { get; set; }
+
+        [Column("status")]
+        public string Status { get; set; }
+
+        [Column("collected_at")]
+        public DateTime CollectedAt { get; set; }
+
+        [Column("returned_at")]
+        public DateTime ReturnedAt { get; set; }
+
+        [Column("cancelled_at")]
+        public DateTime CancelledAt { get; set; }
+
+        [Column("amount_charged")]
+        public decimal AmountCharged { get; set; }
+
+
     }
 }

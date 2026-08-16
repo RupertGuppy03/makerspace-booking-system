@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
-import { supabase } from "../../lib/supabaseClient"
 import './UserPage.css';
 import type { Tool } from "../../types/tool";
-import type { Reservation } from "../../types/reservation";
 import { useAuth } from '../../lib/authProvider';
 import type { NewReservation } from '../../types/newReservasion';
 import AccountBanner from '../../components/accountBanner'
@@ -12,15 +10,11 @@ function UserPage() {
 
 
     const [tools, setTools] = useState<Tool[]>();
-    const [userEmail, setUserEmail] = useState<string>();
     const { user } = useAuth();
-    const userEmailNew = user?.email ?? 'not logged in';
     
 
     useEffect(() => {
-        populateWeatherData();
-        populateUserEmail();
-        populateUserEmailNew();
+        populateToolData();
     }, []);
 
     const table = tools === undefined
@@ -66,23 +60,12 @@ function UserPage() {
 
 
 
-    async function populateWeatherData() {
+    async function populateToolData() {
         const response = await fetch('/api/tools');
         if (response.ok) {
             const data = await response.json();
             setTools(data);
         }
-    }
-
-    async function populateUserEmail() {
-        const { data: { user } } = await supabase.auth.getUser()
-        const email = user?.email || "not logged in";
-        setUserEmail(email);
-    }
-
-    async function populateUserEmailNew() {
-        const email = user?.email || "not logged in";
-        setUserEmailNew(email);
     }
 
     async function handleReserve(toolId : number) {

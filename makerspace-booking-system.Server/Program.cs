@@ -65,17 +65,32 @@ app.MapGet("/api/tools", async () =>
 
 });
 
-app.MapGet("/api/user", async () =>
+app.MapGet("/api/user/{id}/reservations", async (string id) =>
 {
-    //receive JWT
-    //return data related to user
-    //return Results.Ok(new {Email = email });
+    var result = await supabase.From<Reservation>().Get();
+    var supaReservations = result.Models.Where(r => r.UserId == id);
+
+    var reservations = supaReservations.Select(r => new
+    {
+        r.Id,
+        r.StartDay,
+        r.EndDay,
+        r.ToolId,
+        r.UserId,
+        r.Status,
+        r.CollectedAt,
+        r.ReturnedAt,
+        r.CancelledAt,
+        r.AmountCharged
+
+    });
+
+    return reservations;
 
 });
 
 app.MapPost("/api/reservation", async (ReservationDto reservationDto) =>
 {
-    // test if Reservation can be pulled directly out instead of reservationDetails
     var reservation = new Reservation
     {
         StartDay = reservationDto.StartDay,
