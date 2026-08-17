@@ -26,7 +26,7 @@ export default function Reservations() {
                     <th>Id</th>
                     <th>status</th>
                     <th>Collected At</th>
-                    <th>Tool Id</th>
+                    <th>Tool Name</th>
                     <th>Cancel</th>
                 </tr>
             </thead>
@@ -36,7 +36,7 @@ export default function Reservations() {
                         <td>{reservation.id}</td>
                         <td>{reservation.status}</td>
                         <td>{reservation.collectedAt ? new Date(reservation.collectedAt).toDateString() : ''}</td>
-                        <td>{reservation.toolId}</td>
+                        <td>{reservation.tool ? reservation.tool.name : "no tool found"}</td>
                         <td><button type="button" onClick={() => handleCancelReservation(reservation.id) }> cancel </button></td>
                     </tr>
                 )}

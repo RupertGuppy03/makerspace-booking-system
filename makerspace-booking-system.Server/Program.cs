@@ -1,10 +1,15 @@
+using makerspace_booking_system.Server;
 using makerspace_booking_system.Server.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Supabase.Gotrue;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<SupabaseDbContext>(opt => 
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Supabase"))
+    );
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -46,52 +51,24 @@ await supabase.InitializeAsync();
 // ## Minimal API endpoints here ##
 // ################################
 
-app.MapGet("/api/tools", async () =>
+app.MapGet("/api/tools", async (SupabaseDbContext db) =>
 {
-    var result = await supabase.From<Tool>().Get();
-    var supaTools = result.Models;
-
-    // Project to simple object so it can be serialized and read by React
-    var tools = supaTools.Select(t => new
-    {
-        t.Id,
-        t.CreatedAt,
-        t.Name,
-        t.IsTakenOut,
-        t.MaintenancePeriod,
-        t.LastMaintained
-    });
-    return tools;
+    return await db.Tools.ToListAsync();
 
 });
 
-app.MapGet("/api/user/{id}/reservations", async (string id) =>
+app.MapGet("/api/user/{id}/reservations", async (string id, SupabaseDbContext db) =>
 {
-    var result = await supabase.From<Reservation>().Get();
-    var supaReservations = result.Models.Where(r => r.UserId == id);
-
-    var reservations = supaReservations.Select(r => new
-    {
-        r.Id,
-        r.StartDay,
-        r.EndDay,
-        r.ToolId,
-        r.UserId,
-        r.Status,
-        r.CollectedAt,
-        r.ReturnedAt,
-        r.CancelledAt,
-        r.AmountCharged
-
-    });
-
-    return reservations;
+    return await db.Reservations
+    .Where(r => r.UserId.ToString() == id)
+    .Include(r => r.Tool)
+    .ToListAsync();
 
 });
 
 app.MapPost("/api/reservation", async (ReservationDto reservationDto) =>
 {
-    var reservation = new Reservation
+    var reservation = new ReservationSupa
     {
         StartDay = reservationDto.StartDay,
         EndDay = reservationDto.EndDay,
@@ -99,7 +76,7 @@ app.MapPost("/api/reservation", async (ReservationDto reservationDto) =>
         UserId = reservationDto.UserId
     };
 
-    await supabase.From<Reservation>().Insert(reservation);
+    await supabase.From<ReservationSupa>().Insert(reservation);
     return "good"; //TODO not sure what to return here
 });
 

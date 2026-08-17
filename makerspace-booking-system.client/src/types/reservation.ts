@@ -1,6 +1,8 @@
+import type { Tool } from "./tool";
+
 export type Reservation = {
     id: number,
-    startDay: Date,
+    starDay: Date,
     endDay: Date,
     toolId: number,
     userId: string,
@@ -8,6 +10,8 @@ export type Reservation = {
     collectedAt: Date,
     returnedAt: Date,
     cancelledAt: Date,
-    amountCharged: number
+    amountCharged: number,
+
+    tool: Tool
 
 };
