@@ -1,0 +1,90 @@
+/*
+ * Scoped under .admin-sidebar for the same reason ManagementPage.css scopes
+ * under .management-dashboard — index.css pins #root and centres text, which
+ * fights a sidebar layout, so we override locally instead of touching the
+ * shared file.
+ *
+ * Colours come from the CSS variables index.css already defines.
+ */
+
+.admin-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    flex-shrink: 0;
+    height: 100%;
+    min-height: 100vh;
+    padding: 20px 16px;
+    box-sizing: border-box;
+    border-right: 1px solid var(--border);
+    text-align: left;
+}
+
+.admin-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.admin-sidebar-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-h);
+}
+
+.admin-sidebar-icons {
+    display: flex;
+    gap: 8px;
+    color: var(--text);
+}
+
+.admin-sidebar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.admin-sidebar-link {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.admin-sidebar-link:hover {
+    background: var(--accent-bg);
+}
+
+.admin-sidebar-link--active {
+    background: var(--accent-bg);
+    color: var(--text-h);
+    font-weight: 600;
+    border: 1px solid var(--accent-border);
+}
+
+.admin-sidebar-signout {
+    margin-top: 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.admin-sidebar-signout:hover {
+    background: var(--accent-bg);
+}

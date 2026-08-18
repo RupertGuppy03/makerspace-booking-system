@@ -1,0 +1,70 @@
+/*
+ * Scoped under .admin-dashboard, same reasoning as ManagementPage.css:
+ * index.css pins #root width and centres text globally, which fights this
+ * layout, so we override locally rather than editing the shared file.
+ */
+
+.admin-dashboard {
+    display: flex;
+    align-items: stretch;
+    text-align: left;
+    min-height: 100vh;
+}
+
+.admin-panel {
+    flex: 1;
+    padding: 24px 32px;
+    box-sizing: border-box;
+}
+
+.admin-panel h2 {
+    margin-top: 0;
+}
+
+/* ---------- Dashboard summary cards ---------- */
+
+.admin-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+    max-width: 700px;
+}
+
+.admin-summary-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.admin-summary-value {
+    margin: 0 0 4px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-h);
+}
+
+.admin-summary-label {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text);
+}
+
+/* ---------- Shared status notes ---------- */
+
+.admin-loading-note {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.admin-error-note {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--text);
+    border: 1px solid var(--accent-border);
+    background: var(--accent-bg);
+    border-radius: 4px;
+    padding: 8px 12px;
+}
