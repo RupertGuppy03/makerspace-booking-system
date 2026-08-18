@@ -13,6 +13,7 @@ function App() {
             <p>/login</p>
             <p>/userpage</p>
             <p>/userpage/reservations</p>
+            <p>/userpage/reservations/create</p>
             <p>/managementpage</p>
         </div>
     );

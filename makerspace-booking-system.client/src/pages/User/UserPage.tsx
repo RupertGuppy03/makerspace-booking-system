@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import './UserPage.css';
 import type { Tool } from "../../types/tool";
-import { useAuth } from '../../lib/authProvider';
-import type { NewReservation } from '../../types/newReservasion';
 import AccountBanner from '../../components/accountBanner'
+import { createSearchParams, useNavigate } from "react-router-dom";
 
 
+//TODO have this page use the same tab system as Management for future/active/old reservations
 function UserPage() {
 
-
+    const navigate = useNavigate();
     const [tools, setTools] = useState<Tool[]>();
-    const { user } = useAuth();
+    //const { user } = useAuth();
     
 
     useEffect(() => {
@@ -38,7 +38,7 @@ function UserPage() {
                         <td>{tool.isTakenOut ? "true" : "false"}</td>
                         <td>{tool.maintenancePeriod}</td>
                         <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
-                        <td><button type="button" onClick={() => handleReserve(tool.id) }> reserve </button></td>
+                        <td><button type="button" onClick={() => handleNavigateReserve(tool.id) }> reserve </button></td>
                     </tr>
                 )}
             </tbody>
@@ -68,32 +68,16 @@ function UserPage() {
         }
     }
 
-    async function handleReserve(toolId : number) {
-        if (!user) {
-            alert("Must be logged in to reserve a tool");
-            return;
-        }
-        alert("Reserve Pressed")
+    async function handleNavigateReserve(toolId: number) {
 
-        const endDate: Date = new Date();
-        endDate.setDate(endDate.getDate() + 1);
+        const toolIdStr = toolId.toString();
 
-        const reservation: NewReservation = {
-            startDay: new Date(),
-            endDay: endDate,
-            toolId: toolId,
-            userId: user.id
-        };
-
-        const response = await fetch("/api/reservation", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reservation)
+        navigate({
+            pathname: "/userpage/reserve",
+            search: createSearchParams({
+                toolId: toolIdStr
+            }).toString()
         });
-
-        const data = await response.json()
-        alert(`reservation created: ${data}`);
-        return data; //TODO does this return to anywhere?
 
     }
    

@@ -57,30 +57,38 @@ app.MapGet("/api/tools", async (SupabaseDbContext db) =>
 
 });
 
-app.MapGet("/api/user/{id}/reservations", async (string id, SupabaseDbContext db) =>
+app.MapGet("/api/user/{uuid}/reservations", async (string uuid, SupabaseDbContext db) =>
 {
     return await db.Reservations
-    .Where(r => r.UserId.ToString() == id)
+    .Where(r => r.UserId.ToString() == uuid)
     .Include(r => r.Tool)
     .ToListAsync();
 
 });
 
-app.MapPost("/api/reservation", async (ReservationDto reservationDto) =>
+app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContext db) =>
 {
-    var reservation = new ReservationSupa
-    {
-        StartDay = reservationDto.StartDay,
-        EndDay = reservationDto.EndDay,
-        ToolId = reservationDto.ToolId,
-        UserId = reservationDto.UserId
-    };
+    db.Reservations.Add(reservation); //TODO there may still be merit to having a DTO for POSTing a whole new entry
+    await db.SaveChangesAsync();
 
-    await supabase.From<ReservationSupa>().Insert(reservation);
-    return "good"; //TODO not sure what to return here
+    return Results.Ok("Reservation successfully added");
 });
 
 
+app.MapPatch("/api/reservation/{id}/cancel", async (int id, SupabaseDbContext db) => 
+{
+    var reservation = await db.Reservations.FindAsync(id);
+    if (reservation is null) return Results.NotFound();
+
+    reservation.Status = "cancelled";
+    //TODO have error happen if reservation is already cancelled, or in a state which it shouldnt be cancelled
+    
+    await db.SaveChangesAsync();
+
+    return Results.Ok("cancelled");
+
+
+});
 
 
 

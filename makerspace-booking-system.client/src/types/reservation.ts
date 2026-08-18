@@ -1,17 +1,17 @@
 import type { Tool } from "./tool";
 
 export type Reservation = {
-    id: number,
-    starDay: Date,
+    id : number,
+    startDay: Date,
     endDay: Date,
     toolId: number,
     userId: string,
     status: string,
-    collectedAt: Date,
-    returnedAt: Date,
-    cancelledAt: Date,
+    collectedAt?: Date,
+    returnedAt?: Date,
+    cancelledAt?: Date,
     amountCharged: number,
 
-    tool: Tool
+    tool?: Tool
 
 };

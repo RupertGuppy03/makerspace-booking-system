@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
-import { supabase } from "../../../lib/supabaseClient"
-import type { Tool } from "../../../types/tool";
 import type { Reservation } from "../../../types/reservation";
 import { useAuth } from '../../../lib/authProvider';
-import type { NewReservation } from '../../../types/newReservasion';
 import AccountBanner from '../../../components/accountBanner'
 
 
@@ -47,8 +44,8 @@ export default function Reservations() {
     return (
         <div>
             <AccountBanner />
-            <h1 id="tableLabel">User Tool View</h1>
-            <p>This page shows all tools from the database and allows you to reverse one if logged in</p>
+            <h1 id="tableLabel">Your Reservations</h1>
+            <p>This page shows all the reservations you have made and their status</p>
             <br />
             <div>
                 {table}
@@ -70,32 +67,15 @@ export default function Reservations() {
         }
     }
 
-     async function handleCancelReservation(toolId : number) {
-    //     if (!user) {
-    //         alert("Must be logged in to reserve a tool");
-    //         return;
-    //     }
-    //     alert("Reserve Pressed")
+     async function handleCancelReservation(reservationId : number) {
 
-    //     const endDate: Date = new Date();
-    //     endDate.setDate(endDate.getDate() + 1);
 
-    //     const reservation: NewReservation = {
-    //         startDay: new Date(),
-    //         endDay: endDate,
-    //         toolId: toolId,
-    //         userId: user.id
-    //     };
+             const response = await fetch(`/api/reservation/${reservationId}/cancel`, {
+                 method: "Patch",
+             });
 
-    //     const response = await fetch("/api/reservation", {
-    //         method: "POST",
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify(reservation)
-    //     });
-
-    //     const data = await response.json()
-    //     alert(`reservation created: ${data}`);
-    //     return data; //TODO does this return to anywhere ?
+             const data = await response.json()
+             alert(`reservation cancelled: ${data}`);
 
      }
    
