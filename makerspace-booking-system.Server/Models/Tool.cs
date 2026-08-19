@@ -23,8 +23,5 @@ namespace makerspace_booking_system.Server.Models
 
         [Column("last_maintained")]
         public DateOnly LastMaintained { get; set; }
-
-        [Column("daily_rate")]
-        public decimal DailyRate { get; set; }
     }
 }
