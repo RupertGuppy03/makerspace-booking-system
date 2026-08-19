@@ -1,12 +1,10 @@
-using Supabase.Postgrest.Attributes;
-using Supabase.Postgrest.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace makerspace_booking_system.Server.Models
 {
-    [Table("DamageIncidents")]
-    public class DamageIncident : BaseModel
+    public class DamageIncident
     {
-        [PrimaryKey("id")]
+        [Column("id")]
         public int Id { get; set; }
 
         [Column("created_at")]
