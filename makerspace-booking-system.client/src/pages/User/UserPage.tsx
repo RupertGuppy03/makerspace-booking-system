@@ -1,26 +1,20 @@
 import { useEffect, useState } from 'react';
-import { supabase } from "../../lib/supabaseClient"
 import './UserPage.css';
 import type { Tool } from "../../types/tool";
-import type { Reservation } from "../../types/reservation";
-import { useAuth } from '../../lib/authProvider';
-import type { NewReservation } from '../../types/newReservasion';
 import AccountBanner from '../../components/accountBanner'
+import { createSearchParams, useNavigate } from "react-router-dom";
 
 
+//TODO have this page use the same tab system as Management for future/active/old reservations
 function UserPage() {
 
-
+    const navigate = useNavigate();
     const [tools, setTools] = useState<Tool[]>();
-    const [userEmail, setUserEmail] = useState<string>();
-    const { user } = useAuth();
-    const userEmailNew = user?.email ?? 'not logged in';
+    //const { user } = useAuth();
     
 
     useEffect(() => {
-        populateWeatherData();
-        populateUserEmail();
-        populateUserEmailNew();
+        populateToolData();
     }, []);
 
     const table = tools === undefined
@@ -44,7 +38,7 @@ function UserPage() {
                         <td>{tool.isTakenOut ? "true" : "false"}</td>
                         <td>{tool.maintenancePeriod}</td>
                         <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
-                        <td><button type="button" onClick={() => handleReserve(tool.id) }> reserve </button></td>
+                        <td><button type="button" onClick={() => handleNavigateReserve(tool.id) }> reserve </button></td>
                     </tr>
                 )}
             </tbody>
@@ -66,7 +60,7 @@ function UserPage() {
 
 
 
-    async function populateWeatherData() {
+    async function populateToolData() {
         const response = await fetch('/api/tools');
         if (response.ok) {
             const data = await response.json();
@@ -74,43 +68,16 @@ function UserPage() {
         }
     }
 
-    async function populateUserEmail() {
-        const { data: { user } } = await supabase.auth.getUser()
-        const email = user?.email || "not logged in";
-        setUserEmail(email);
-    }
+    async function handleNavigateReserve(toolId: number) {
 
-    async function populateUserEmailNew() {
-        const email = user?.email || "not logged in";
-        setUserEmailNew(email);
-    }
+        const toolIdStr = toolId.toString();
 
-    async function handleReserve(toolId : number) {
-        if (!user) {
-            alert("Must be logged in to reserve a tool");
-            return;
-        }
-        alert("Reserve Pressed")
-
-        const endDate: Date = new Date();
-        endDate.setDate(endDate.getDate() + 1);
-
-        const reservation: NewReservation = {
-            startDay: new Date(),
-            endDay: endDate,
-            toolId: toolId,
-            userId: user.id
-        };
-
-        const response = await fetch("/api/reservation", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reservation)
+        navigate({
+            pathname: "/userpage/reserve",
+            search: createSearchParams({
+                toolId: toolIdStr
+            }).toString()
         });
-
-        const data = await response.json()
-        alert(`reservation created: ${data}`);
-        return data; //TODO does this return to anywhere?
 
     }
    

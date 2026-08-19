@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { supabase } from "./lib/supabaseClient";
+
 import './App.css';
 import AccountBanner from './components/accountBanner';
 
@@ -12,8 +11,10 @@ function App() {
             <h1 id="tableLabel">Available Pages</h1>
             <p>/signup</p>
             <p>/login</p>
-            <p>/user</p>
-            <p>/user/reservations (TODO)</p>
+            <p>/userpage</p>
+            <p>/userpage/reservations</p>
+            <p>/userpage/reservations/create</p>
+            <p>/managementpage</p>
         </div>
     );
 
