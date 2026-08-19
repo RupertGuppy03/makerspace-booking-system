@@ -2,6 +2,8 @@
 
 import type { Tool } from '../../types/tool.ts';
 import type { NewTool } from '../../types/newTool.ts'
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabaseClient.ts';
 
 export type AdminToolsState = {
     tools: Tool[] | null;
@@ -10,18 +12,108 @@ export type AdminToolsState = {
 
     addTool: (tool: NewTool) => Promise<void>;
     markMaintained: (toolId: number) => Promise<void>;
+    removeTool: (toolId: number) => Promise<void>;
 };
-export function useAdminTools(): AdminToolsState {
+
+// --- collects a row from the backend and maps it to a Tool type
+function mapRowToTool(row: any): Tool {
     return {
-        tools: null,
-        loading: true,
-        error: null,
-        //will hookup to the backend and supabase once the endpoints are created
-        addTool: async (tool) => {
-            console.warn('addTool not yet wired to backend:', tool);
-        },
-        markMaintained: async (toolId) => {
-            console.warn('markMaintained not yet wired to backend:', toolId);
-         },
-    }
+        id: row.id,
+        createdAt: new Date(row.created_at),
+        name: row.name,
+        isTakenOut: row.is_taken_out,
+        maintenancePeriod: row.maintenance_period,
+        lastMaintained: new Date(row.last_maintained),
+        dailyRate: parseFloat(row.daily_rate)
+    }   
+}
+
+export function useAdminTools(): AdminToolsState {
+    const [tools, setTools] = useState<Tool[] | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+
+    // --- fetching Tools from supabase ---
+    const fetchTools = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+
+        const { data, error } = await supabase
+            .from('Tools')
+            .select('*')
+            .order('id', { ascending: true });
+
+        if (error) {
+            setError(error.message);
+            setTools(null);
+        } else {
+            setTools((data ?? []).map(mapRowToTool));
+        }
+
+        setLoading(false);
+
+    }, []);
+
+    useEffect(() => {
+        fetchTools();
+    }, [fetchTools]);
+
+    // --- adding tools to the supabase ---
+    const addTool = useCallback(async (tool: NewTool) => {
+        const { error } = await supabase.from('Tools').insert({
+            name: tool.name,
+            created_at: tool.createdAt,
+            is_taken_out: tool.isTakenOut,
+            maintenance_period: tool.maintenancePeriod,
+            last_maintained: tool.lastMaintained,
+            daily_rate: tool.dailyRate
+        });
+
+        if (error) {
+            setError(error.message);
+            return;
+        }
+
+        await fetchTools();
+    }, [fetchTools]);
+
+
+    // --- Mark Maintained on tool ---
+    const markMaintained = useCallback(async (toolId: number) => {
+        const { error } = await supabase
+            .from('Tools')
+            .update({ last_maintained: new Date().toISOString() })
+            .eq('id', toolId);
+
+        if (error) {
+            setError(error.message);
+            return;
+        }
+
+        await fetchTools();
+    }, [fetchTools]);
+
+
+    // --- remove a Tool ---
+    const removeTool = useCallback(async (toolId: number) => {
+        const { error } = await supabase
+            .from('Tools')
+            .delete()
+            .eq('id', toolId);
+
+        console.log('called');
+
+        if (error) {
+            setError(error.message);
+            return;
+        }
+
+        await fetchTools();
+    }, [fetchTools]);
+    
+
+    return {
+        tools, loading, error, addTool, markMaintained, removeTool
+    };
 }

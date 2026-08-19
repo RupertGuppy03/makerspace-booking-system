@@ -68,3 +68,10 @@
     border-radius: 4px;
     padding: 8px 12px;
 }
+
+/* ------------------ admin delete button ------------*/
+.admin-delete-button {
+    font-size: 12px !important;
+    padding: 2px 3px !important;
+    min-width: unset !important;
+}

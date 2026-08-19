@@ -14,7 +14,7 @@
     flex-shrink: 0;
     height: 100%;
     min-height: 100vh;
-    padding: 20px 16px;
+    padding: 25px 5px;
     box-sizing: border-box;
     border-right: 1px solid var(--border);
     text-align: left;

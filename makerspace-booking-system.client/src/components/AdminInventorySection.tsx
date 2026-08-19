@@ -1,11 +1,12 @@
 import {
-    Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper,
+    Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, Button
 } from '@mui/material';
 import { useAdminTools } from "../pages/Admin/useAdminTools";
-import { isOverdue } from './adminToolUtils'
+import { isOverdue } from './adminToolUtils';
+
 
 function AdminInventorySection() {
-    const { tools, loading, error } = useAdminTools();
+    const { tools, loading, error, removeTool } = useAdminTools();
 
     return (
         <section>
@@ -22,6 +23,7 @@ function AdminInventorySection() {
                             <TableCell>Status</TableCell>
                             <TableCell>Maintenance period</TableCell>
                             <TableCell>Last maintained</TableCell>
+                            <TableCell>Daily Rate</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -48,11 +50,27 @@ function AdminInventorySection() {
                                 <TableCell>
                                     {new Date(tool.lastMaintained).toDateString()}
                                 </TableCell>
+                                <TableCell>${tool.dailyRate.toFixed(2)}</TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="outlined"
+                                        color="error"
+                                        className="admin-delete-button"
+                                        onClick={() => {
+                                            if (window.confirm(`Delete ${tool.name}? This can't be undone.`)) {
+                                                removeTool(tool.id);
+                                            }
+                                        }}
+                                    >
+                                        Delete
+                                    </Button>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
+
         </section>
     );
 }

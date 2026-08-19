@@ -50,7 +50,7 @@ function AdminSidebar({ activeSection, onSelect, onSignOut }: Props) {
             </ul>
 
             <button type="button" className="admin-sidebar-signout" onClick={onSignOut}>
-                SignOut :)
+                SignOut
             </button>
         </nav>
     );
