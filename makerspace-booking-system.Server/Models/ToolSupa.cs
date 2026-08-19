@@ -1,13 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace makerspace_booking_system.Server.Models
 {
-    public class Tool
+    [Table("Tools")]
+    public class ToolSupa : BaseModel
     {
-        // Use [Column("col_name")] to match the column name in supabase
-        // Keep the actual attribute name PascalCase
-
-        [Column("id")]
+        [PrimaryKey("id")]
         public int Id { get; set; }
 
         [Column("created_at")]

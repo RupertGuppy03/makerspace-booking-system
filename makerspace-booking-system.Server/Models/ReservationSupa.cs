@@ -1,17 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace makerspace_booking_system.Server.Models
 {
-    public class Reservation
+    [Table("Reservations")]
+    public class ReservationSupa : BaseModel
     {
-        // Use [Column("col_name")] to match the column name in supabase
-        // Keep the actual attribute name PascalCase
-
-        [Column("id")]
+        [PrimaryKey("id")]
         public int Id { get; set; }
 
         [Column("start_day")]
-        public DateTime StartDay { get; set; }
+        public DateTime StartDay{ get; set; }
 
         [Column("end_day")]
         public DateTime EndDay { get; set; }
@@ -20,25 +19,23 @@ namespace makerspace_booking_system.Server.Models
         public int ToolId { get; set; }
 
         [Column("user_id")]
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
 
         [Column("status")]
         public string Status { get; set; }
 
         [Column("collected_at")]
-        public DateTime? CollectedAt { get; set; }
+        public DateTime CollectedAt { get; set; }
 
         [Column("returned_at")]
-        public DateTime? ReturnedAt { get; set; }
+        public DateTime ReturnedAt { get; set; }
 
         [Column("cancelled_at")]
-        public DateTime? CancelledAt { get; set; }
+        public DateTime CancelledAt { get; set; }
 
         [Column("amount_charged")]
         public decimal AmountCharged { get; set; }
 
 
-        [ForeignKey(nameof(ToolId))]
-        public Tool? Tool { get; set; }
     }
 }
