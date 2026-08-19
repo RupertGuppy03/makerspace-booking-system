@@ -8,7 +8,7 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ManagementMetricCard from './ManagementMetricCard';
-import { useDashboardMetrics } from '../pages/Management/useDashboardMetrics';
+import { useDashboardMetrics } from '../../pages/Management/useDashboardMetrics';
 
 function ManagementRevenueSection() {
     const { metrics } = useDashboardMetrics();

@@ -13,9 +13,9 @@
 
 import {useState} from 'react';
 import './ManagementPage.css';
-import ManagementRevenueSection from '../../components/ManagementRevenueSection';
-import ManagementUserSection from '../../components/ManagementUserSection';
-import ManagementToolSection from '../../components/ManagementToolSection';
+import ManagementRevenueSection from '../../components/Management/ManagementRevenueSection';
+import ManagementUserSection from '../../components/Management/ManagementUserSection';
+import ManagementToolSection from '../../components/Management/ManagementToolSection';
 
 type Tab = 'revenue' | 'users' | 'tools';
 

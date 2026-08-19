@@ -1,7 +1,7 @@
 import {
     Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, Button
 } from '@mui/material';
-import { useAdminTools } from "../pages/Admin/useAdminTools";
+import { useAdminTools } from "../../pages/Admin/useAdminTools";
 import { isOverdue } from './adminToolUtils';
 
 

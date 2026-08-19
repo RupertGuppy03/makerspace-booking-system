@@ -1,4 +1,4 @@
-import type { Tool } from '../types/tool';
+import type { Tool } from '../../types/tool';
 
 /**
     keeps track of a tools maintanenace days

@@ -16,17 +16,19 @@ export type AdminToolsState = {
 };
 
 // --- collects a row from the backend and maps it to a Tool type
-function mapRowToTool(row: any): Tool {
-    return {
-        id: row.id,
-        createdAt: new Date(row.created_at),
-        name: row.name,
-        isTakenOut: row.is_taken_out,
-        maintenancePeriod: row.maintenance_period,
-        lastMaintained: new Date(row.last_maintained),
-        dailyRate: parseFloat(row.daily_rate)
-    }   
-}
+// ### This should be unnecessary now with EF core backend
+//
+// function mapRowToTool(row: any): Tool {
+//     return {
+//         id: row.id,
+//         createdAt: new Date(row.created_at),
+//         name: row.name,
+//         isTakenOut: row.is_taken_out,
+//         maintenancePeriod: row.maintenance_period,
+//         lastMaintained: new Date(row.last_maintained),
+//         dailyRate: parseFloat(row.daily_rate)
+//     }   
+// }
 
 export function useAdminTools(): AdminToolsState {
     const [tools, setTools] = useState<Tool[] | null>(null);
@@ -39,16 +41,15 @@ export function useAdminTools(): AdminToolsState {
         setLoading(true);
         setError(null);
 
-        const { data, error } = await supabase
-            .from('Tools')
-            .select('*')
-            .order('id', { ascending: true });
-
-        if (error) {
-            setError(error.message);
-            setTools(null);
+        const response = await fetch('/api/tools');
+        if (response.ok) {
+            const data = await response.json();
+            setTools(data);
         } else {
-            setTools((data ?? []).map(mapRowToTool));
+            const errorData = await response.json();
+            alert(`Error fetching tools: ${errorData.message}`);
+            setError(errorData.message);
+            setTools(null);
         }
 
         setLoading(false);
@@ -61,18 +62,20 @@ export function useAdminTools(): AdminToolsState {
 
     // --- adding tools to the supabase ---
     const addTool = useCallback(async (tool: NewTool) => {
-        const { error } = await supabase.from('Tools').insert({
-            name: tool.name,
-            created_at: tool.createdAt,
-            is_taken_out: tool.isTakenOut,
-            maintenance_period: tool.maintenancePeriod,
-            last_maintained: tool.lastMaintained,
-            daily_rate: tool.dailyRate
+
+        const response = await fetch("/api/tool", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tool)
         });
 
-        if (error) {
-            setError(error.message);
-            return;
+        if (response.ok) {
+            const data = await response.json()
+            alert(`Reservation created: ${data}`);
+        } else {
+            const errorData = await response.json();
+            alert(`Error creating tool: ${errorData.message}`);
+            setError(errorData.message);
         }
 
         await fetchTools();
@@ -81,14 +84,20 @@ export function useAdminTools(): AdminToolsState {
 
     // --- Mark Maintained on tool ---
     const markMaintained = useCallback(async (toolId: number) => {
-        const { error } = await supabase
-            .from('Tools')
-            .update({ last_maintained: new Date().toISOString() })
-            .eq('id', toolId);
 
-        if (error) {
-            setError(error.message);
-            return;
+        const response = await fetch(`/api/tool/${toolId}/maintain`, {
+            method: "Patch",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(new Date().toISOString())
+        });
+
+        if (response.ok) {
+            const data = await response.json()
+            alert(`Tool marked as maintained: ${data}`);
+        } else {
+            const errorData = await response.json();
+            alert(`Error marking tool as maintained: ${errorData.message}`);
+            setError(errorData.message);
         }
 
         await fetchTools();
@@ -97,16 +106,18 @@ export function useAdminTools(): AdminToolsState {
 
     // --- remove a Tool ---
     const removeTool = useCallback(async (toolId: number) => {
-        const { error } = await supabase
-            .from('Tools')
-            .delete()
-            .eq('id', toolId);
 
-        console.log('called');
+        const response = await fetch(`/api/tool/${toolId}`, {
+            method: "DELETE",
+        });
 
-        if (error) {
-            setError(error.message);
-            return;
+        if (response.ok) {
+            const data = await response.json()
+            alert(`Tool deleted: ${data}`);
+        } else {
+            const errorData = await response.json();
+            alert(`Error deleting tool: ${errorData.message}`);
+            setError(errorData.message);
         }
 
         await fetchTools();
