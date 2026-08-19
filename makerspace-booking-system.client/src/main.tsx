@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.tsx'
 import UserPage from "./pages/User/UserPage.tsx";
 import Reservations from "./pages/User/reservations/Reservations.tsx";
+import Reserve from "./pages/User/Reserve/Reserve.tsx";
 import AdminPage from "./pages/Admin/AdminPage.tsx";
 import ManagementPage from "./pages/Management/ManagementPage.tsx";
 import Signup from "./pages/Signup/Signup.tsx";
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/" element={<App />} />
                 <Route path="/userpage" element={<UserPage />} />
                 <Route path="/userpage/reservations" element={<Reservations />} />
+                <Route path="/userpage/reserve" element={<Reserve />} />
                 <Route path="/adminpage" element={<AdminPage />} />
                 <Route path="/managementpage" element={<ManagementPage />} />
                 <Route path="/signup" element={<Signup />} />

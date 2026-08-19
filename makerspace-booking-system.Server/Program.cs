@@ -1,10 +1,15 @@
+using makerspace_booking_system.Server;
 using makerspace_booking_system.Server.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Supabase.Gotrue;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<SupabaseDbContext>(opt => 
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Supabase"))
+    );
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -46,64 +51,44 @@ await supabase.InitializeAsync();
 // ## Minimal API endpoints here ##
 // ################################
 
-app.MapGet("/api/tools", async () =>
+app.MapGet("/api/tools", async (SupabaseDbContext db) =>
 {
-    var result = await supabase.From<Tool>().Get();
-    var supaTools = result.Models;
-
-    // Project to simple object so it can be serialized and read by React
-    var tools = supaTools.Select(t => new
-    {
-        t.Id,
-        t.CreatedAt,
-        t.Name,
-        t.IsTakenOut,
-        t.MaintenancePeriod,
-        t.LastMaintained
-    });
-    return tools;
+    return await db.Tools.ToListAsync();
 
 });
 
-app.MapGet("/api/user/{id}/reservations", async (string id) =>
+app.MapGet("/api/user/{uuid}/reservations", async (string uuid, SupabaseDbContext db) =>
 {
-    var result = await supabase.From<Reservation>().Get();
-    var supaReservations = result.Models.Where(r => r.UserId == id);
-
-    var reservations = supaReservations.Select(r => new
-    {
-        r.Id,
-        r.StartDay,
-        r.EndDay,
-        r.ToolId,
-        r.UserId,
-        r.Status,
-        r.CollectedAt,
-        r.ReturnedAt,
-        r.CancelledAt,
-        r.AmountCharged
-
-    });
-
-    return reservations;
+    return await db.Reservations
+    .Where(r => r.UserId.ToString() == uuid)
+    .Include(r => r.Tool)
+    .ToListAsync();
 
 });
 
-app.MapPost("/api/reservation", async (ReservationDto reservationDto) =>
+app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContext db) =>
 {
-    var reservation = new Reservation
-    {
-        StartDay = reservationDto.StartDay,
-        EndDay = reservationDto.EndDay,
-        ToolId = reservationDto.ToolId,
-        UserId = reservationDto.UserId
-    };
+    db.Reservations.Add(reservation); //TODO there may still be merit to having a DTO for POSTing a whole new entry
+    await db.SaveChangesAsync();
 
-    await supabase.From<Reservation>().Insert(reservation);
-    return "good"; //TODO not sure what to return here
+    return Results.Ok("Reservation successfully added");
 });
 
 
+app.MapPatch("/api/reservation/{id}/cancel", async (int id, SupabaseDbContext db) => 
+{
+    var reservation = await db.Reservations.FindAsync(id);
+    if (reservation is null) return Results.NotFound();
+
+    reservation.Status = "cancelled";
+    //TODO have error happen if reservation is already cancelled, or in a state which it shouldnt be cancelled
+    
+    await db.SaveChangesAsync();
+
+    return Results.Ok("cancelled");
+
+
+});
 
 
 
