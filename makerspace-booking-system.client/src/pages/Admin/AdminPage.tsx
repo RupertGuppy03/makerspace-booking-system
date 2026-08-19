@@ -1,65 +1,29 @@
-import { useEffect, useState } from 'react';
-import './../../App.css';
+import { useState } from 'react';
+import './AdminPage.css';
 
-interface Tool {
-    id: number;
-    createdAt: Date;
-    name: string;
-    isTakenOut: boolean;
-    maintenancePeriod: number;
-    lastMaintained: Date;
-}
+import AdminSidebar, { type AdminSection } from '../../components/AdminSidebar';
+import AdminDashboardSection from '../../components/AdminDashboardSection';
+import AdminInventorySection from '../../components/AdminInventorySection';
+import AdminAddToolSection from '../../components/AdminAddToolSection';
+import AdminReportSection from '../../components/AdminReportSection';
+import AdminMaintenanceSection from '../../components/AdminMaintenanceSection';
 
 function AdminPage() {
-    const [tools, setTools] = useState<Tool[]>();
-
-    useEffect(() => {
-        populateWeatherData();
-    }, []);
-
-    const contents = tools === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <div>
-            <table className="table table-striped" aria-labelledby="tableLabel">
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Name</th>
-                        <th>Is Taken Out</th>
-                        <th>Maintenance Period</th>
-                        <th>Last Maintained</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tools.map((tool, idx) =>
-                        <tr key={idx}>
-                            <td>{tool.id}</td>
-                            <td>{tool.name}</td>
-                            <td>{tool.isTakenOut ? "true" : "false"}</td>
-                            <td>{tool.maintenancePeriod}</td>
-                            <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-
-        </div>;
+    const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
 
     return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
+        <div className="admin-dashboard">
+            <AdminSidebar activeSection={activeSection} onSelect={setActiveSection} />
 
-    async function populateWeatherData() {
-        const response = await fetch('/api/tools');
-        if (response.ok) {
-            const data = await response.json();
-            setTools(data);
-        }
-    }
+            <main className="admin-panel">
+                {activeSection === 'dashboard' && <AdminDashboardSection />}
+                {activeSection === 'inventory' && <AdminInventorySection />}
+                {activeSection === 'addTool' && <AdminAddToolSection />}
+                {activeSection === 'report' && <AdminReportSection />}
+                {activeSection === 'maintenance' && <AdminMaintenanceSection />}
+            </main>
+        </div>
+    )
 }
 
 export default AdminPage;

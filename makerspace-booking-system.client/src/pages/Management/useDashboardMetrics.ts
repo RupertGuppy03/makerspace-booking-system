@@ -14,6 +14,7 @@ export type DashbaordMetricsState = {
     error: string | null;
     awaitingScema: boolean;
 }
+
 // this function is used to return the initial state of the dashboard metrics
 export function useDashboardMetrics(): DashbaordMetricsState {
     return {
