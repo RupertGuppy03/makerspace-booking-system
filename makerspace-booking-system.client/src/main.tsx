@@ -18,11 +18,11 @@ createRoot(document.getElementById('root')!).render(
             <StrictMode>
               <Routes>
                 <Route path="/" element={<App />} />
-                <Route path="/userpage" element={<UserPage />} />
-                <Route path="/userpage/reservations" element={<Reservations />} />
-                <Route path="/userpage/reserve" element={<Reserve />} />
-                <Route path="/adminpage" element={<AdminPage />} />
-                <Route path="/managementpage" element={<ManagementPage />} />
+                <Route path="/user" element={<UserPage />} />
+                <Route path="/user/reservations" element={<Reservations />} />
+                <Route path="/user/reserve" element={<Reserve />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/management" element={<ManagementPage />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
               </Routes>
