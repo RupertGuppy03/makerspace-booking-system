@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Supabase.Gotrue;
 using System.Text.Json;
+using makerspace_booking_system.Server.Services; // added this to get access to the DashboardMetrics class
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<SupabaseDbContext>(opt => 
@@ -135,11 +136,27 @@ app.MapPatch("/api/reservation/{id}/cancel", async (int id, SupabaseDbContext db
 
 });
 
+app.MapGet("api/management/metrics", async (SupabaseDbContext db) =>
+{
+    var reservations = await db.Reservations
+          .Select(r => new Reservation
+          {
+            Id = r.Id,
+            StartDay = r.StartDay,
+            EndDay = r.EndDay,
+            ToolId = r.ToolId,
+            Status = r.Status,
+            CollectedAt = r.CollectedAt,
+            ReturnedAt = r.ReturnedAt,
+            CancelledAt = r.CancelledAt,
+            AmountCharged = r.AmountCharged
+          })
+          .ToListAsync();
+    var tools = await db.Tools.ToListAsync();
+    var incidents = await db.DamageIncidents.ToListAsync();
 
-
-
-
-
+    return DashboardMetricsBuilder.Build(reservations, tools, incidents, DateTime.UtcNow);
+});
 app.MapFallbackToFile("/index.html");
 
 app.Run();

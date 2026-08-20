@@ -13,10 +13,15 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import ManagementMetricCard from './ManagementMetricCard';
-import { useDashboardMetrics } from '../../pages/Management/useDashboardMetrics';
+import type { DashboardMetrics } from '../../types/metrics';
 
-function ManagementToolSection() {
-    const { metrics } = useDashboardMetrics();
+type Props = {
+    metrics: DashboardMetrics | null;
+    loading: boolean;
+    error: string | null;
+};
+
+function ManagementToolSection({ metrics, loading, error }: Props) {
 
     // Empty lists until the schema is locked. Recharts needs arrays, never null.
     const utilisationMetrics = metrics?.toolMetrics.utilisationMetrics ?? [];
@@ -33,6 +38,9 @@ function ManagementToolSection() {
                     <ManagementMetricCard
                         title="Tool utilisation rate"
                         definition="Days each tool was booked out, as a percentage of the days it was available in the period. Maintenance downtime currently counts as available time, which slightly understates the figure."
+                        loading={loading}
+                        error={error}
+                        isEmpty={utilisationMetrics.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={utilisationMetrics} layout="vertical">
@@ -48,7 +56,9 @@ function ManagementToolSection() {
                     <ManagementMetricCard
                         title="Damage incidents per tool"
                         definition="Number of damage incidents recorded against each tool in the period."
-                        placeholderMessage="Requires a DamageIncidents table, which does not exist in the database yet."
+                        loading={loading}
+                        error={error}
+                        isEmpty={damageMetrics.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={damageMetrics}>
@@ -64,6 +74,9 @@ function ManagementToolSection() {
                     <ManagementMetricCard
                         title="Most requested tools"
                         definition="Number of bookings made for each tool, ranked highest first. Cancelled bookings are included, because a cancellation still shows the tool was wanted."
+                        loading={loading}
+                        error={error}
+                        isEmpty={demandMetrics.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={280}>
                             <BarChart data={demandMetrics} layout="vertical">
