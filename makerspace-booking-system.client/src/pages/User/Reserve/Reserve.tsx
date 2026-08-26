@@ -70,14 +70,22 @@ export default function Reserve() {
             amountCharged: 12
         };
 
+        alert(uuid)
+
         const response = await fetch("/api/reservation", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reservation)
         });
 
-        const data = await response.json()
-        alert(`Reservation created: ${data}`);
+        if (response.ok) {
+
+            const data = await response.json()
+            alert(`Reservation created: ${data}`);
+        } else {
+            const errorData = await response.json();
+            alert(`Error Creating reservation: ${errorData.detail}`);
+        }
     };
    
 };

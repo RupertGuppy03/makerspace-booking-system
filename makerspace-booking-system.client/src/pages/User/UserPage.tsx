@@ -73,7 +73,7 @@ function UserPage() {
         const toolIdStr = toolId.toString();
 
         navigate({
-            pathname: "/userpage/reserve",
+            pathname: "/user/reserve",
             search: createSearchParams({
                 toolId: toolIdStr
             }).toString()
