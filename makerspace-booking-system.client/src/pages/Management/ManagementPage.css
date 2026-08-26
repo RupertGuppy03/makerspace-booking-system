@@ -107,17 +107,15 @@
  * work once this is removed for a card that has data.
  */
 .management-chart-placeholder {
-    position: absolute;
-    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 240px;
     padding: 16px;
     box-sizing: border-box;
     background: var(--social-bg);
-    pointer-events: none;
+    border-radius: 4px;
 }
-
 .management-chart-placeholder p {
     max-width: 30ch;
     text-align: center;
@@ -136,4 +134,22 @@
     font-size: 13px;
     line-height: 1.5;
     color: var(--text);
+}
+
+/*
+* Recharts sets a white tooltip background as an inline style and lets the text
+* colour inherit from the page, so in dark mode it's white on white and looks
+* like an empty box. !important is needed here because a normal rule can't beat
+* an inline style.
+*/
+.management-dashboard .recharts-default-tooltip {
+    background: var(--bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px;
+    padding: 8px 12px !important;
+}
+
+.management-dashboard .recharts-tooltip-label,
+.management-dashboard .recharts-tooltip-item {
+    color: var(--text-h) !important;
 }
