@@ -4,5 +4,6 @@ export type Tool = {
     name : string,
     isTakenOut : boolean,
     maintenancePeriod : number,
-    lastMaintained : Date
+    lastMaintained: Date,
+    dailyRate: number
 }
