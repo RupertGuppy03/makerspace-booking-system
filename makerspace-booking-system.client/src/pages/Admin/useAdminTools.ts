@@ -13,7 +13,21 @@ export type AdminToolsState = {
     addTool: (tool: NewTool) => Promise<void>;
     markMaintained: (toolId: number) => Promise<void>;
     removeTool: (toolId: number) => Promise<void>;
+    updateTool: (toolId: number, changes: ToolUpdate) => Promise<void>;
 };
+
+/**
+  * will be use to update a tool in the database, only the fields that are provided will be updated
+ */
+export type ToolUpdate = Partial<{
+    name: string;
+    isTakenOut: boolean;
+    maintenancePeriod: number;
+    lastMaintained: Date;
+    dailyRate: number;
+}>;
+
+
 
 // --- collects a row from the backend and maps it to a Tool type
 function mapRowToTool(row: any): Tool {
@@ -111,9 +125,33 @@ export function useAdminTools(): AdminToolsState {
 
         await fetchTools();
     }, [fetchTools]);
-    
+
+    const updateTool = useCallback(async (toolId: number, changes: ToolUpdate) => {
+        // map camelCase client fields to snake_case DB columns
+        const dbChanges: any = {};
+        if (changes.name !== undefined) dbChanges.name = changes.name;
+        if (changes.isTakenOut !== undefined) dbChanges.is_taken_out = changes.isTakenOut;
+        if (changes.maintenancePeriod !== undefined) dbChanges.maintenance_period = changes.maintenancePeriod;
+        if (changes.lastMaintained !== undefined) dbChanges.last_maintained = (changes.lastMaintained instanceof Date)
+            ? changes.lastMaintained.toISOString()
+            : changes.lastMaintained;
+        if (changes.dailyRate !== undefined) dbChanges.daily_rate = changes.dailyRate;
+
+        const { error } = await supabase
+            .from('Tools')
+            .update(dbChanges)
+            .eq('id', toolId);
+
+        if (error) {
+            setError(error.message);
+            return;
+        }
+
+        await fetchTools();
+    }, [fetchTools]);
+
 
     return {
-        tools, loading, error, addTool, markMaintained, removeTool
+        tools, loading, error, addTool, markMaintained, removeTool, updateTool
     };
 }

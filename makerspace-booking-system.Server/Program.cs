@@ -74,6 +74,24 @@ app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContex
     return Results.Ok("Reservation successfully added");
 });
 
+/*
+ * For admin page where they can update the tool details (name, maintenance, cost) - Jayden
+ */
+app.MapPatch("/api/tool/{id}", async (int id, [FromBody]ToolUpdateDto update, SupabaseDbContext db) => {
+    var tool = await db.Tools.FindAsync(id);
+    if (tool is null) return Results.NotFound();
+
+    // Update the tool properties with the values from the DTO
+    if (update.Name is not null) tool.Name = update.Name;
+    if (update.IsTakenOut is not null) tool.IsTakenOut = update.IsTakenOut.Value;
+    if (update.MaintenancePeriod is not null) tool.MaintenancePeriod = update.MaintenancePeriod.Value;
+    if (update.LastMaintained is not null) tool.LastMaintained = update.LastMaintained.Value;
+    if (update.DailyRate is not null) tool.DailyRate = update.DailyRate.Value;
+    await db.SaveChangesAsync();
+
+    return Results.Ok($"{tool.Name} details updated successfully");
+});
+
 
 app.MapPatch("/api/reservation/{id}/cancel", async (int id, SupabaseDbContext db) => 
 {
