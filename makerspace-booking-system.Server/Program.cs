@@ -58,6 +58,13 @@ app.MapGet("/api/tools", async (SupabaseDbContext db) =>
 
 });
 
+// --- Get one tool
+app.MapGet("/api/tools/{id}", async (int id, SupabaseDbContext db) =>
+{
+    return await db.Tools.FirstAsync(t => t.Id == id);
+
+});
+
 // --- Create a new tool
 app.MapPost("/api/tool", async (Tool tool, SupabaseDbContext db) =>
 {
@@ -110,6 +117,15 @@ app.MapGet("/api/user/{uuid}/reservations", async (string uuid, SupabaseDbContex
 
 });
 
+// --- Get list of all reservations for a given tool
+app.MapGet("/api/tools/{id}/reservations", async (int id, SupabaseDbContext db) =>
+{
+    return await db.Reservations
+    .Where(r => r.ToolId == id)
+    .ToListAsync();
+
+});
+
 // --- Create new reservation
 app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContext db) =>
 {
@@ -138,8 +154,9 @@ app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContex
     foreach (var (StartDay, EndDay) in dateRanges)
     {
         //if the new reservation overlaps with any existing reservation...
-        if ((reservation.StartDay >= StartDay && reservation.StartDay <= EndDay)
-        || (reservation.EndDay >= StartDay && reservation.EndDay <= EndDay))
+        if ((reservation.StartDay >= StartDay && reservation.StartDay <= EndDay) //StartDay is contained in existing reservation
+        || (reservation.EndDay >= StartDay && reservation.EndDay <= EndDay) //EndDay is contained in existing reservation
+        || (reservation.StartDay <= StartDay && reservation.EndDay >= EndDay)) //new reservation completely surrounds existing reservation
         {
             return Results.Problem("Failed to create reservation. Time period overlaps with existing reservation");
         }

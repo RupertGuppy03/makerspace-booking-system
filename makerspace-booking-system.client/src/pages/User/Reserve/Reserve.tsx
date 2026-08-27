@@ -1,27 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/authProvider';
 import AccountBanner from '../../../components/accountBanner';
 import { useSearchParams } from 'react-router-dom';
 import type { NewReservation } from '../../../types/newReservasion';
+import { DateRangePicker, type DateRange } from "rsuite";
+import type { Reservation } from '../../../types/reservation';
+import type { Tool } from '../../../types/tool';
 
 
 export default function Reserve() {
 
     const [searchParams] = useSearchParams();
-    const [startDate, setStartDate] = useState<Date>(new Date());
-    const [endDate, setEndDate] = useState<Date>(new Date());
+    const [tool, setTool] = useState<Tool>();
+    const [existingReservations, setExistingReservations] = useState<Reservation[]>([]);
+    const [dateRange, setDateRange] = useState<DateRange | null>();
     const { user } = useAuth();
+
+    useEffect(() => {
+        populateToolName();
+        getExistingReservations();
+    }, [])
 
     const form =
         <form onSubmit={handleSubmitReservation}>
-            {/*TODO import a react date picker library*/}
             <label>
-                Start Date:
-                <input type="date" defaultValue={Date.now()} onChange={e => { if (e.target.valueAsDate) setStartDate(e.target.valueAsDate) }}/>
-            </label>
-            <label>
-                End Date:
-                <input type="date" onChange={e => { if (e.target.valueAsDate) setEndDate(e.target.valueAsDate) }}/>
+                Start and End Dates:
+                <DateRangePicker value={dateRange} onChange={setDateRange}
+                    shouldDisableDate={handleShouldDisableDate}
+                />
             </label>
             <button type="submit">Create Reservation</button>
         </form>
@@ -31,6 +37,7 @@ export default function Reserve() {
         <div>
             <AccountBanner />
             <h1 id="tableLabel">Reserve Tool</h1>
+            <h4>Making reservation for tool: {tool?.name ?? "Loading..."}</h4>
             <br />
             <div>
                 {form}
@@ -38,6 +45,37 @@ export default function Reserve() {
         </div>
     );
 
+    async function populateToolName() {
+        const toolId = searchParams.get('toolId')
+        const response = await fetch(`/api/tools/${toolId}`);
+        if (response.ok) {
+            const data = await response.json();
+            setTool(data);
+        }
+    }
+
+    async function getExistingReservations() {
+        const toolId = searchParams.get('toolId')
+        const response = await fetch(`/api/tools/${toolId}/reservations`);
+        if (response.ok) {
+            const data = await response.json();
+            setExistingReservations(data);
+        }
+    }
+
+    function handleShouldDisableDate(date: Date) {
+        //disable if date is today or in the past
+        if (date < new Date()) return true;
+
+        //disable if the date overlaps with any existing reservations
+        if (existingReservations?.some(r => new Date(r.startDay) <= date && date <= new Date(r.endDay))) {
+            return true
+        }
+
+        //otherwise, keep enabled
+        return false;
+
+    }
 
 
     async function handleSubmitReservation(e : React.SubmitEvent) {
@@ -52,6 +90,11 @@ export default function Reserve() {
         }
         const uuid = user.id;
 
+        if (!dateRange) {
+            alert("Please Select a start and end date for the reservation")
+            return;
+        }
+
         const toolIdStr = searchParams.get('toolId');
         if (!toolIdStr) {
             alert("Error: no tool is selected");
@@ -62,15 +105,13 @@ export default function Reserve() {
 
         //Create new reservation
         const reservation: NewReservation = {
-            startDay: startDate,
-            endDay: endDate,
+            startDay: dateRange[0],
+            endDay: dateRange[1],
             userId: uuid,
             toolId: toolId,
             status: "booked",
             amountCharged: 12
         };
-
-        alert(uuid)
 
         const response = await fetch("/api/reservation", {
             method: "POST",
