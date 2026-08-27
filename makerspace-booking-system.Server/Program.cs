@@ -59,6 +59,13 @@ app.MapGet("/api/tools", async (SupabaseDbContext db) =>
 
 });
 
+// --- Get one tool
+app.MapGet("/api/tools/{id}", async (int id, SupabaseDbContext db) =>
+{
+    return await db.Tools.FirstAsync(t => t.Id == id);
+
+});
+
 // --- Create a new tool
 app.MapPost("/api/tool", async (Tool tool, SupabaseDbContext db) =>
 {
@@ -111,9 +118,52 @@ app.MapGet("/api/user/{uuid}/reservations", async (string uuid, SupabaseDbContex
 
 });
 
+// --- Get list of all reservations for a given tool
+app.MapGet("/api/tools/{id}/reservations", async (int id, SupabaseDbContext db) =>
+{
+    return await db.Reservations
+    .Where(r => r.ToolId == id)
+    .ToListAsync();
+
+});
+
 // --- Create new reservation
 app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContext db) =>
 {
+
+    //start and end date validations
+    if (reservation.StartDay < DateTime.Now)
+    {
+        return Results.Problem("Failed to create reservation. Cannot create a reservation in the past");
+    }
+
+    if (reservation.EndDay < reservation.StartDay)
+    {
+        return Results.Problem("Failed to create reservation. The end date cannot be before the start date");
+    }
+
+    if (reservation.EndDay - reservation.StartDay > TimeSpan.FromDays(5))
+    {
+        return Results.Problem("Failed to create reservation. Cannot create a reservation with a duration of more than 5 days");
+    }
+
+
+    //Check no other reservations exist with the same tool for an overlapping date.
+    var reservations = await db.Reservations.Where(r => r.ToolId == reservation.ToolId).ToListAsync();
+    var dateRanges = reservations.Select(r => ( r.StartDay, r.EndDay ));
+
+    foreach (var (StartDay, EndDay) in dateRanges)
+    {
+        //if the new reservation overlaps with any existing reservation...
+        if ((reservation.StartDay >= StartDay && reservation.StartDay <= EndDay) //StartDay is contained in existing reservation
+        || (reservation.EndDay >= StartDay && reservation.EndDay <= EndDay) //EndDay is contained in existing reservation
+        || (reservation.StartDay <= StartDay && reservation.EndDay >= EndDay)) //new reservation completely surrounds existing reservation
+        {
+            return Results.Problem("Failed to create reservation. Time period overlaps with existing reservation");
+        }
+    }
+
+
     db.Reservations.Add(reservation); //TODO there may still be merit to having a DTO for POSTing a whole new entry
     await db.SaveChangesAsync();
 
