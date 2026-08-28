@@ -3,10 +3,14 @@ import {
 } from '@mui/material';
 import { useAdminTools } from "../../pages/Admin/useAdminTools";
 import { isOverdue } from './adminToolUtils';
+import { useState } from 'react';
+import type { Tool } from "../types/tool";
+import AdminEditToolModal from './AdminEditToolModal';
 
 
 function AdminInventorySection() {
-    const { tools, loading, error, removeTool } = useAdminTools();
+    const { tools, loading, error, removeTool, updateTool } = useAdminTools();
+    const [editingTool, setEditingTool] = useState<Tool | null>(null);
 
     return (
         <section>
@@ -54,15 +58,10 @@ function AdminInventorySection() {
                                 <TableCell>
                                     <Button
                                         variant="outlined"
-                                        color="error"
-                                        className="admin-delete-button"
-                                        onClick={() => {
-                                            if (window.confirm(`Delete ${tool.name}? This can't be undone.`)) {
-                                                removeTool(tool.id);
-                                            }
-                                        }}
+                                        className="admin-edit-button"
+                                        onClick={() => setEditingTool(tool)}
                                     >
-                                        Delete
+                                        Edit
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -70,6 +69,14 @@ function AdminInventorySection() {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <AdminEditToolModal
+                open={editingTool !== null}
+                tool={editingTool}
+                onClose={() => setEditingTool(null)}
+                onDelete={removeTool}
+                onSave={updateTool}
+            />
 
         </section>
     );
