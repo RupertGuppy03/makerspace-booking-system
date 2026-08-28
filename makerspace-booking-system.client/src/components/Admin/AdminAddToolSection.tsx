@@ -1,5 +1,5 @@
 import { Button, Stack } from "@mui/material";
-import { useAdminTools } from "../pages/Admin/useAdminTools";
+import { useAdminTools } from "../../pages/Admin/useAdminTools";
 import { useState } from 'react';
 
 function AdminAddToolSection() {

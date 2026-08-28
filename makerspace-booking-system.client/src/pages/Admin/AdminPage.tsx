@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import './AdminPage.css';
 
-import AdminSidebar, { type AdminSection } from '../../components/AdminSidebar';
-import AdminDashboardSection from '../../components/AdminDashboardSection';
-import AdminInventorySection from '../../components/AdminInventorySection';
-import AdminAddToolSection from '../../components/AdminAddToolSection';
-import AdminReportSection from '../../components/AdminReportSection';
-import AdminMaintenanceSection from '../../components/AdminMaintenanceSection';
+import AdminSidebar, { type AdminSection } from '../../components/Admin/AdminSidebar';
+import AdminDashboardSection from '../../components/Admin/AdminDashboardSection';
+import AdminInventorySection from '../../components/Admin/AdminInventorySection';
+import AdminAddToolSection from '../../components/Admin/AdminAddToolSection';
+import AdminReportSection from '../../components/Admin/AdminReportSection';
+import AdminMaintenanceSection from '../../components/Admin/AdminMaintenanceSection';
 
 function AdminPage() {
     const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');

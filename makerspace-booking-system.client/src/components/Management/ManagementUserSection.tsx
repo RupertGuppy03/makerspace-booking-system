@@ -13,10 +13,15 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import ManagementMetricCard from './ManagementMetricCard';
-import { useDashboardMetrics } from '../pages/Management/useDashboardMetrics';
+import type { DashboardMetrics } from '../../types/metrics';
 
-function ManagementUserSection() {
-    const { metrics } = useDashboardMetrics();
+type Props = {
+    metrics: DashboardMetrics | null;
+    loading: boolean;
+    error: string | null;
+};
+
+function ManagementUserSection({ metrics, loading, error }: Props) {
 
     // Empty lists until the schema is locked. Recharts needs arrays, never null.
     const onTimeReturnTrend = metrics?.userMetrics.onTimeReturnTrend ?? [];
@@ -34,6 +39,9 @@ function ManagementUserSection() {
                     <ManagementMetricCard
                         title="On-time return rate"
                         definition="Bookings returned on or before their due date, as a percentage of all bookings that have been returned. Bookings still out are excluded."
+                        loading={loading}
+                        error={error}
+                        isEmpty={onTimeReturnTrend.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={240}>
                             <LineChart data={onTimeReturnTrend}>
@@ -49,6 +57,9 @@ function ManagementUserSection() {
                     <ManagementMetricCard
                         title="Average overdue duration"
                         definition="Average number of days late, counting only bookings that were returned after their due date. On-time returns are excluded so the figure is not diluted toward zero."
+                        loading={loading}
+                        error={error}
+                        isEmpty={averageOverdueTrend.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={240}>
                             <BarChart data={averageOverdueTrend}>
@@ -64,6 +75,9 @@ function ManagementUserSection() {
                     <ManagementMetricCard
                         title="Cancellation rate"
                         definition="Bookings cancelled before collection, as a percentage of all bookings made. The borrower told us in advance."
+                        loading={loading}
+                        error={error}
+                        isEmpty={cancellationTrend.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={240}>
                             <LineChart data={cancellationTrend}>
@@ -79,6 +93,9 @@ function ManagementUserSection() {
                     <ManagementMetricCard
                         title="No-show rate"
                         definition="Bookings never collected and never cancelled, as a percentage of all bookings made. Tracked separately from cancellations because the borrower gave no warning."
+                        loading={loading}
+                        error={error}
+                        isEmpty={noShowTrend.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={240}>
                             <LineChart data={noShowTrend}>

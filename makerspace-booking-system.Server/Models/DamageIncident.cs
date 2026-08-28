@@ -8,7 +8,7 @@ namespace makerspace_booking_system.Server.Models
         public int Id { get; set; }
 
         [Column("created_at")]
-        public DateTime CreatedAt{ get; set; }
+        public DateTime? CreatedAt{ get; set; }
 
         [Column("tool_id")]
         public int ToolId { get; set; }

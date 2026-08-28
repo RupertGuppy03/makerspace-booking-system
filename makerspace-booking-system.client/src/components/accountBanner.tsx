@@ -1,8 +1,12 @@
 import { useAuth } from '../lib/authProvider';
 import { supabase } from "../lib/supabaseClient";
+import { createSearchParams, useNavigate } from "react-router-dom";
+
 
 export default function AccountBanner() {
 
+
+    const navigate = useNavigate();
     const { user } = useAuth();
     const userEmail = user?.email ?? 'not logged in';
 
@@ -13,12 +17,13 @@ export default function AccountBanner() {
             {user 
                 ? <button onClick={handleLogout}>logout</button>
                 : <div>
-                    <button onClick={() => alert("Go to /signup yourself")}>go to /signup</button>
-                    <button onClick={() => alert("Go to /login yourself")}>go to /login</button>
+                    <button onClick={() => navigate("signup")}>signup</button>
+                    <button onClick={() => navigate("login")}>login</button>
                 </div>
             }
         </div>
     );
+
 
     function handleLogout() {
         supabase.auth.signOut();

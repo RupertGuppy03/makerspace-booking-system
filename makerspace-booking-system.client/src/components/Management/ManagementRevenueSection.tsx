@@ -8,10 +8,15 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ManagementMetricCard from './ManagementMetricCard';
-import { useDashboardMetrics } from '../pages/Management/useDashboardMetrics';
+import type { DashboardMetrics } from '../../types/metrics';
 
-function ManagementRevenueSection() {
-    const { metrics } = useDashboardMetrics();
+type Props = {
+    metrics: DashboardMetrics | null;
+    loading: boolean;
+    error: string | null;
+};
+
+function ManagementRevenueSection({ metrics, loading, error }: Props) {
 
     // Empty list until the schema is locked. Recharts needs an array, never null.
     const monthlyRevenue = metrics?.revenueMetrics.monthlyRevenue ?? [];
@@ -26,6 +31,9 @@ function ManagementRevenueSection() {
                     <ManagementMetricCard
                         title="Revenue over time"
                         definition="Sum of amount_charged for all bookings, grouped by the month the booking starts. Cancelled bookings are excluded."
+                        loading={loading}
+                        error={error}
+                        isEmpty={monthlyRevenue.length === 0}
                     >
                         <ResponsiveContainer width="100%" height={240}>
                             <LineChart data={monthlyRevenue}>
