@@ -4,8 +4,8 @@ import {
 import { useAdminTools } from "../../pages/Admin/useAdminTools";
 import { isOverdue } from './adminToolUtils';
 import { useState } from 'react';
-import type { Tool } from "../types/tool";
-import AdminEditToolModal from './AdminEditToolModal';
+import type { Tool } from "../../types/tool";
+import AdminEditToolModal from '../AdminEditToolModal';
 
 
 function AdminInventorySection() {
