@@ -6,9 +6,11 @@ import type { NewReservation } from '../../../types/newReservasion';
 import { DateRangePicker, type DateRange } from "rsuite";
 import type { Reservation } from '../../../types/reservation';
 import type { Tool } from '../../../types/tool';
+import { useNavigate } from "react-router-dom";
 
 
 export default function Reserve() {
+    const navigate = useNavigate();
 
     const [searchParams] = useSearchParams();
     const [tool, setTool] = useState<Tool>();
@@ -123,6 +125,7 @@ export default function Reserve() {
 
             const data = await response.json()
             alert(`Reservation created: ${data}`);
+            navigate("/user/reservations")
         } else {
             const errorData = await response.json();
             alert(`Error Creating reservation: ${errorData.detail}`);
