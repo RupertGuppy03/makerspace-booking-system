@@ -3,7 +3,7 @@
  * later
  */
 
-import { useAdminTools } from "../pages/Admin/useAdminTools"
+import { useAdminTools } from "../../pages/Admin/useAdminTools"
 import { isOverdue } from "./adminToolUtils";
 
 
