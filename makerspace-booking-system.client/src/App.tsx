@@ -1,7 +1,7 @@
 
 import './App.css';
 import AccountBanner from './components/accountBanner';
-import { createSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 

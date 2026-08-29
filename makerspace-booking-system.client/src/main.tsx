@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import 'rsuite/dist/rsuite.min.css'
 import './index.css'
 import App from './App.tsx'
 import UserPage from "./pages/User/UserPage.tsx";
