@@ -3,8 +3,8 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, Stack, TextField, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
-import type { Tool } from '../types/tool';
-import type { ToolUpdate } from '../pages/Admin/useAdminTools';
+import type { Tool } from '../../types/tool';
+import type { ToolUpdate } from '../../pages/Admin/useAdminTools';
 import { useRef } from 'react';
 
 type Props = {

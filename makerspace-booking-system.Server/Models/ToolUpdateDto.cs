@@ -12,7 +12,7 @@ namespace makerspace_booking_system.Server.Models {
         public string? Name { get; set; }
         public bool? IsTakenOut { get; set; }
         public int? MaintenancePeriod { get; set; }
-        public DateOnly? LastMaintained { get; set; }
+        public DateTime? LastMaintained { get; set; }
         public decimal? DailyRate { get; set; }
     }
 }

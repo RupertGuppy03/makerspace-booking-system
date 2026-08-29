@@ -60,9 +60,15 @@ export function useAdminTools(): AdminToolsState {
             const data = await response.json();
             setTools(data);
         } else {
-            const errorData = await response.json();
-            alert(`Error fetching tools: ${errorData.message}`);
-            setError(errorData.message);
+            let message = `Request failed (${response.status})`;
+            try {
+                const errorData = await response.json();
+                message = errorData.message ?? message;
+            } catch (error) {
+                console.error('Error fetching tools:', error);
+            }
+            alert(`Error fetching tools: ${message}`);
+            setError(message);
             setTools(null);
         }
 
