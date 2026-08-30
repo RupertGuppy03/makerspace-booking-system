@@ -225,7 +225,7 @@ namespace makerspace_booking_system.tests
             Assert.AreEqual(28, updatedTool.DailyRate);
         }
 
-
+        [TestMethod]
         public async Task MaintainTool_ToolLastMaintainedIsUpdated()
         {
             //Arrange - Add tool to database
