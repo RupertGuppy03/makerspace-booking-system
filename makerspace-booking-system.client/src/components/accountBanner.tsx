@@ -17,8 +17,8 @@ export default function AccountBanner() {
             {user 
                 ? <button onClick={handleLogout}>logout</button>
                 : <div>
-                    <button onClick={() => navigate("signup")}>signup</button>
-                    <button onClick={() => navigate("login")}>login</button>
+                    <button onClick={() => navigate("/signup")}>signup</button>
+                    <button onClick={() => navigate("/login")}>login</button>
                 </div>
             }
         </div>

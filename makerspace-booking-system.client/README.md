@@ -1,60 +1,32 @@
-# frontend/
+# React + TypeScript + Vite
 
-React + TypeScript single-page app, built with Vite.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-> **Not scaffolded yet.** There is no `package.json` here — this commit is folders only. The
-> scaffold is the next commit.
+Currently, two official plugins are available:
 
-## Scaffolding it (next commit)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-```bash
-cd frontend
-npm create vite@latest . -- --template react-ts
+## React Compiler
 
-npm install react-router-dom @tanstack/react-query \
-            @mui/material @mui/icons-material @emotion/react @emotion/styled \
-            recharts @supabase/supabase-js
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
 ```
 
-(Playwright for end-to-end tests comes later, if we need it — it's a big install.)
-
-## Running it (once scaffolded)
-
-```bash
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # production build
-npm run test       # Vitest
-```
-
-## Folder layout
-
-| Folder | What goes in it |
-|---|---|
-| `src/pages/` | One component per route. **One file per person** — see its README |
-| `src/components/` | Reusable UI shared across pages |
-| `src/api/` | TanStack Query hooks that call the backend |
-| `src/types/` | Shared TypeScript types mirroring the backend models |
-| `src/lib/` | Supabase client, helpers, formatting utils |
-| `src/tests/` | Vitest + React Testing Library unit tests |
-
-## Environment
-
-Copy `.env.example` → `.env` and fill in the Supabase values. Vite only exposes variables prefixed
-`VITE_`. `.env` is gitignored — never commit it.
-
-## Working together
-
-Three of us are building pages in parallel:
-
-| Page | Route | Owner |
-|---|---|---|
-| `ManagementPage.tsx` | `/management` | Rupert |
-| `UserPage.tsx` | `/user` | Bailey |
-| `AdminPage.tsx` | `/admin` | Jayden |
-| `LoginPage.tsx` | `/login` | unassigned |
-
-Shared files (`main.tsx`, `App.tsx`, routing, theme) are where merge conflicts come from. Flag it in
-the group chat before changing one.
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
