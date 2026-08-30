@@ -4,4 +4,5 @@
     <Deploy />
   </Project>
   <Project Path="makerspace-booking-system.Server/makerspace-booking-system.Server.csproj" />
+  <Project Path="makerspace-booking-system.tests/makerspace-booking-system.tests.csproj" Id="74214e12-63ba-4faf-a3b6-0443ee30c125" />
 </Solution>

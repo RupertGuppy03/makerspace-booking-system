@@ -38,12 +38,16 @@ app.UseHttpsRedirection();
 var url = Environment.GetEnvironmentVariable("SUPABASE_URL");
 var key = builder.Configuration["SUPABASE_KEY:ServiceApiKey"];
 
-var options = new Supabase.SupabaseOptions
+// Only initialize Supabase if environment variables are set (skip in test environment)
+if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(key))
 {
-    AutoConnectRealtime = true
-};
-var supabase = new Supabase.Client(url, key, options);
-await supabase.InitializeAsync();
+    var options = new Supabase.SupabaseOptions
+    {
+        AutoConnectRealtime = true
+    };
+    var supabase = new Supabase.Client(url, key, options);
+    await supabase.InitializeAsync();
+}
 
 
 
@@ -155,9 +159,7 @@ app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContex
     foreach (var (StartDay, EndDay) in dateRanges)
     {
         //if the new reservation overlaps with any existing reservation...
-        if ((reservation.StartDay >= StartDay && reservation.StartDay <= EndDay) //StartDay is contained in existing reservation
-        || (reservation.EndDay >= StartDay && reservation.EndDay <= EndDay) //EndDay is contained in existing reservation
-        || (reservation.StartDay <= StartDay && reservation.EndDay >= EndDay)) //new reservation completely surrounds existing reservation
+        if (DateRangesOverlap(reservation.StartDay, reservation.EndDay, StartDay, EndDay)) 
         {
             return Results.Problem("Failed to create reservation. Time period overlaps with existing reservation");
         }
@@ -229,3 +231,18 @@ app.MapGet("api/management/metrics", async (SupabaseDbContext db) =>
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+
+//This is to allow the testing to access this file
+public partial class Program 
+{ 
+    public static bool DateRangesOverlap(DateTime startDay1, DateTime endDay1, DateTime startDay2, DateTime endDay2) {
+        if ((startDay1 >= startDay2 && startDay1 <= endDay2) //StartDay1 is between startDay2 and endDay2
+        || (endDay1 >= startDay2 && endDay1 <= endDay2) //EndDay1 is between startDay2 and endDay2
+        || (startDay1 <= startDay2 && endDay1 >= endDay2)) //new range 1 completely includes range 2
+        {
+            return true;
+        }
+        return false;
+    }
+}
