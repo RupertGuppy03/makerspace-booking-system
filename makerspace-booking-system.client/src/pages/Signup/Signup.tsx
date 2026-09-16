@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import './Signup.css'
 import { supabase } from '../../lib/supabaseClient'
+import { useNavigate } from "react-router-dom";
+
 
 
 function Signup() {
+    const navigate = useNavigate();
 
 
 
@@ -22,6 +25,7 @@ function Signup() {
             alert(error.message)
         } else {
             alert('Signup successful')
+            navigate("/")
         }
 
 

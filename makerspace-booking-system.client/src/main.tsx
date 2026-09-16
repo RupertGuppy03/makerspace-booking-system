@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// Bootstrap first, so it acts as the base layer that everything else can override.
-import 'bootstrap/dist/css/bootstrap.min.css'
+import 'rsuite/dist/rsuite.min.css'
 import './index.css'
 // Points Bootstrap's colour variables at ours, so dark mode keeps working.
 import './theme.css'

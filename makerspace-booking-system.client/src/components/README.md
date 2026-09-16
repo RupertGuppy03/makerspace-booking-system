@@ -5,13 +5,7 @@ shouldn't fetch data themselves.
 
 ## Naming
 
-This folder is shared by all three of us, so **prefix components that are really yours**:
-
-- `ManagementToolTable.tsx` ✅ — clearly Rupert's, nobody else will touch it
-- `Table.tsx` ❌ — three people will each want this name
-
-Genuinely shared things (`LoadingSpinner.tsx`, `ErrorMessage.tsx`, `ConfirmDialog.tsx`) go
-unprefixed — but say so in the group chat so we don't build the same one twice.
+Put components made for a specific page in a sub-folder.
 
 ## Conventions
 

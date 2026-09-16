@@ -18,7 +18,7 @@ function UserPage() {
     }, []);
 
     const table = tools === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started.</em></p>
+        ? <p><em>Loading...</em></p>
         : <table className="table table-striped" aria-labelledby="tableLabel">
             <thead>
                 <tr>
@@ -73,7 +73,7 @@ function UserPage() {
         const toolIdStr = toolId.toString();
 
         navigate({
-            pathname: "/userpage/reserve",
+            pathname: "/user/reserve",
             search: createSearchParams({
                 toolId: toolIdStr
             }).toString()
