@@ -1,155 +1,180 @@
 /*
- * this is the css file for the management page, it contains all the styling for the management page
+ * Every rule here is scoped under .management-shell so nothing can reach
+ * another person's page.
  *
- * Everything is scoped under .management-dashboard on purpose. The app's global
- * index.css pins #root to a fixed width and centres all text, which fights a
- * dashboard layout — but that file is shared with the whole team, so we override
- * inside our own class instead of editing it.
- *
- * Colours come from the CSS variables index.css already defines, so this page
- * follows the app's light and dark themes automatically.
+ * Colours are defined as variables on the shell itself rather than taken from
+ * index.css, because the dashboard wants a light grey canvas with white cards
+ * rather than the flat white the rest of the app uses. The dark-mode block
+ * below swaps the same four variables, so every rule underneath follows along
+ * without being written twice.
  */
 
-.management-dashboard {
-    text-align: left;
-    padding: 24px;
-    box-sizing: border-box;
-}
+.management-shell {
+    --management-canvas: #f4f7fa;
+    --management-card: #ffffff;
+    --management-card-border: #e9edf2;
+    --management-heading: #1b232f;
+    --management-muted: #8a94a6;
 
-.management-header h1 {
-    margin: 0 0 8px;
-}
-
-.management-subtitle {
-    color: var(--text);
-    margin: 0 0 20px;
-}
-
-/* Makes it obvious in a demo that the figures aren't real yet. */
-.management-banner {
-    padding: 12px 16px;
-    margin: 0 0 24px;
-    border: 1px solid var(--accent-border);
-    background: var(--accent-bg);
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.management-tabs {
     display: flex;
-    gap: 4px;
-    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+@media (prefers-color-scheme: dark) {
+    .management-shell {
+        --management-canvas: #12131a;
+        --management-card: #1b1d26;
+        --management-card-border: #2a2d3a;
+        --management-heading: #f3f4f6;
+        --management-muted: #8b93a5;
+    }
+}
+
+/*
+ * Defensive reset. Login.css currently sets `* { color: #fff }` across the whole
+ * app, which forces white text onto anything that does not set its own colour.
+ * This undoes it inside the dashboard only. It can be deleted once that file is
+ * scoped to its own page.
+ */
+.management-shell,
+.management-shell * {
+    color: inherit;
+}
+
+.management-main {
+    /* flex: 1 lets the main column take whatever width the sidebar leaves.
+       min-width: 0 stops wide charts from forcing the column to overflow. */
+    flex: 1;
+    min-width: 0;
+    background: var(--management-canvas);
+    color: var(--management-muted);
+    min-height: 100vh;
+    padding: 28px 32px 48px;
+}
+
+/* ---------- page heading ---------- */
+
+.management-header {
     margin-bottom: 24px;
 }
 
-.management-tab {
-    padding: 10px 20px;
-    border: none;
-    border-bottom: 2px solid transparent;
-    background: none;
-    color: var(--text);
-    font: inherit;
-    font-size: 16px;
-    cursor: pointer;
+.management-title {
+    /* index.css sets every h1 to 56px, which is far too big for a dashboard.
+       A class beats a plain element selector, so this wins without touching
+       the shared file. */
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    margin: 0 0 4px;
+    color: var(--management-heading);
 }
 
-.management-tab:hover {
-    color: var(--text-h);
+.management-breadcrumb {
+    font-size: 13px;
+    color: var(--management-muted);
 }
 
-.management-tab--active {
-    color: var(--text-h);
-    border-bottom-color: var(--accent);
+.management-breadcrumb span {
+    color: var(--management-heading);
 }
+
+/* ---------- section heading ---------- */
 
 .management-panel h2 {
-    margin-top: 0;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 2px;
+    color: var(--management-heading);
 }
 
-/* ---------- Metric cards ---------- */
+.management-panel > div > section > p {
+    font-size: 13px;
+    color: var(--management-muted);
+    margin-bottom: 18px;
+}
 
-/*
- * auto-fit + minmax means the browser decides the column count from the
- * available width: two or three across on a laptop, one on a narrow window.
- * No media queries needed.
- */
+/* ---------- metric cards ---------- */
+
 .management-metric-grid {
     display: grid;
+    /* auto-fit means the browser fits as many 340px columns as there is room
+       for, then shares any leftover space between them. */
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 20px;
-    margin-top: 20px;
 }
 
 .management-metric-card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
+    background: var(--management-card);
+    border: 1px solid var(--management-card-border);
+    border-radius: 10px;
+    padding: 18px 20px 14px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .management-metric-title {
-    margin: 0 0 12px;
-    font-size: 17px;
-    color: var(--text-h);
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    color: var(--management-heading);
 }
 
-/*
- * position: relative makes this the anchor for the placeholder overlay below.
- * Without it the placeholder would position itself against the whole page.
- */
 .management-metric-chart {
-    position: relative;
+    /* Fixed height so a card does not change size when its chart is swapped
+       for the "nothing to show" message. */
+    min-height: 280px;
 }
 
-/*
- * Sits on top of the chart so the axes stay visible underneath — the layout is
- * real, only the numbers are missing.
- * pointer-events: none lets mouse events reach the chart, so tooltips still
- * work once this is removed for a card that has data.
- */
 .management-chart-placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 240px;
-    padding: 16px;
-    box-sizing: border-box;
-    background: var(--social-bg);
-    border-radius: 4px;
-}
-.management-chart-placeholder p {
-    max-width: 30ch;
+    min-height: 280px;
     text-align: center;
+    color: var(--management-muted);
     font-size: 14px;
-    color: var(--text-h);
 }
 
-/*
- * The calculation rule, shown on screen rather than buried in code, so the
- * figure above it can actually be checked by whoever is reading the dashboard.
- */
 .management-metric-definition {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--management-muted);
     margin: 12px 0 0;
     padding-top: 12px;
-    border-top: 1px solid var(--border);
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--text);
+    border-top: 1px solid var(--management-card-border);
 }
 
-/*
-* Recharts sets a white tooltip background as an inline style and lets the text
-* colour inherit from the page, so in dark mode it's white on white and looks
-* like an empty box. !important is needed here because a normal rule can't beat
-* an inline style.
-*/
-.management-dashboard .recharts-default-tooltip {
-    background: var(--bg) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 4px;
+/* ---------- Recharts ---------- */
+
+.management-shell .recharts-cartesian-axis-tick text {
+    fill: var(--management-muted);
+    font-size: 12px;
+}
+
+.management-shell .recharts-cartesian-grid line {
+    stroke: var(--management-card-border);
+}
+
+.management-shell .recharts-default-tooltip {
+    background: var(--management-card) !important;
+    border: 1px solid var(--management-card-border) !important;
+    border-radius: 8px;
     padding: 8px 12px !important;
 }
 
-.management-dashboard .recharts-tooltip-label,
-.management-dashboard .recharts-tooltip-item {
-    color: var(--text-h) !important;
+.management-shell .recharts-tooltip-label,
+.management-shell .recharts-tooltip-item {
+    color: var(--management-heading) !important;
+}
+
+/* Below tablet width the sidebar stacks on top, so the shell runs vertically. */
+@media (max-width: 900px) {
+    .management-shell {
+        flex-direction: column;
+    }
+
+    .management-main {
+        padding: 20px 16px 40px;
+        width: 100%;
+    }
 }

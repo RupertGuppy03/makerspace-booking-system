@@ -3,9 +3,8 @@
  * trends for the makerspace for all tools: utilisation rate, damage incidents
  * per tool, and most requested tools.
  *
- * All three charts are fully configured but have no data yet. Utilisation and
- * demand need columns that do not exist; damage needs an entire DamageIncidents
- * table, which has not been created at all.
+ * Figures arrive from /api/management/metrics. When a metric has no rows yet the
+ * card shows a short message in place of the chart.
  */
 
 import {
@@ -13,17 +12,18 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import ManagementMetricCard from './ManagementMetricCard';
-import type { DashboardMetrics } from '../../types/metrics';
+import { useOutletContext } from 'react-router-dom';
+import type { DashboardMetricsState } from '../../pages/Management/useDashboardMetrics';
 
-type Props = {
-    metrics: DashboardMetrics | null;
-    loading: boolean;
-    error: string | null;
-};
+function ManagementToolSection() {
+    /*
+     * The figures are fetched once by ManagementPage, the frame this section
+     * sits inside. useOutletContext reads what that frame passed down, so this
+     * section does not fetch anything itself.
+     */
+    const { metrics, loading, error } = useOutletContext<DashboardMetricsState>();
 
-function ManagementToolSection({ metrics, loading, error }: Props) {
-
-    // Empty lists until the schema is locked. Recharts needs arrays, never null.
+    // Recharts needs arrays, never null, so fall back to empty ones.
     const utilisationMetrics = metrics?.toolMetrics.utilisationMetrics ?? [];
     const damageMetrics = metrics?.toolMetrics.damageMetrics ?? [];
     const demandMetrics = metrics?.toolMetrics.demandMetrics ?? [];

@@ -2,23 +2,24 @@
  * this is for the revenue tab of the manager dashboard. It will display the
  * revenue metrics and trends for the makerspace.
  *
- * The chart is fully configured but has no data yet — the amount_charged column
- * does not exist in the database, so it renders empty with a placeholder over it.
+ * Figures arrive from /api/management/metrics. When a metric has no rows yet the
+ * card shows a short message in place of the chart.
  */
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ManagementMetricCard from './ManagementMetricCard';
-import type { DashboardMetrics } from '../../types/metrics';
+import { useOutletContext } from 'react-router-dom';
+import type { DashboardMetricsState } from '../../pages/Management/useDashboardMetrics';
 
-type Props = {
-    metrics: DashboardMetrics | null;
-    loading: boolean;
-    error: string | null;
-};
+function ManagementRevenueSection() {
+    /*
+     * The figures are fetched once by ManagementPage, the frame this section
+     * sits inside. useOutletContext reads what that frame passed down, so this
+     * section does not fetch anything itself.
+     */
+    const { metrics, loading, error } = useOutletContext<DashboardMetricsState>();
 
-function ManagementRevenueSection({ metrics, loading, error }: Props) {
-
-    // Empty list until the schema is locked. Recharts needs an array, never null.
+    // Recharts needs an array, never null, so fall back to an empty one.
     const monthlyRevenue = metrics?.revenueMetrics.monthlyRevenue ?? [];
 
     return (

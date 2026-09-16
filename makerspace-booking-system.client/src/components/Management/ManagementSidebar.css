@@ -1,0 +1,112 @@
+/*
+ * Scoped entirely under .management-sidebar so none of it can reach another
+ * person's page. The rail stays dark in both light and dark mode, which is why
+ * these colours are written out rather than taken from the shared variables.
+ */
+
+.management-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: #1b232f;
+    color: #c3ccd9;
+    padding: 24px 0;
+    /* Keeps the rail on screen while the metrics scroll past it. */
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+}
+
+.management-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px 28px;
+}
+
+.management-sidebar-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #4680ff;
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.management-sidebar-name {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.management-sidebar-heading {
+    padding: 0 24px 10px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #6b7789;
+}
+
+.management-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.management-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 24px;
+    color: #c3ccd9;
+    text-decoration: none;
+    font-size: 15px;
+    /* Transparent bar now, coloured in when the link is active. */
+    border-left: 3px solid transparent;
+}
+
+.management-sidebar-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.management-sidebar-link--active {
+    color: #fff;
+    border-left-color: #4680ff;
+    background: rgba(70, 128, 255, 0.12);
+}
+
+.management-sidebar-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    opacity: 0.85;
+}
+
+/* Below tablet width the rail lies down across the top instead. */
+@media (max-width: 900px) {
+    .management-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        padding-bottom: 8px;
+    }
+
+    .management-sidebar-nav {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .management-sidebar-link {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+    }
+
+    .management-sidebar-link--active {
+        border-left-color: transparent;
+        border-bottom-color: #4680ff;
+    }
+}
