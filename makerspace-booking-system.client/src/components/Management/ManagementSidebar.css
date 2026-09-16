@@ -55,6 +55,25 @@
     flex-direction: column;
 }
 
+/* ---------- links to the admin and user pages ---------- */
+
+.management-sidebar-pages {
+    display: flex;
+    flex-direction: column;
+    margin-top: 18px;
+}
+
+/* Looks like the DASHBOARD heading, but can be clicked. */
+.management-sidebar-heading--link {
+    display: block;
+    padding-top: 10px;
+    text-decoration: none;
+}
+
+.management-sidebar-heading--link:hover {
+    color: #fff;
+}
+
 .management-sidebar-link {
     display: flex;
     align-items: center;

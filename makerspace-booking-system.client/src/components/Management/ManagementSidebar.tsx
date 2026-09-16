@@ -5,7 +5,7 @@
  * highlight, so nothing needs to be passed in from the page.
  */
 
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import ManagementUserChip from './ManagementUserChip';
 import './ManagementSidebar.css';
 
@@ -58,6 +58,19 @@ function ManagementSidebar() {
                         {section.label}
                     </NavLink>
                 ))}
+            </nav>
+
+            {/*
+              * Headings that leave the dashboard for the other pages. They start
+              * with "/" so they go to /admin and /user, not /management/admin.
+              */}
+            <nav className="management-sidebar-pages" aria-label="Other pages">
+                <Link to="/admin" className="management-sidebar-heading management-sidebar-heading--link">
+                    Admin
+                </Link>
+                <Link to="/user" className="management-sidebar-heading management-sidebar-heading--link">
+                    User page
+                </Link>
             </nav>
 
             {/* Placeholder until this is wired to the signed-in user. */}
