@@ -16,6 +16,7 @@ import './ManagementPage.css';
 import ManagementRevenueSection from '../../components/Management/ManagementRevenueSection';
 import ManagementUserSection from '../../components/Management/ManagementUserSection';
 import ManagementToolSection from '../../components/Management/ManagementToolSection';
+import { useDashboardMetrics } from './useDashboardMetrics';
 
 type Tab = 'revenue' | 'users' | 'tools';
 
@@ -33,6 +34,7 @@ const TABS: { id: Tab; label: string }[] = [
 
 function ManagementPage() {
     const [activeTab, setActiveTab] = useState<Tab>('revenue');
+    const {metrics, loading, error} = useDashboardMetrics();
 
     return (
         <div className="management-dashboard">
@@ -42,10 +44,6 @@ function ManagementPage() {
                     An overview of how the makerspace is running. Figures cover the last 12 months.
                 </p>
             </header>
-
-            <p className="management-banner">
-                Prototype - the management dashboard is still in development
-            </p>
 
             <nav className="management-tabs" role="tablist" aria-label="Management Dashboard Tabs">
                 {TABS.map((tab) => (
@@ -67,9 +65,15 @@ function ManagementPage() {
             </nav>
 
             <main className="management-panel">
-                {activeTab === 'revenue' && <ManagementRevenueSection />}
-                {activeTab === 'users' && <ManagementUserSection />}
-                {activeTab === 'tools' && <ManagementToolSection />}
+                {activeTab === 'revenue' && (
+                        <ManagementRevenueSection metrics={metrics} loading={loading} error={error} />
+                    )}
+                    {activeTab === 'users' && (
+                        <ManagementUserSection metrics={metrics} loading={loading} error={error} />
+                    )}
+                    {activeTab === 'tools' && (
+                        <ManagementToolSection metrics={metrics} loading={loading} error={error} />
+                    )}
             </main>
         </div>
     );

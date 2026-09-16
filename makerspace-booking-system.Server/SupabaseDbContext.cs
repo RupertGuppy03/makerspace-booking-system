@@ -12,5 +12,7 @@ namespace makerspace_booking_system.Server
         public DbSet<Tool> Tools => Set<Tool>();
         public DbSet<Reservation> Reservations => Set<Reservation>();
 
+        public DbSet<DamageIncident> DamageIncidents => Set<DamageIncident>(); // Added setter for damage incidents
+        
     }
 }
