@@ -1,49 +1,39 @@
 /**
- * The small Week / Month / Year switch in the corner of a chart card.
+ * The small Week / Month switch in the corner of a chart card.
  *
- * Only the ranges the API can actually supply are clickable. The rest are
- * shown but disabled, with a tooltip explaining why, so the control is already
- * in place when the backend can feed it.
+ * Props:
+ * - value: the range currently selected
+ * - onChange: called with the new range when a button is clicked
+ *
+ * The API sends every trend both ways, so switching never fetches anything -
+ * the section just reads the other list.
  */
 
-export type TimeRange = 'week' | 'month' | 'year';
+export type TimeRange = 'week' | 'month';
 
 type Props = {
     value: TimeRange;
     onChange: (range: TimeRange) => void;
-    // Ranges the caller can actually show data for.
-    available: TimeRange[];
 };
 
 const RANGES: { id: TimeRange; label: string }[] = [
     { id: 'week', label: 'Week' },
     { id: 'month', label: 'Month' },
-    { id: 'year', label: 'Year' },
 ];
 
-function ManagementTimeRange({ value, onChange, available }: Props) {
+function ManagementTimeRange({ value, onChange }: Props) {
     return (
         <div className="management-range">
-            {RANGES.map((range) => {
-                const enabled = available.includes(range.id);
-
-                return (
-                    <button
-                        key={range.id}
-                        type="button"
-                        disabled={!enabled}
-                        title={enabled ? undefined : 'The dashboard API does not supply this range yet'}
-                        className={
-                            value === range.id
-                                ? 'management-range--on'
-                                : undefined
-                        }
-                        onClick={() => onChange(range.id)}
-                    >
-                        {range.label}
-                    </button>
-                );
-            })}
+            {RANGES.map((range) => (
+                <button
+                    key={range.id}
+                    type="button"
+                    className={value === range.id ? 'management-range--on' : undefined}
+                    onClick={() => onChange(range.id)}
+                >
+                    {range.label}
+                </button>
+            ))}
         </div>
     );
 }

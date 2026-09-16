@@ -35,7 +35,7 @@ export const AXIS = {
 /**
  * Utilisation is the one number where the colour carries meaning rather than
  * decoration: a tool booked out more than 80% of the time is the signal that a
- * second unit is worth buying, and under 45% suggests one is sitting idle.
+ * second unit is worth buying, and under 60% suggests one is sitting idle.
  */
 export function utilisationColour(rate: number): string {
     if (rate >= 80) return CHART_COLOURS.rose;
@@ -80,41 +80,41 @@ export function utilisationTooltip(value: unknown): string {
 }
 
 /**
- * The API sends months as "Oct 25". A hyphen reads as a date on an axis, where
- * a space can look like two separate labels that have run together.
+ * The API sends periods as "Oct 25" (a month) or "15 Sep" (a week). A hyphen
+ * reads as a date on an axis, where a space can look like two separate labels
+ * that have run together.
  */
-export function monthLabel(value: unknown): string {
+export function periodLabel(value: unknown): string {
     return typeof value === 'string' ? value.replace(' ', '-') : String(value ?? '');
 }
 
 /*
- * Month axes.
+ * Time axes, for both weekly and monthly charts.
  *
- * The ticks are chosen by hand (see everySecondMonth) rather than left to
+ * The ticks are chosen by hand (see everyNthPeriod) rather than left to
  * Recharts, because its 'preserveStartEnd' setting forces the final label in
- * whether or not it is evenly spaced — which left a three-month gap at the end
- * of a chart where every other gap was two. interval 0 tells Recharts to draw
- * exactly the ticks it is given.
+ * whether or not it is evenly spaced — which left an uneven gap at the end of a
+ * chart. interval 0 tells Recharts to draw exactly the ticks it is given.
  */
-export const MONTH_AXIS = {
+export const PERIOD_AXIS = {
     ...AXIS,
     interval: 0,
     tickMargin: 8,
-    tickFormatter: monthLabel,
+    tickFormatter: periodLabel,
 };
 
 /**
- * Picks which months get a label on a chart's axis.
+ * Picks which periods (weeks or months) get a label on a chart's axis.
  *
- * `step` is how many months to move between labels — 2 on a full-width chart,
- * 3 (a quarter) on a half-width one, where twelve labels will not fit.
+ * `step` is how many periods to move between labels — 2 on a full-width chart,
+ * 3 on a half-width one, where twelve labels will not fit.
  *
  * It counts back from the end of the list rather than forward from the start,
- * so the gaps stay even AND the most recent month always keeps its label —
+ * so the gaps stay even AND the most recent period always keeps its label —
  * that is the one someone reading the dashboard looks at first.
  */
-export function everyNthMonth(months: string[], step: number): string[] {
-    return months.filter((_, index) => (months.length - 1 - index) % step === 0);
+export function everyNthPeriod(periods: string[], step: number): string[] {
+    return periods.filter((_, index) => (periods.length - 1 - index) % step === 0);
 }
 
 /*

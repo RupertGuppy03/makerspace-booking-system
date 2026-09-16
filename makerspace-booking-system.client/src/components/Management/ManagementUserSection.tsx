@@ -7,6 +7,7 @@
  * the card says so rather than drawing a chart of zeroes.
  */
 
+import { useState } from 'react';
 import {
     AreaChart, Area, BarChart, Bar,
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -15,9 +16,11 @@ import { useOutletContext } from 'react-router-dom';
 import type { DashboardMetricsState } from '../../pages/Management/useDashboardMetrics';
 import ManagementMetricCard from './ManagementMetricCard';
 import ManagementStatCard from './ManagementStatCard';
+import ManagementTimeRange from './ManagementTimeRange';
+import type { TimeRange } from './ManagementTimeRange';
 import {
-    CHART_COLOURS, AXIS, MONTH_AXIS, CHART_MARGIN, BAR_CURSOR,
-    everyNthMonth, monthLabel, formatPercent, percentTooltip, daysTooltip,
+    CHART_COLOURS, AXIS, PERIOD_AXIS, CHART_MARGIN, BAR_CURSOR,
+    everyNthPeriod, periodLabel, formatPercent, percentTooltip, daysTooltip,
 } from './managementChartTheme';
 
 function ManagementUserSection() {
@@ -27,21 +30,38 @@ function ManagementUserSection() {
      */
     const { metrics, loading, error } = useOutletContext<DashboardMetricsState>();
 
+    /*
+     * Whether the charts show weeks or months. All three charts share this one
+     * value, so clicking any of their switches moves all three together.
+     */
+    const [range, setRange] = useState<TimeRange>('month');
+
+    // The same switch, handed to each chart card.
+    const rangeSwitch = <ManagementTimeRange value={range} onChange={setRange} />;
+
     // Recharts needs arrays, never null, so fall back to empty ones.
-    const onTimeReturnTrend = metrics?.userMetrics.onTimeReturnTrend ?? [];
-    const averageOverdueTrend = metrics?.userMetrics.averageOverdueTrend ?? [];
-    const cancellationTrend = metrics?.userMetrics.cancellationTrend ?? [];
-    const noShowTrend = metrics?.userMetrics.noShowTrend ?? [];
+    // [range] picks either the .week or the .month list for the charts.
+    const onTimeReturnTrend = metrics?.userMetrics.onTimeReturnTrend[range] ?? [];
+    const averageOverdueTrend = metrics?.userMetrics.averageOverdueTrend[range] ?? [];
+    const cancellationTrend = metrics?.userMetrics.cancellationTrend[range] ?? [];
+    const noShowTrend = metrics?.userMetrics.noShowTrend[range] ?? [];
+
+    // The small sparklines in the headline cards always show months, to match
+    // their 12-month figures.
+    const onTimeByMonth = metrics?.userMetrics.onTimeReturnTrend.month ?? [];
+    const overdueByMonth = metrics?.userMetrics.averageOverdueTrend.month ?? [];
+    const cancellationByMonth = metrics?.userMetrics.cancellationTrend.month ?? [];
+    const noShowByMonth = metrics?.userMetrics.noShowTrend.month ?? [];
 
     /*
      * Cancellations and no-shows are two ways the same thing goes wrong, so
      * they share one chart. The API returns them as two separate lists covering
-     * the same months, so we stitch them into a single row per month — which is
-     * the shape Recharts needs to draw two lines on one set of axes.
+     * the same periods, so we stitch them into a single row per period — which
+     * is the shape Recharts needs to draw two lines on one set of axes.
      */
-    const failedBookings = cancellationTrend.map((month, index) => ({
-        month: month.month,
-        cancelled: month.rate,
+    const failedBookings = cancellationTrend.map((point, index) => ({
+        period: point.period,
+        cancelled: point.rate,
         noShow: noShowTrend[index]?.rate ?? 0,
     }));
 
@@ -58,7 +78,7 @@ function ManagementUserSection() {
                         label="Returned on time"
                         value={metrics === null ? null : formatPercent(metrics.userMetrics.onTimeReturnRate)}
                         note="Of all returned bookings"
-                        trend={onTimeReturnTrend.map((month) => month.rate)}
+                        trend={onTimeByMonth.map((point) => point.rate)}
                     />
                 </div>
                 <div className="col-sm-6 col-xl-3">
@@ -71,7 +91,7 @@ function ManagementUserSection() {
                                 : `${metrics.userMetrics.averageOverdueDays.toFixed(1)} days`
                         }
                         note="Counting late returns only"
-                        trend={averageOverdueTrend.map((month) => month.duration)}
+                        trend={overdueByMonth.map((point) => point.duration)}
                     />
                 </div>
                 <div className="col-sm-6 col-xl-3">
@@ -80,7 +100,7 @@ function ManagementUserSection() {
                         label="Cancelled"
                         value={metrics === null ? null : formatPercent(metrics.userMetrics.cancellationRate)}
                         note="Called off before collection"
-                        trend={cancellationTrend.map((month) => month.rate)}
+                        trend={cancellationByMonth.map((point) => point.rate)}
                     />
                 </div>
                 <div className="col-sm-6 col-xl-3">
@@ -89,7 +109,7 @@ function ManagementUserSection() {
                         label="No-shows"
                         value={metrics === null ? null : formatPercent(metrics.userMetrics.noShowRate)}
                         note="Never collected, never cancelled"
-                        trend={noShowTrend.map((month) => month.rate)}
+                        trend={noShowByMonth.map((point) => point.rate)}
                     />
                 </div>
             </div>
@@ -98,11 +118,12 @@ function ManagementUserSection() {
             <div className="mb-4">
                 <ManagementMetricCard
                     title="Bookings that never happened"
-                    definition="Cancelled bookings were called off in advance. No-shows were never collected and never cancelled, so they hold a tool nobody else could book."
+                    definition={`Cancelled bookings were called off in advance. No-shows were never collected and never cancelled, so they hold a tool nobody else could book. Shown per ${range} over the last 12 ${range}s.`}
                     loading={loading}
                     error={error}
                     isEmpty={failedBookings.length === 0}
                     height={280}
+                    action={rangeSwitch}
                 >
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={failedBookings} margin={CHART_MARGIN}>
@@ -118,12 +139,12 @@ function ManagementUserSection() {
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                             <XAxis
-                                    dataKey="month"
-                                    {...MONTH_AXIS}
-                                    ticks={everyNthMonth(failedBookings.map((m) => m.month), 2)}
-                                />
+                                dataKey="period"
+                                {...PERIOD_AXIS}
+                                ticks={everyNthPeriod(failedBookings.map((p) => p.period), 2)}
+                            />
                             <YAxis {...AXIS} unit="%" />
-                            <Tooltip formatter={percentTooltip} labelFormatter={monthLabel} />
+                            <Tooltip formatter={percentTooltip} labelFormatter={periodLabel} />
                             <Legend />
                             <Area
                                 type="monotone"
@@ -151,11 +172,12 @@ function ManagementUserSection() {
                 <div className="col-lg-6">
                     <ManagementMetricCard
                         title="Returned on time"
-                        definition="Share of returned bookings given back on or before their end date."
+                        definition={`Share of returned bookings given back on or before their end date, per ${range}.`}
                         loading={loading}
                         error={error}
                         isEmpty={onTimeReturnTrend.length === 0}
                         height={210}
+                        action={rangeSwitch}
                     >
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={onTimeReturnTrend} margin={CHART_MARGIN}>
@@ -167,12 +189,12 @@ function ManagementUserSection() {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis
-                                    dataKey="month"
-                                    {...MONTH_AXIS}
-                                    ticks={everyNthMonth(onTimeReturnTrend.map((m) => m.month), 3)}
+                                    dataKey="period"
+                                    {...PERIOD_AXIS}
+                                    ticks={everyNthPeriod(onTimeReturnTrend.map((p) => p.period), 3)}
                                 />
                                 <YAxis {...AXIS} unit="%" />
-                                <Tooltip formatter={percentTooltip} labelFormatter={monthLabel} />
+                                <Tooltip formatter={percentTooltip} labelFormatter={periodLabel} />
                                 <Area
                                     type="monotone"
                                     dataKey="rate"
@@ -189,25 +211,26 @@ function ManagementUserSection() {
                 <div className="col-lg-6">
                     <ManagementMetricCard
                         title="How late, when late"
-                        definition="Average days past the end date, counting only bookings that were actually returned late."
+                        definition={`Average days past the end date per ${range}, counting only bookings that were actually returned late.`}
                         loading={loading}
                         error={error}
                         isEmpty={
                             averageOverdueTrend.length === 0 ||
-                            allZero(averageOverdueTrend.map((month) => month.duration))
+                            allZero(averageOverdueTrend.map((point) => point.duration))
                         }
                         height={210}
+                        action={rangeSwitch}
                     >
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={averageOverdueTrend} margin={CHART_MARGIN}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis
-                                    dataKey="month"
-                                    {...MONTH_AXIS}
-                                    ticks={everyNthMonth(averageOverdueTrend.map((m) => m.month), 3)}
+                                    dataKey="period"
+                                    {...PERIOD_AXIS}
+                                    ticks={everyNthPeriod(averageOverdueTrend.map((p) => p.period), 3)}
                                 />
                                 <YAxis {...AXIS} unit="d" />
-                                <Tooltip cursor={BAR_CURSOR} formatter={daysTooltip} labelFormatter={monthLabel} />
+                                <Tooltip cursor={BAR_CURSOR} formatter={daysTooltip} labelFormatter={periodLabel} />
                                 <Bar
                                     dataKey="duration"
                                     name="Days overdue"

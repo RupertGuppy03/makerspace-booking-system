@@ -18,9 +18,10 @@ import ManagementMetricCard from './ManagementMetricCard';
 import ManagementStatCard from './ManagementStatCard';
 import ManagementTimeRange from './ManagementTimeRange';
 import type { TimeRange } from './ManagementTimeRange';
+import ManagementRankedList from './ManagementRankedList';
 import {
-    CHART_COLOURS, AXIS, CHART_MARGIN, BAR_CURSOR, utilisationColour, formatPercent,
-    utilisationTooltip,
+    CHART_COLOURS, CATEGORY_COLOURS, AXIS, CHART_MARGIN, BAR_CURSOR, utilisationColour,
+    formatPercent, utilisationTooltip, moneyTooltip,
 } from './managementChartTheme';
 
 function ManagementToolSection() {
@@ -30,13 +31,37 @@ function ManagementToolSection() {
      */
     const { metrics, loading, error } = useOutletContext<DashboardMetricsState>();
 
-    // Which period the revenue split would cover, once the API can supply it.
+    /*
+     * Whether "Revenue by tool" covers the last 12 weeks or the last 12 months.
+     * The API sends both, so switching just reads the other list.
+     */
     const [range, setRange] = useState<TimeRange>('month');
 
     // Recharts needs arrays, never null, so fall back to empty ones.
     const utilisationMetrics = metrics?.toolMetrics.utilisationMetrics ?? [];
     const damageMetrics = metrics?.toolMetrics.damageMetrics ?? [];
     const demandMetrics = metrics?.toolMetrics.demandMetrics ?? [];
+    // [range] picks either the .week or the .month list.
+    const revenueByTool = metrics?.toolMetrics.revenueByTool[range] ?? [];
+
+    /*
+     * The doughnut gets hard to read with lots of slices, so we name the four
+     * biggest earners and group the rest into "Other tools". The API already
+     * sends them biggest first.
+     */
+    const topTools = revenueByTool.slice(0, 4);
+    const otherToolsTotal = revenueByTool.slice(4).reduce((sum, tool) => sum + tool.amount, 0);
+
+    const toolSlices = [
+        ...topTools.map((tool, index) => ({
+            label: tool.toolName,
+            value: tool.amount,
+            colour: CATEGORY_COLOURS[index],
+        })),
+        ...(otherToolsTotal > 0
+            ? [{ label: 'Other tools', value: otherToolsTotal, colour: CHART_COLOURS.grey }]
+            : []),
+    ];
 
     // Headline figures, worked out from the lists above.
     const averageUtilisation =
@@ -97,40 +122,46 @@ function ManagementToolSection() {
 
             {/* ---------- revenue split and utilisation ---------- */}
             <div className="row g-4 mb-4">
-                <div className="col-lg-5">
+                <div className="col-lg-6">
                     <ManagementMetricCard
                         title="Revenue by tool"
-                        /*
-                         * Nothing in the metrics endpoint attributes revenue to a
-                         * particular tool, so this card stays empty on purpose. The
-                         * period switch is here ready for when the API can supply it.
-                         */
-                        definition="Share of revenue earned by each tool in the selected period. Waiting on the dashboard API to report revenue per tool."
+                        definition={`Share of revenue earned by each tool over the last 12 ${range}s. Cancelled bookings are excluded, and tools that earned nothing are left out.`}
                         loading={loading}
                         error={error}
-                        isEmpty
+                        isEmpty={toolSlices.length === 0}
                         height={200}
-                        action={
-                            <ManagementTimeRange value={range} onChange={setRange} available={[]} />
-                        }
+                        action={<ManagementTimeRange value={range} onChange={setRange} />}
                     >
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={[]}
-                                    dataKey="amount"
-                                    nameKey="toolName"
-                                    innerRadius="62%"
-                                    outerRadius="100%"
-                                    stroke="none"
-                                />
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <div className="row align-items-center h-100">
+                            <div className="col-sm-7 h-100">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={toolSlices}
+                                            dataKey="value"
+                                            nameKey="label"
+                                            innerRadius="62%"
+                                            outerRadius="100%"
+                                            stroke="none"
+                                        >
+                                            {/* Cell colours each slice individually. */}
+                                            {toolSlices.map((slice) => (
+                                                <Cell key={slice.label} fill={slice.colour} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip formatter={moneyTooltip} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="col-sm-5">
+                                {/* The percentage each tool earned, next to the doughnut. */}
+                                <ManagementRankedList items={toolSlices} />
+                            </div>
+                        </div>
                     </ManagementMetricCard>
                 </div>
 
-                <div className="col-lg-7">
+                <div className="col-lg-6">
                     <ManagementMetricCard
                         title="Utilisation"
                         definition="Share of days in the period each tool was booked out. Red means booked more than 80% of the time, which suggests a second unit is worth buying. Green under 60% suggests one is sitting idle."
