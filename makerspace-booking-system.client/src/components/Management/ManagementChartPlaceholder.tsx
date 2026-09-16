@@ -1,19 +1,19 @@
 /**
- * 
- * the message shown here is where the data would be displayed, but the data is not being fetched from the backend yet.
- * 
- * 
+ * Shown in place of a chart when there is nothing to draw — still loading, the
+ * request failed, or the period genuinely has no records.
+ *
+ * The dashboard never invents numbers, so an empty metric says so plainly
+ * rather than showing a chart of zeroes that could be mistaken for real.
  */
 
-
 type Props = {
-    message?: string;
+    message: string;
 };
 
-function ManagementChartPlaceholder({message}: Props) {
+function ManagementChartPlaceholder({ message }: Props) {
     return (
         <div className="management-chart-placeholder">
-            <p>{message ?? 'Will render once the database schema is locked.'}</p>
+            <p>{message}</p>
         </div>
     );
 }

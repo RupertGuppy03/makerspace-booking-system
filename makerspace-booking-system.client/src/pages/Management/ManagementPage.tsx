@@ -44,8 +44,8 @@ function ManagementPage() {
             <ManagementSidebar />
 
             <div className="management-main">
-                <header className="management-header">
-                    <h1 className="management-title">Manager Dashboard</h1>
+                <header>
+                    <h1 className="management-title">{sectionLabel}</h1>
                     <p className="management-breadcrumb">
                         Home / Dashboard / <span>{sectionLabel}</span>
                     </p>

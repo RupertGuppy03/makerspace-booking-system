@@ -6,6 +6,7 @@
  */
 
 import { NavLink } from 'react-router-dom';
+import ManagementUserChip from './ManagementUserChip';
 import './ManagementSidebar.css';
 
 // Each section of the dashboard, in the order they appear in the rail.
@@ -58,6 +59,9 @@ function ManagementSidebar() {
                     </NavLink>
                 ))}
             </nav>
+
+            {/* Placeholder until this is wired to the signed-in user. */}
+            <ManagementUserChip name="Rupert Guppy" role="Manager" />
         </aside>
     );
 }

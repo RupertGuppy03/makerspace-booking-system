@@ -10,11 +10,11 @@
     background: #1b232f;
     color: #c3ccd9;
     padding: 24px 0;
-    /* Keeps the rail on screen while the metrics scroll past it. */
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
-    height: 100vh;
+    /* A column so the user chip can be pushed to the bottom with margin-top. */
+    display: flex;
+    flex-direction: column;
+    /* The card's left-hand corners. The main column rounds the right-hand pair. */
+    border-radius: 14px 0 0 14px;
 }
 
 .management-sidebar-brand {
@@ -89,9 +89,9 @@
 @media (max-width: 900px) {
     .management-sidebar {
         width: 100%;
-        height: auto;
-        position: static;
         padding-bottom: 8px;
+        /* Stacked, so the rail now holds the top two corners. */
+        border-radius: 14px 14px 0 0;
     }
 
     .management-sidebar-nav {
@@ -109,4 +109,39 @@
         border-left-color: transparent;
         border-bottom-color: #4680ff;
     }
+}
+
+/* ---------- signed-in user, pinned to the bottom ---------- */
+
+.management-sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 22px;
+    margin-top: auto;
+    font-size: 12px;
+    color: #8e99ab;
+}
+
+.management-sidebar-avatar {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #33405a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.management-sidebar-username {
+    display: block;
+    color: #fff;
+}
+
+.management-sidebar-role {
+    display: block;
 }
