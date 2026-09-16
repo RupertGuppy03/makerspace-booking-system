@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
 import type { Reservation } from "../../../types/reservation";
 import { useAuth } from '../../../lib/authProvider';
-import AccountBanner from '../../../components/accountBanner'
+import ReservationTable from '../../../components/ReservationTable'
 
+type Tab = 'current' | 'past' | 'all';
+
+const TABS: { id: Tab; label: string }[] = [
+    { id: 'current', label: 'Current' },
+    { id: 'past', label: 'Past' },
+    { id: 'all', label: 'All' },
+];
 
 export default function Reservations() {
 
 
+    const [activeTab, setActiveTab] = useState<Tab>('current');
     const [reservations, setReservations] = useState<Reservation[]>();
+    const [filteredReservations, setFilteredReservations] = useState<Reservation[]>();
     const { user } = useAuth();
     
 
@@ -15,42 +24,43 @@ export default function Reservations() {
         populateReservationData();
     }, [user]); //TODO depending on user here causes a 2nd api call. should JWT in api fetch instead
 
-    const table = reservations === undefined
-        ? <p><em>Must be logged in to see your reservations</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>status</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Tool Name</th>
-                    <th>Cancel</th>
-                </tr>
-            </thead>
-            <tbody>
-                {reservations.map((reservation, idx) =>
-                    <tr key={idx}>
-                        <td>{reservation.id}</td>
-                        <td>{reservation.status}</td>
-                        <td>{reservation.startDay ? new Date(reservation.startDay).toDateString() : ''}</td>
-                        <td>{reservation.endDay ? new Date(reservation.endDay).toDateString() : ''}</td>
-                        <td>{reservation.tool ? reservation.tool.name : "no tool found"}</td>
-                        <td><button type="button" onClick={() => handleCancelReservation(reservation.id) }> cancel </button></td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
+    useEffect(() => {
+        filterReservations();
+    }, [activeTab, reservations])
+
+    const table =
+        <div>
+            <nav className="management-tabs" role="tablist" aria-label="Reservation Table Tabs">
+                {TABS.map((tab) => (
+                    <button
+                        key={tab.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === tab.id}
+                        className={
+                            activeTab === tab.id
+                                ? 'management-tab management-tab--active'
+                                : 'management-tab'
+                        }
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </nav>
+            <ReservationTable reservations={filteredReservations} handleCancelReservation={handleCancelReservation} />
+        </div>
 
 
     return (
         <div>
-            <AccountBanner />
             <h1 id="tableLabel">Your Reservations</h1>
             <p>This page shows all the reservations you have made and their status</p>
             <br />
             <div>
-                {table}
+                {user === null
+                    ? < p > <em>You must be logged in to see your reservations</em></p>
+                    : table}
 
             </div>
         </div>
@@ -67,6 +77,22 @@ export default function Reservations() {
             const data = await response.json();
             setReservations(data);
         }
+    }
+
+    async function filterReservations() {
+        if (reservations === undefined) return;
+        //const now = new Date()
+        const filtered = reservations.filter(r => {
+            //Option here to filter by date instead of status. Doesn't work because startDay is actually in yyyy-mm-ddThh:mm:dd date format
+            // if (activeTab === 'current') return r.startDay >= now;
+            // if (activeTab === 'past') return r.startDay < now;
+            const status = r.status;
+            if (activeTab === 'current') return status == "booked"
+            if (activeTab === 'past') return status == "cancelled" || status == "returned" || status == "no_show"
+            return true; // 'all'
+        })
+        setFilteredReservations(filtered)
+
     }
 
      async function handleCancelReservation(reservationId : number) {

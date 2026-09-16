@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import './UserPage.css';
 import type { Tool } from "../../types/tool";
-import AccountBanner from '../../components/accountBanner'
 import { createSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from '../../lib/authProvider';
 
 
-//TODO have this page use the same tab system as Management for future/active/old reservations
+
 function UserPage() {
 
     const navigate = useNavigate();
     const [tools, setTools] = useState<Tool[]>();
-    //const { user } = useAuth();
+    const { user } = useAuth();
+    const [searchName, setSearchName] = useState<string>("");
     
 
     useEffect(() => {
@@ -31,14 +32,14 @@ function UserPage() {
                 </tr>
             </thead>
             <tbody>
-                {tools.map((tool, idx) =>
+                {tools.filter(t => (t.name.includes(searchName) || searchName == "")).map((tool, idx) =>
                     <tr key={idx}>
                         <td>{tool.id}</td>
                         <td>{tool.name}</td>
                         <td>{tool.isTakenOut ? "true" : "false"}</td>
                         <td>{tool.maintenancePeriod}</td>
                         <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
-                        <td><button type="button" onClick={() => handleNavigateReserve(tool.id) }> reserve </button></td>
+                        <td><button type="button" onClick={(e) => handleNavigateReserve(e.target.value) }> reserve </button></td>
                     </tr>
                 )}
             </tbody>
@@ -47,13 +48,12 @@ function UserPage() {
 
     return (
         <div>
-            <AccountBanner />
             <h1 id="tableLabel">User Tool View</h1>
             <p>This page shows all tools from the database and allows you to reverse one if logged in</p>
             <br />
             <div>
+                <input placeholder="Search by Name" value={searchName} onChange={handleSearchOnChange} />
                 {table}
-
             </div>
         </div>
     );
@@ -70,6 +70,11 @@ function UserPage() {
 
     async function handleNavigateReserve(toolId: number) {
 
+        if (!user) {
+            alert("You must be logged in to reserve a tool");
+            return;
+        }
+
         const toolIdStr = toolId.toString();
 
         navigate({
@@ -79,6 +84,10 @@ function UserPage() {
             }).toString()
         });
 
+    }
+
+    async function handleSearchOnChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setSearchName(e.currentTarget.value)
     }
    
 }
