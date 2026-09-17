@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import 'rsuite/dist/rsuite.min.css'
 import './index.css'
 // Points Bootstrap's colour variables at ours, so dark mode keeps working.
