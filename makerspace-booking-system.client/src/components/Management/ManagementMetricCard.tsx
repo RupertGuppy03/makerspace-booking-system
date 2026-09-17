@@ -1,9 +1,10 @@
 /**
- * The frame each metric sits in: a title, the chart, and a definition.
+ * The white card a chart sits in: a title, an optional control in the header,
+ * the chart itself, and a short note underneath explaining what it means.
  *
  * The chart is passed as children rather than as a prop so each metric can use
- * whatever chart type suits it. A placeholder covers the chart only when there
- * is genuinely nothing to show.
+ * whatever chart type suits it. When there is nothing to show, a short message
+ * replaces the chart rather than leaving an empty set of axes.
  */
 
 import type { ReactNode } from 'react';
@@ -15,6 +16,10 @@ type Props = {
     loading: boolean;
     error: string | null;
     isEmpty: boolean;
+    // How tall the chart area should be, in pixels.
+    height?: number;
+    // Anything to show on the right of the header, such as a time range switch.
+    action?: ReactNode;
     children: ReactNode;
 };
 
@@ -30,18 +35,27 @@ function placeholderMessage(
     return null;
 }
 
-function ManagementMetricCard({ title, definition, loading, error, isEmpty, children }: Props) {
+function ManagementMetricCard({
+    title, definition, loading, error, isEmpty, height = 240, action, children,
+}: Props) {
     const message = placeholderMessage(loading, error, isEmpty);
 
     return (
-        <article className="management-metric-card">
-            <h3 className="management-metric-title">{title}</h3>
-
-            <div className="management-metric-chart">
-                {message === null ? children : <ManagementChartPlaceholder message={message} />}
+        <article className="management-card">
+            <div className="management-card-head">
+                <h3 className="management-card-title">{title}</h3>
+                {action}
             </div>
 
-            <p className="management-metric-definition">{definition}</p>
+            <div className="management-card-body">
+                {/* Fixed height so the card does not resize when the chart is
+                    swapped for the "nothing to show" message. */}
+                <div style={{ height }}>
+                    {message === null ? children : <ManagementChartPlaceholder message={message} />}
+                </div>
+
+                <p className="management-card-note">{definition}</p>
+            </div>
         </article>
     );
 }

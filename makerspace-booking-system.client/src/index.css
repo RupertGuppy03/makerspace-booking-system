@@ -50,15 +50,14 @@
   }
 }
 
+/*
+ * Layout-neutral on purpose.
+ * This used to pin a fixed 1126px width and centre all text, which every page
+ * then had to fight. Bootstrap's .container now handles page width, so #root
+ * just fills the screen and lets each page decide how it looks.
+ */
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
-  display: flex;
-  flex-direction: column;
   box-sizing: border-box;
 }
 
