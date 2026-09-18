@@ -82,14 +82,26 @@ app.MapPost("/api/tool", async (Tool tool, SupabaseDbContext db) =>
 // --- Delete a tool
 app.MapDelete("/api/tool/{id}", async (int id, SupabaseDbContext db) =>
 {
-    if (await db.Tools.FindAsync(id) is Tool tool)
-    {
-        db.Tools.Remove(tool);
-        await db.SaveChangesAsync();
-        return Results.NoContent();
+    var tool = await db.Tools.FindAsync(id);
+    if (tool is null) return Results.NotFound();
+
+    if (tool.IsTakenOut) {//prevents deletion of a tool that is currently taken out
+        return Results.Problem("Cannot delete tool that is currently taken out.");
     }
 
-    return Results.NotFound();
+    var hasActiveOrFutureReservations = await db.Reservations.AnyAsync(r => 
+        r.ToolId == id && 
+        r.Status != "cancelled" && 
+        r.EndDay >= DateTime.UtcNow);
+
+    if (hasActiveOrFutureReservations) {//prevents deletion of a tool that has active or future reservations
+        return Results.Problem("Cannot delete tool with active or future reservations.");
+    }
+
+    db.Tools.Remove(tool);
+    await db.SaveChangesAsync();
+
+    return Results.Ok($"{tool.Name} successfully deleted");
 });
 
 
@@ -228,6 +240,31 @@ app.MapGet("api/management/metrics", async (SupabaseDbContext db) =>
 
     return DashboardMetricsBuilder.Build(reservations, tools, incidents, DateTime.UtcNow);
 });
+
+// --- Get list of all reservations (admin), optionally filtered by tool, user, or date range
+app.MapGet("/api/reservations", async (
+    int? toolId,
+    string? userId,
+    DateTime? startDate,
+    DateTime? endDate,
+    SupabaseDbContext db) => {
+        var query = db.Reservations.Include(r => r.Tool).AsQueryable();
+
+        if (toolId is not null)
+            query = query.Where(r => r.ToolId == toolId);
+
+        if (!string.IsNullOrEmpty(userId))
+            query = query.Where(r => r.UserId.ToString() == userId);
+
+        if (startDate is not null)
+            query = query.Where(r => r.EndDay >= startDate);
+
+        if (endDate is not null)
+            query = query.Where(r => r.StartDay <= endDate);
+
+    return await query.OrderByDescending(r => r.StartDay).ToListAsync();
+});
+
 app.MapFallbackToFile("/index.html");
 
 app.Run();
@@ -246,3 +283,7 @@ public partial class Program
         return false;
     }
 }
+
+
+
+

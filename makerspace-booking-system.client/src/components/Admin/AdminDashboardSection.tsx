@@ -21,7 +21,7 @@ function AdminDashboardSection() {
             <p>this just shows the summary of the makerspace</p>
 
             <div className="admin-summary-grid">
-                <article className="admin-summary-card">
+                <article className="admin-summary-card"> 
                     <p className="admin-summary-value">{loading ? '-' : totalTools}</p>
                     <p className="admin-summary-label">Total tools</p>
                 </article>
