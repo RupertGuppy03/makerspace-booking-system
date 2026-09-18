@@ -32,7 +32,7 @@ function UserPage() {
                 </tr>
             </thead>
             <tbody>
-                {tools.filter(t => (t.name.includes(searchName) || searchName == "")).map((tool, idx) =>
+                {tools.filter(t => (t.name.toLowerCase().includes(searchName.toLowerCase()) || searchName == "")).map((tool, idx) =>
                     <tr key={idx}>
                         <td>{tool.id}</td>
                         <td>{tool.name}</td>
