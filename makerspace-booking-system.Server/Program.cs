@@ -85,14 +85,17 @@ app.MapDelete("/api/tool/{id}", async (int id, SupabaseDbContext db) =>
     var tool = await db.Tools.FindAsync(id);
     if (tool is null) return Results.NotFound();
 
+    if (tool.IsTakenOut) {//prevents deletion of a tool that is currently taken out
+        return Results.Problem("Cannot delete tool that is currently taken out.");
+    }
+
     var hasActiveOrFutureReservations = await db.Reservations.AnyAsync(r => 
         r.ToolId == id && 
-        r.Status == "cancelled" && 
-        r.EndDay >= DateTime.Now);
+        r.Status != "cancelled" && 
+        r.EndDay >= DateTime.UtcNow);
 
-    if (hasActiveOrFutureReservations) {
+    if (hasActiveOrFutureReservations) {//prevents deletion of a tool that has active or future reservations
         return Results.Problem("Cannot delete tool with active or future reservations.");
-    
     }
 
     db.Tools.Remove(tool);
@@ -237,26 +240,6 @@ app.MapGet("api/management/metrics", async (SupabaseDbContext db) =>
 
     return DashboardMetricsBuilder.Build(reservations, tools, incidents, DateTime.UtcNow);
 });
-app.MapFallbackToFile("/index.html");
-
-app.Run();
-
-
-//This is to allow the testing to access this file
-public partial class Program 
-{ 
-    public static bool DateRangesOverlap(DateTime startDay1, DateTime endDay1, DateTime startDay2, DateTime endDay2) {
-        if ((startDay1 >= startDay2 && startDay1 <= endDay2) //StartDay1 is between startDay2 and endDay2
-        || (endDay1 >= startDay2 && endDay1 <= endDay2) //EndDay1 is between startDay2 and endDay2
-        || (startDay1 <= startDay2 && endDay1 >= endDay2)) //new range 1 completely includes range 2
-        {
-            return true;
-        }
-        return false;
-    }
-}
-
-
 
 // --- Get list of all reservations (admin), optionally filtered by tool, user, or date range
 app.MapGet("/api/reservations", async (
@@ -279,5 +262,28 @@ app.MapGet("/api/reservations", async (
         if (endDate is not null)
             query = query.Where(r => r.StartDay <= endDate);
 
-        return await query.OrderByDescending(r => r.StartDay).ToListAsync();
-    });
+    return await query.OrderByDescending(r => r.StartDay).ToListAsync();
+});
+
+app.MapFallbackToFile("/index.html");
+
+app.Run();
+
+
+//This is to allow the testing to access this file
+public partial class Program 
+{ 
+    public static bool DateRangesOverlap(DateTime startDay1, DateTime endDay1, DateTime startDay2, DateTime endDay2) {
+        if ((startDay1 >= startDay2 && startDay1 <= endDay2) //StartDay1 is between startDay2 and endDay2
+        || (endDay1 >= startDay2 && endDay1 <= endDay2) //EndDay1 is between startDay2 and endDay2
+        || (startDay1 <= startDay2 && endDay1 >= endDay2)) //new range 1 completely includes range 2
+        {
+            return true;
+        }
+        return false;
+    }
+}
+
+
+
+
