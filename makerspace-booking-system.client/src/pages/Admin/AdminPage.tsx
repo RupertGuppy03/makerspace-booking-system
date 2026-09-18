@@ -5,7 +5,7 @@ import AdminSidebar, { type AdminSection } from '../../components/Admin/AdminSid
 import AdminDashboardSection from '../../components/Admin/AdminDashboardSection';
 import AdminInventorySection from '../../components/Admin/AdminInventorySection';
 import AdminAddToolSection from '../../components/Admin/AdminAddToolSection';
-import AdminReportSection from '../../components/Admin/AdminReportSection';
+import AdminReservationSection from '../../components/Admin/AdminReservationSection';
 import AdminMaintenanceSection from '../../components/Admin/AdminMaintenanceSection';
 
 function AdminPage() {
@@ -19,7 +19,7 @@ function AdminPage() {
                 {activeSection === 'dashboard' && <AdminDashboardSection />}
                 {activeSection === 'inventory' && <AdminInventorySection />}
                 {activeSection === 'addTool' && <AdminAddToolSection />}
-                {activeSection === 'report' && <AdminReportSection />}
+                {activeSection === 'reservations' && <AdminReservationSection />}
                 {activeSection === 'maintenance' && <AdminMaintenanceSection />}
             </main>
         </div>

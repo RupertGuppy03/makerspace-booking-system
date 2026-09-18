@@ -1,13 +1,13 @@
-import SearchIcon from '@mui/icons-material/Search';
+
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import './AdminSidebar.css';
-import { useState } from 'react';
 
-export type AdminSection = 'dashboard' | 'inventory' | 'addTool' | 'maintenance';
+export type AdminSection = 'dashboard' | 'inventory' | 'addTool' | 'maintenance' | 'reservations';
 
 export const ADMIN_SECTIONS: { id: AdminSection; label: string }[] = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'inventory', label: 'Inventory' },
+    { id: 'reservations', label: 'Reservations' },
     { id: 'addTool', label: 'Add Tools' },
     { id: 'maintenance', label: 'Maintenance' }
 ];
@@ -19,14 +19,12 @@ type Props = {
 }
 
 function AdminSidebar({ activeSection, onSelect, onSignOut }: Props) {
-    const [searchOpen, setSearchOpen] = useState(false);
 
     return (
         <nav className="admin-sidebar" aria-label="Admin navigation">
             <div className="admin-sidebar-header">
                 <span className="admin-sidebar-title">Admin Page</span>
                 <div className="admin-sidebar-icons">
-                    <SearchIcon fontSize="small" aria-label="Search"/>
                     <AccountCircleIcon fontSize="small" aria-label="Account" />
                 </div>
             </div>
