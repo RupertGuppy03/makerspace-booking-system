@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/authProvider';
-import AccountBanner from '../../../components/accountBanner';
 import { useSearchParams } from 'react-router-dom';
 import type { NewReservation } from '../../../types/newReservasion';
 import { DateRangePicker, type DateRange } from "rsuite";
@@ -37,7 +36,6 @@ export default function Reserve() {
 
     return (
         <div>
-            <AccountBanner />
             <h1 id="tableLabel">Reserve Tool</h1>
             <h4>Making reservation for tool: {tool?.name ?? "Loading..."}</h4>
             <br />
