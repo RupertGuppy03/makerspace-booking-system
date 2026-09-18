@@ -1,155 +1,337 @@
 /*
- * this is the css file for the management page, it contains all the styling for the management page
+ * Styling for the manager dashboard.
  *
- * Everything is scoped under .management-dashboard on purpose. The app's global
- * index.css pins #root to a fixed width and centres all text, which fights a
- * dashboard layout — but that file is shared with the whole team, so we override
- * inside our own class instead of editing it.
- *
- * Colours come from the CSS variables index.css already defines, so this page
- * follows the app's light and dark themes automatically.
+ * Everything is scoped under .management-shell so none of it can reach another
+ * person's page. The dashboard is deliberately light in both light and dark
+ * system settings: it is a reporting screen meant to be read like a printed
+ * report, and the colour coding on the charts only works against a pale canvas.
  */
 
-.management-dashboard {
+/*
+ * The dark frame the dashboard card sits on.
+ *
+ * #root is shared by every page and UserPage.css pins it to a 1280px max-width
+ * with 2rem of padding, which framed this page unevenly — wide down the sides,
+ * thin at the top. :has() lets us undo that for this page only: the rule applies
+ * to #root only when a .management-shell is somewhere inside it, so no other
+ * page is affected and nobody else's stylesheet has to change.
+ *
+ * The background is set here rather than relying on Login.css's black body, so
+ * the frame survives once that file is scoped to its own page.
+ */
+#root:has(.management-shell) {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: #0f1319;
+}
+
+.management-shell {
+    /* One place to change a colour. Every rule below refers to these. */
+    --m-canvas: #f1f5f9;
+    --m-card: #ffffff;
+    --m-line: #e8edf3;
+    --m-ink: #1b232f;
+    --m-muted: #7d8799;
+    --m-blue: #4680ff;
+
+    display: flex;
+    /* stretch, so the sidebar and the content column are always the same
+       height and the card stays a clean rectangle. */
+    align-items: stretch;
+    /* An even 8px of the dark frame shows on all four sides. The min-height
+       subtracts both margins so a short page still fills the window without
+       creating a scrollbar. */
+    margin: 8px;
+    min-height: calc(100vh - 16px);
+    /* UserPage.css centres everything through #root. This puts it back. */
     text-align: left;
-    padding: 24px;
-    box-sizing: border-box;
 }
 
-.management-header h1 {
-    margin: 0 0 8px;
+/*
+ * Login.css currently sets `* { color: #fff }` across the whole app, which
+ * forces white text onto anything that does not set its own colour. This undoes
+ * it inside the dashboard. Delete once that file is scoped to its own page.
+ */
+.management-shell,
+.management-shell * {
+    color: inherit;
 }
 
-.management-subtitle {
-    color: var(--text);
+.management-main {
+    /* flex: 1 takes whatever width the sidebar leaves.
+       min-width: 0 stops a wide chart from forcing the column to overflow. */
+    flex: 1;
+    min-width: 0;
+    background: var(--m-canvas);
+    color: var(--m-ink);
+    padding: 24px 28px 56px;
+    /* The card's right-hand corners. The sidebar rounds the left-hand pair. */
+    border-radius: 0 14px 14px 0;
+}
+
+/*
+ * Login.css ships its own grid using Bootstrap's exact class names, and because
+ * it loads last in the bundle it beats Bootstrap. Its `.row [class^='col']` rule
+ * floats every column and adds a 2% side margin, so two 50% columns no longer
+ * fit on a line and wrap instead.
+ *
+ * This puts Bootstrap's behaviour back, inside the dashboard only. Delete the
+ * whole block once Login.css is scoped to its own page.
+ */
+.management-shell .row {
+    position: static;
+}
+
+.management-shell .row::after {
+    /* Login.css adds a float clearfix here, which becomes a stray flex item. */
+    content: none;
+}
+
+.management-shell .row > [class^="col"],
+.management-shell .row > [class*=" col"] {
+    float: none;
+    /* Login.css adds a 2% side margin. Only that needs removing. */
+    margin-right: 0;
+    margin-left: 0;
+    /* Bootstrap splits its vertical gutter in two: the row is pulled up by one
+       gutter and each column pushed back down by the same amount. Clearing all
+       margin above removed the second half, so every row rode up and closed the
+       gap beneath the one before it. */
+    margin-top: var(--bs-gutter-y);
+    min-height: 0;
+}
+
+/* ---------- page heading ---------- */
+
+.management-title {
+    /* index.css sets every h1 to 56px. A class beats a plain element
+       selector, so this wins without editing the shared file. */
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    margin: 0 0 3px;
+}
+
+.management-breadcrumb {
+    font-size: 12.5px;
+    color: var(--m-muted);
     margin: 0 0 20px;
 }
 
-/* Makes it obvious in a demo that the figures aren't real yet. */
-.management-banner {
-    padding: 12px 16px;
-    margin: 0 0 24px;
-    border: 1px solid var(--accent-border);
-    background: var(--accent-bg);
-    border-radius: 4px;
-    font-size: 14px;
+.management-breadcrumb span {
+    color: var(--m-ink);
+    font-weight: 500;
 }
 
-.management-tabs {
+/* ---------- KPI cards ---------- */
+
+.management-stat {
+    border-radius: 9px;
+    padding: 16px 18px;
+    height: 100%;
+    overflow: hidden;
+    color: #fff;
+    /* A column so the note and sparkline row can be pushed to the bottom,
+       which keeps cards of different text lengths aligned with each other. */
     display: flex;
-    gap: 4px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
+    flex-direction: column;
 }
 
-.management-tab {
-    padding: 10px 20px;
-    border: none;
-    border-bottom: 2px solid transparent;
-    background: none;
-    color: var(--text);
-    font: inherit;
-    font-size: 16px;
+.management-stat--blue  { background: #4680ff; }
+.management-stat--green { background: #2fa47c; }
+.management-stat--amber { background: #e8933a; }
+.management-stat--sky   { background: #4bb8f0; }
+
+/*
+ * The four pieces stack down the card, each across its full width:
+ * label, value, note, sparkline.
+ *
+ * The label sits tight against the value so they read as one unit, then a
+ * clear gap separates that pair from the note underneath. The sparkline uses
+ * margin-top: auto, which in a flex column soaks up the leftover space and
+ * pins the line to the bottom — so the lines stay level across all four cards
+ * even when one label or note wraps onto an extra line.
+ */
+
+.management-stat-label {
+    font-size: 13px;
+    line-height: 1.3;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.management-stat-value {
+    font-size: 27px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin: 1px 0 0;
+}
+
+.management-stat-note {
+    font-size: 11.5px;
+    line-height: 1.4;
+    opacity: 0.92;
+    margin: 12px 0 0;
+}
+
+.management-stat-spark {
+    width: 100%;
+    height: 34px;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+/* ---------- chart cards ---------- */
+
+.management-card {
+    background: var(--m-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    height: 100%;
+}
+
+.management-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--m-line);
+}
+
+.management-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.management-card-body {
+    padding: 16px 18px;
+}
+
+.management-card-note {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--m-muted);
+    margin: 12px 0 0;
+    padding-top: 11px;
+    border-top: 1px solid var(--m-line);
+}
+
+/* ---------- time range toggle ---------- */
+
+.management-range {
+    display: inline-flex;
+    background: #eef2f7;
+    border-radius: 7px;
+    padding: 3px;
+}
+
+.management-range button {
+    border: 0;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 11px;
+    border-radius: 5px;
+    color: var(--m-muted);
     cursor: pointer;
+    /* Login.css uppercases every button in the app. Not in here. */
+    text-transform: none;
 }
 
-.management-tab:hover {
-    color: var(--text-h);
+.management-range button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
-.management-tab--active {
-    color: var(--text-h);
-    border-bottom-color: var(--accent);
+.management-range button.management-range--on {
+    background: var(--m-blue);
+    color: #fff;
 }
 
-.management-panel h2 {
-    margin-top: 0;
+/* ---------- ranked list beside a donut ---------- */
+
+.management-rank-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin: 0 0 4px;
 }
 
-/* ---------- Metric cards ---------- */
-
-/*
- * auto-fit + minmax means the browser decides the column count from the
- * available width: two or three across on a laptop, one on a narrow window.
- * No media queries needed.
- */
-.management-metric-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+.management-rank-row b {
+    font-weight: 600;
 }
 
-.management-metric-card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
+.management-rank-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: #eef2f7;
+    margin-bottom: 13px;
+    overflow: hidden;
 }
 
-.management-metric-title {
-    margin: 0 0 12px;
-    font-size: 17px;
-    color: var(--text-h);
+.management-rank-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
 }
 
-/*
- * position: relative makes this the anchor for the placeholder overlay below.
- * Without it the placeholder would position itself against the whole page.
- */
-.management-metric-chart {
-    position: relative;
-}
+/* ---------- empty / loading state ---------- */
 
-/*
- * Sits on top of the chart so the axes stay visible underneath — the layout is
- * real, only the numbers are missing.
- * pointer-events: none lets mouse events reach the chart, so tooltips still
- * work once this is removed for a card that has data.
- */
 .management-chart-placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 240px;
-    padding: 16px;
-    box-sizing: border-box;
-    background: var(--social-bg);
-    border-radius: 4px;
-}
-.management-chart-placeholder p {
-    max-width: 30ch;
     text-align: center;
-    font-size: 14px;
-    color: var(--text-h);
-}
-
-/*
- * The calculation rule, shown on screen rather than buried in code, so the
- * figure above it can actually be checked by whoever is reading the dashboard.
- */
-.management-metric-definition {
-    margin: 12px 0 0;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
+    color: var(--m-muted);
     font-size: 13px;
-    line-height: 1.5;
-    color: var(--text);
+    padding: 0 20px;
+    height: 100%;
+    min-height: 180px;
 }
 
-/*
-* Recharts sets a white tooltip background as an inline style and lets the text
-* colour inherit from the page, so in dark mode it's white on white and looks
-* like an empty box. !important is needed here because a normal rule can't beat
-* an inline style.
-*/
-.management-dashboard .recharts-default-tooltip {
-    background: var(--bg) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 4px;
-    padding: 8px 12px !important;
+/* ---------- Recharts ---------- */
+
+.management-shell .recharts-cartesian-axis-tick text {
+    fill: var(--m-muted);
+    font-size: 11.5px;
 }
 
-.management-dashboard .recharts-tooltip-label,
-.management-dashboard .recharts-tooltip-item {
-    color: var(--text-h) !important;
+.management-shell .recharts-cartesian-grid line {
+    stroke: var(--m-line);
+}
+
+.management-shell .recharts-default-tooltip {
+    background: var(--m-ink) !important;
+    border: 0 !important;
+    border-radius: 6px;
+    padding: 8px 11px !important;
+}
+
+.management-shell .recharts-tooltip-label,
+.management-shell .recharts-tooltip-item {
+    color: #fff !important;
+    font-size: 12px;
+}
+
+.management-shell .recharts-legend-item-text {
+    color: var(--m-muted) !important;
+    font-size: 12px;
+}
+
+/* Below tablet width the sidebar stacks on top. */
+@media (max-width: 900px) {
+    .management-shell {
+        flex-direction: column;
+    }
+
+    .management-main {
+        padding: 18px 14px 40px;
+        width: 100%;
+        /* Stacked, so the main column now holds the bottom two corners. */
+        border-radius: 0 0 14px 14px;
+    }
 }

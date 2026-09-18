@@ -1,6 +1,6 @@
 import { useAuth } from '../lib/authProvider';
 import { supabase } from "../lib/supabaseClient";
-import { createSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 export default function AccountBanner() {
@@ -17,8 +17,8 @@ export default function AccountBanner() {
             {user 
                 ? <button onClick={handleLogout}>logout</button>
                 : <div>
-                    <button onClick={() => navigate("signup")}>signup</button>
-                    <button onClick={() => navigate("login")}>login</button>
+                    <button onClick={() => navigate("/signup")}>signup</button>
+                    <button onClick={() => navigate("/login")}>login</button>
                 </div>
             }
         </div>
@@ -26,6 +26,7 @@ export default function AccountBanner() {
 
 
     function handleLogout() {
+        navigate("/")
         supabase.auth.signOut();
     }
 

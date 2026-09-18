@@ -12,51 +12,73 @@ namespace makerspace_booking_system.Server.Services
             List<DamageIncident> incidents,
             DateTime now)
         {
-            var months = BuildMonthsList(now);
-            var windowStart = months[0];
-            var windowEnd = months[^1].AddMonths(1);
+            var months = MonthBuckets(now);
+            var weeks = WeekBuckets(now);
+
+            // The widest span anything on the dashboard reports on: the last 12 months.
+            var window = new Bucket("12 months", months[0].Start, months[^1].End);
 
             // only booking in the last 12 months filter
             var inWindow = reservations
-            .Where(r => r.StartDay >= windowStart && r.StartDay < windowEnd)
+            .Where(r => IsIn(r, window))
             .ToList();
 
             return new DashboardMetrics(
-                  BuildRevenueMetrics(inWindow, months),
-                  BuildUserMetrics(inWindow, months, now),
-                  BuildToolMetrics(inWindow, tools, incidents, windowStart, windowEnd)
-              );
+                BuildRevenueMetrics(inWindow, tools, incidents, weeks, months, window),
+                BuildUserMetrics(inWindow, weeks, months, now),
+                BuildToolMetrics(inWindow, tools, incidents, weeks, window)
+            );
         
         }
 
 
         // --- shared helpers -------------------------------------------------
 
-        // The first day of each of the last 12 months, oldest first.
-        private static List<DateTime> BuildMonthsList(DateTime now)
+        // One bar or point on a chart: its axis label, and the span of time it covers.
+        // End is exclusive, so a booking belongs to it when Start <= StartDay < End.
+        private record Bucket(string Label, DateTime Start, DateTime End);
+
+        // Did this booking start inside this bucket?
+        private static bool IsIn(Reservation reservation, Bucket bucket)
+        {
+            return reservation.StartDay >= bucket.Start && reservation.StartDay < bucket.End;
+        }
+
+        // The last 12 calendar months, oldest first. The newest is this month.
+        private static List<Bucket> MonthBuckets(DateTime now)
         {
             var firstOfThisMonth = new DateTime(
                 now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
-            var months = new List<DateTime>();
+            var months = new List<Bucket>();
             for (var i = 11; i >= 0; i--)
             {
-                months.Add(firstOfThisMonth.AddMonths(-i));
+                var start = firstOfThisMonth.AddMonths(-i);
+                var label = start.ToString("MMM yy", CultureInfo.InvariantCulture);
+                months.Add(new Bucket(label, start, start.AddMonths(1)));
             }
             return months;
         }
 
-        // The X axis label on every chart, e.g. "Sep 25".
-        private static string Label(DateTime monthStart)
+        // The last 12 Monday-to-Sunday weeks, oldest first. The newest is this week.
+        private static List<Bucket> WeekBuckets(DateTime now)
         {
-            return monthStart.ToString("MMM yy", CultureInfo.InvariantCulture);
-        }
+            // DayOfWeek counts Sunday as 0 and Monday as 1, so this works out
+            // how many days ago the most recent Monday was (Monday = 0, Sunday = 6).
+            var daysSinceMonday = ((int)now.DayOfWeek + 6) % 7;
 
-        // Was this booking made in this particular month?
-        private static bool IsInMonth(Reservation reservation, DateTime month)
-        {
-            return reservation.StartDay.Year == month.Year
-                && reservation.StartDay.Month == month.Month;
+            var thisMonday = new DateTime(
+                now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc)
+                .AddDays(-daysSinceMonday);
+
+            var weeks = new List<Bucket>();
+            for (var i = 11; i >= 0; i--)
+            {
+                var start = thisMonday.AddDays(-7 * i);
+                var label = start.ToString("d MMM", CultureInfo.InvariantCulture);
+                weeks.Add(new Bucket(label, start, start.AddDays(7)));
+            }
+            return weeks;
         }
 
         // A percentage rounded to one decimal place. Returns 0 rather than
@@ -70,57 +92,142 @@ namespace makerspace_booking_system.Server.Services
         // --- revenue tab ----------------------------------------------------
 
         private static RevenueMetrics BuildRevenueMetrics(
-            List<Reservation> reservations, List<DateTime> months)
+            List<Reservation> reservations,
+            List<Tool> tools,
+            List<DamageIncident> incidents,
+            List<Bucket> weeks,
+            List<Bucket> months,
+            Bucket window)
         {
             // A cancelled booking never took any money.
             var charged = reservations
                 .Where(r => r.Status != "cancelled")
                 .ToList();
 
-            var monthly = new List<MonthlyRevenue>();
-            foreach (var month in months)
+            return new RevenueMetrics(
+                charged.Sum(r => r.AmountCharged),
+                new Ranged<RevenuePoint>(
+                    RevenueSeries(charged, weeks),
+                    RevenueSeries(charged, months)),
+                RepairCosts(incidents, tools, window));
+        }
+
+        // Money taken in each bucket, one chart point per bucket.
+        // Expects cancelled bookings to be filtered out already.
+        private static List<RevenuePoint> RevenueSeries(
+            List<Reservation> charged, List<Bucket> buckets)
+        {
+            var points = new List<RevenuePoint>();
+            foreach (var bucket in buckets)
             {
                 var total = charged
-                    .Where(r => IsInMonth(r, month))
+                    .Where(r => IsIn(r, bucket))
                     .Sum(r => r.AmountCharged);
 
-                monthly.Add(new MonthlyRevenue(Label(month), total));
+                points.Add(new RevenuePoint(bucket.Label, total));
             }
+            return points;
+        }
 
-            return new RevenueMetrics(charged.Sum(r => r.AmountCharged), monthly);
+        // Total repair bill per tool over the window, biggest first.
+        // Tools with no repair costs are left out, so the chart only lists real costs.
+        private static List<ToolRepairCost> RepairCosts(
+            List<DamageIncident> incidents, List<Tool> tools, Bucket window)
+        {
+            var inWindow = incidents
+                .Where(i => i.CreatedAt != null
+                    && i.CreatedAt >= window.Start
+                    && i.CreatedAt < window.End)
+                .ToList();
+
+            return tools
+                .Select(tool => new ToolRepairCost(
+                    tool.Id,
+                    tool.Name,
+                    inWindow.Where(i => i.ToolId == tool.Id).Sum(i => i.RepairCost)))
+                .Where(t => t.RepairCost > 0)
+                .OrderByDescending(t => t.RepairCost)
+                .ToList();
         }
 
         // --- user tab -------------------------------------------------------
 
         private static UserMetrics BuildUserMetrics(
-            List<Reservation> reservations, List<DateTime> months, DateTime now)
+            List<Reservation> reservations,
+            List<Bucket> weeks,
+            List<Bucket> months,
+            DateTime now)
         {
-            var onTimeTrend = new List<MonthlyRate>();
-            var overdueTrend = new List<MonthlyDuration>();
-            var cancellationTrend = new List<MonthlyRate>();
-            var noShowTrend = new List<MonthlyRate>();
-
-            // Same four sums as below, but one month's bookings at a time.
-            foreach (var month in months)
-            {
-                var forMonth = reservations.Where(r => IsInMonth(r, month)).ToList();
-                var label = Label(month);
-
-                onTimeTrend.Add(new MonthlyRate(label, OnTimeRate(forMonth)));
-                overdueTrend.Add(new MonthlyDuration(label, AverageOverdueDays(forMonth)));
-                cancellationTrend.Add(new MonthlyRate(label, CancellationRate(forMonth)));
-                noShowTrend.Add(new MonthlyRate(label, NoShowRate(forMonth, now)));
-            }
-
             return new UserMetrics(
                 OnTimeRate(reservations),
                 AverageOverdueDays(reservations),
                 CancellationRate(reservations),
                 NoShowRate(reservations, now),
-                onTimeTrend,
-                overdueTrend,
-                cancellationTrend,
-                noShowTrend);
+                new Ranged<RatePoint>(
+                    OnTimeSeries(reservations, weeks),
+                    OnTimeSeries(reservations, months)),
+                new Ranged<DurationPoint>(
+                    OverdueSeries(reservations, weeks),
+                    OverdueSeries(reservations, months)),
+                new Ranged<RatePoint>(
+                    CancellationSeries(reservations, weeks),
+                    CancellationSeries(reservations, months)),
+                new Ranged<RatePoint>(
+                    NoShowSeries(reservations, weeks, now),
+                    NoShowSeries(reservations, months, now))
+            );
+        }
+
+        // On-time return rate for each bucket, one chart point per bucket.
+        private static List<RatePoint> OnTimeSeries(
+            List<Reservation> reservations, List<Bucket> buckets)
+        {
+            var points = new List<RatePoint>();
+            foreach (var bucket in buckets)
+            {
+                var inBucket = reservations.Where(r => IsIn(r, bucket)).ToList();
+                points.Add(new RatePoint(bucket.Label, OnTimeRate(inBucket)));
+            }
+            return points;
+        }
+
+        // Average days overdue for each bucket.
+        private static List<DurationPoint> OverdueSeries(
+            List<Reservation> reservations, List<Bucket> buckets)
+        {
+            var points = new List<DurationPoint>();
+            foreach (var bucket in buckets)
+            {
+                var inBucket = reservations.Where(r => IsIn(r, bucket)).ToList();
+                points.Add(new DurationPoint(bucket.Label, AverageOverdueDays(inBucket)));
+            }
+            return points;
+        }
+
+        // Cancellation rate for each bucket.
+        private static List<RatePoint> CancellationSeries(
+            List<Reservation> reservations, List<Bucket> buckets)
+        {
+            var points = new List<RatePoint>();
+            foreach (var bucket in buckets)
+            {
+                var inBucket = reservations.Where(r => IsIn(r, bucket)).ToList();
+                points.Add(new RatePoint(bucket.Label, CancellationRate(inBucket)));
+            }
+            return points;
+        }
+
+        // No-show rate for each bucket. Needs "now" to know which due dates have passed.
+        private static List<RatePoint> NoShowSeries(
+            List<Reservation> reservations, List<Bucket> buckets, DateTime now)
+        {
+            var points = new List<RatePoint>();
+            foreach (var bucket in buckets)
+            {
+                var inBucket = reservations.Where(r => IsIn(r, bucket)).ToList();
+                points.Add(new RatePoint(bucket.Label, NoShowRate(inBucket, now)));
+            }
+            return points;
         }
 
         // Of the bookings that came back, how many were on time?
@@ -170,14 +277,14 @@ namespace makerspace_booking_system.Server.Services
             List<Reservation> reservations,
             List<Tool> tools,
             List<DamageIncident> incidents,
-            DateTime windowStart,
-            DateTime windowEnd)
+            List<Bucket> weeks,
+            Bucket window)
         {
             var utilisation = new List<ToolUtilisation>();
             var damage = new List<ToolDamage>();
             var demand = new List<ToolDemand>();
 
-            var daysInWindow = (windowEnd - windowStart).TotalDays;
+            var daysInWindow = (window.End - window.Start).TotalDays;
 
             foreach (var tool in tools)
             {
@@ -186,7 +293,7 @@ namespace makerspace_booking_system.Server.Services
                 // How many days this tool was actually booked out.
                 var bookedDays = forTool
                     .Where(r => r.Status != "cancelled")
-                    .Sum(r => OverlapDays(r.StartDay, r.EndDay, windowStart, windowEnd));
+                    .Sum(r => OverlapDays(r.StartDay, r.EndDay, window.Start, window.End));
 
                 utilisation.Add(new ToolUtilisation(
                     tool.Id,
@@ -196,8 +303,8 @@ namespace makerspace_booking_system.Server.Services
                 var incidentCount = incidents.Count(i =>
                     i.ToolId == tool.Id
                     && i.CreatedAt != null
-                    && i.CreatedAt >= windowStart
-                    && i.CreatedAt < windowEnd);
+                    && i.CreatedAt >= window.Start
+                    && i.CreatedAt < window.End);
 
                 damage.Add(new ToolDamage(tool.Id, tool.Name, incidentCount));
 
@@ -205,11 +312,37 @@ namespace makerspace_booking_system.Server.Services
                 demand.Add(new ToolDemand(tool.Id, tool.Name, forTool.Count));
             }
 
+            // The last 12 weeks as one span, for the weekly view of revenue by tool.
+            var lastTwelveWeeks = new Bucket("12 weeks", weeks[0].Start, weeks[^1].End);
+
             // Biggest bar first, so the charts read top to bottom.
             return new ToolMetrics(
                 utilisation.OrderByDescending(t => t.UtilisationRate).ToList(),
                 damage.OrderByDescending(t => t.DamageCount).ToList(),
-                demand.OrderByDescending(t => t.RequestCount).ToList());
+                demand.OrderByDescending(t => t.RequestCount).ToList(),
+                new Ranged<ToolRevenue>(
+                    RevenueByTool(reservations, tools, lastTwelveWeeks),
+                    RevenueByTool(reservations, tools, window)));
+        }
+
+        // Money each tool brought in over one span, biggest first.
+        // Cancelled bookings took no money, and tools that earned nothing are
+        // left out so the pie chart has no empty slices.
+        private static List<ToolRevenue> RevenueByTool(
+            List<Reservation> reservations, List<Tool> tools, Bucket span)
+        {
+            var charged = reservations
+                .Where(r => r.Status != "cancelled" && IsIn(r, span))
+                .ToList();
+
+            return tools
+                .Select(tool => new ToolRevenue(
+                    tool.Id,
+                    tool.Name,
+                    charged.Where(r => r.ToolId == tool.Id).Sum(r => r.AmountCharged)))
+                .Where(t => t.Amount > 0)
+                .OrderByDescending(t => t.Amount)
+                .ToList();
         }
 
         // How many days of one booking fall inside the reporting window.

@@ -32,7 +32,7 @@ export default function Login() {
     return (
         <div className="row flex flex-center">
             <div className="col-6 form-widget">
-                <h1 className="header">Supabase + React</h1>
+                <h1 className="header">Login</h1>
                 <p className="description">Login with email and password</p>
                 <form className="form-widget" onSubmit={handleLogin}>
                     <div>
