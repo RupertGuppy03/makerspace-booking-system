@@ -6,6 +6,7 @@ import { DateRangePicker, type DateRange } from "rsuite";
 import type { Reservation } from '../../../types/reservation';
 import type { Tool } from '../../../types/tool';
 import { useNavigate } from "react-router-dom";
+import AccessDenied from '../../AccessDenied/AccessDenied';
 
 
 export default function Reserve() {
@@ -16,7 +17,12 @@ export default function Reserve() {
     const [tool, setTool] = useState<Tool>();
     const [existingReservations, setExistingReservations] = useState<Reservation[]>([]);
     const [dateRange, setDateRange] = useState<DateRange | null>();
-    const { user } = useAuth();
+    const { user, role } = useAuth();
+
+    //Only allow access if logged in with user role or higher (deny if not logged in)
+    if (role != 'user' && role != 'admin' && role != 'manager') {
+        return <AccessDenied />;
+    }
 
     useEffect(() => {
         populateToolName();

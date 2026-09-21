@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Reservation } from "../../../types/reservation";
 import { useAuth } from '../../../lib/authProvider';
 import ReservationTable from '../../../components/ReservationTable'
+import AccessDenied from '../../AccessDenied/AccessDenied';
 
 type Tab = 'current' | 'past' | 'all';
 
@@ -17,7 +18,13 @@ export default function Reservations() {
     const [activeTab, setActiveTab] = useState<Tab>('current');
     const [reservations, setReservations] = useState<Reservation[]>();
     const [filteredReservations, setFilteredReservations] = useState<Reservation[]>();
-    const { user } = useAuth();
+    const { user, role } = useAuth();
+
+
+    //Only allow access if logged in with user role or higher (deny if not logged in)
+    if (role != 'user' && role != 'admin' && role != 'manager') {
+        return <AccessDenied />;
+    }
     
 
     useEffect(() => {

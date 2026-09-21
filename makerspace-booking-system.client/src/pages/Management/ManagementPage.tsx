@@ -17,6 +17,8 @@ import ManagementRevenueSection from '../../components/Management/ManagementReve
 import ManagementUserSection from '../../components/Management/ManagementUserSection';
 import ManagementToolSection from '../../components/Management/ManagementToolSection';
 import { useDashboardMetrics } from './useDashboardMetrics';
+import { useAuth } from '../../lib/authProvider';
+import AccessDenied from '../AccessDenied/AccessDenied';
 
 type Tab = 'revenue' | 'users' | 'tools';
 
@@ -34,7 +36,14 @@ const TABS: { id: Tab; label: string }[] = [
 
 function ManagementPage() {
     const [activeTab, setActiveTab] = useState<Tab>('revenue');
-    const {metrics, loading, error} = useDashboardMetrics();
+    const { metrics, loading, error } = useDashboardMetrics();
+
+    const { role } = useAuth()
+
+    //Only allow access if logged in with manager role
+    if (role != 'manager') {
+        return <AccessDenied />;
+    }
 
     return (
         <div className="management-dashboard">
