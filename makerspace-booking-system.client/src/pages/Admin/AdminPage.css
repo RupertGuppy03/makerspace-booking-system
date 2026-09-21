@@ -75,3 +75,8 @@
     padding: 2px 3px !important;
     min-width: unset !important;
 }
+
+/* ------------------ admin search bar ------------*/
+.admin-search-bar {
+    margin-bottom: 16px 0;
+}

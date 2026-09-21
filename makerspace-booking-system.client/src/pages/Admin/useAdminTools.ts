@@ -60,9 +60,15 @@ export function useAdminTools(): AdminToolsState {
             const data = await response.json();
             setTools(data);
         } else {
-            const errorData = await response.json();
-            alert(`Error fetching tools: ${errorData.message}`);
-            setError(errorData.message);
+            let message = `Request failed (${response.status})`;
+            try {
+                const errorData = await response.json();
+                message = errorData.message ?? message;
+            } catch (error) {
+                console.error('Error fetching tools:', error);
+            }
+            alert(`Error fetching tools: ${message}`);
+            setError(message);
             setTools(null);
         }
 
@@ -76,7 +82,6 @@ export function useAdminTools(): AdminToolsState {
 
     // --- adding tools to the supabase ---
     const addTool = useCallback(async (tool: NewTool) => {
-
         const response = await fetch("/api/tool", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
@@ -85,11 +90,12 @@ export function useAdminTools(): AdminToolsState {
 
         if (response.ok) {
             const data = await response.json()
-            alert(`Reservation created: ${data}`);
+            alert(`Tool created: ${data}`);
         } else {
             const errorData = await response.json();
-            alert(`Error creating tool: ${errorData.message}`);
-            setError(errorData.message);
+            const reason = errorData.detail ?? errorData.message ?? 'Unknown error';
+            alert(`Error creating tool: ${reason}`);
+            setError(reason);
         }
 
         await fetchTools();
@@ -127,11 +133,12 @@ export function useAdminTools(): AdminToolsState {
 
         if (response.ok) {
             const data = await response.json()
-            alert(`Tool deleted: ${data}`);
+            alert(`Tool ${data} deleted successfully`);
         } else {
             const errorData = await response.json();
-            alert(`Error deleting tool: ${errorData.message}`);
-            setError(errorData.message);
+            const reason = errorData.detail ?? errorData.message ?? 'Unknown error';
+            alert(`Error deleting tool: ${reason}`);
+            setError(reason);
         }
 
         await fetchTools();
@@ -154,10 +161,13 @@ export function useAdminTools(): AdminToolsState {
             .eq('id', toolId);
 
         if (error) {
+            alert(`Error updating tool: ${error.message}`);
             setError(error.message);
+            await fetchTools();
             return;
         }
 
+        alert(`Tool ${toolId} updated successfully`);
         await fetchTools();
     }, [fetchTools]);
 
