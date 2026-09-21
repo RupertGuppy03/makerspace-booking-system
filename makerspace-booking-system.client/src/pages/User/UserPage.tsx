@@ -16,6 +16,8 @@ function UserPage() {
 
     useEffect(() => {
         populateToolData();
+
+        
     }, []);
 
     const table = tools === undefined
@@ -32,14 +34,14 @@ function UserPage() {
                 </tr>
             </thead>
             <tbody>
-                {tools.filter(t => (t.name.toLowerCase().includes(searchName.toLowerCase()) || searchName == "")).map((tool, idx) =>
+                {filterTools(tools).map((tool, idx) =>
                     <tr key={idx}>
                         <td>{tool.id}</td>
                         <td>{tool.name}</td>
                         <td>{tool.isTakenOut ? "true" : "false"}</td>
                         <td>{tool.maintenancePeriod}</td>
                         <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
-                        <td><button type="button" onClick={(e) => handleNavigateReserve(e.target.value) }> reserve </button></td>
+                        <td><button type="button" onClick={() => handleNavigateReserve(tool.id)}> reserve </button></td>
                     </tr>
                 )}
             </tbody>
@@ -58,13 +60,36 @@ function UserPage() {
         </div>
     );
 
+    function filterTools(tools: Tool[]): Tool[] {
+
+
+        //Filter out unmaintained tools
+        const now = new Date()
+        const millisecondsInDay = 24*60*60*1000
+        let maintainedTools = tools.filter(t => {
+            const millisecondsSinceMaintained = now.getTime() - t.lastMaintained.getTime()
+            const daysSinceMaintained = Math.floor(millisecondsSinceMaintained / millisecondsInDay)
+            return daysSinceMaintained < t.maintenancePeriod // Allow tool if the days since maintained has not reached or exceeded the maintainance period
+        })
+        //Filter by search term
+        let filteredTools = maintainedTools.filter(t => (t.name.toLowerCase().includes(searchName.toLowerCase()) || searchName == ""))
+        return filteredTools;
+
+    }
+
 
 
     async function populateToolData() {
         const response = await fetch('/api/tools');
         if (response.ok) {
             const data = await response.json();
-            setTools(data);
+
+            const toolList = data.map((tool: any) => ({ //Convert Date type properties from string to Date, as Typescript does not auto convert it.
+                ...tool,
+                createdAt: new Date(tool.createdAt),
+                lastMaintained: new Date(tool.lastMaintained)
+            }));
+            setTools(toolList);
         }
     }
 
