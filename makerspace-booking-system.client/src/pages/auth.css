@@ -1,0 +1,212 @@
+/*
+ * Styling for the login and signup pages.
+ *
+ * Both pages look the same, so they share this one file rather than keeping
+ * two copies that slowly drift apart. Login.tsx and Signup.tsx both import it.
+ *
+ * Every rule is scoped under a class starting with .auth- so none of it can
+ * reach another person's page. The colours are the same ones the manager
+ * dashboard uses, so the app looks like one app.
+ *
+ * This file does NOT touch the old Supabase starter rules still sitting in
+ * Login.css and Signup.css. Those set variables and a background that the rest
+ * of the app quietly depends on, so they are left exactly as they are.
+ */
+
+/*
+ * UserPage.css sets #root to a 1280px box with 2rem of padding, and that
+ * applies to every page in the app, not just the user page. Here it would stop
+ * the card sitting dead centre of the window and add a scrollbar.
+ *
+ * :has() means "only when". This rule applies to #root only when there is an
+ * .auth-shell somewhere inside it, so the login and signup pages get a plain
+ * full-size area to work with and no other page is affected. ManagementPage.css
+ * already does the same thing, so this is a trick the project uses elsewhere.
+ */
+#root:has(.auth-shell) {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- the dark page the card sits on ---------- */
+
+.auth-shell {
+    /* One place to change a colour. Every rule below refers to these. */
+    --auth-bg: #0f1319;          /* the dark frame behind the dashboard card */
+    --auth-card: #1b232f;        /* the same grey as the dashboard sidebar */
+    --auth-line: rgba(255, 255, 255, 0.07);
+    --auth-ink: #ffffff;
+    --auth-muted: #8e99ab;
+    --auth-field: #232c3a;       /* input background */
+    --auth-field-line: #313c4d;
+    --auth-blue: #4680ff;        /* brand mark, focus ring, footer link */
+    --auth-btn: #e8edf3;         /* the light grey button */
+    --auth-btn-hover: #ffffff;
+
+    /* Fill the window and put the card in the middle of it, both ways. */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--auth-bg);
+    color: var(--auth-ink);
+    /* UserPage.css centres all text through #root. The card reads better left. */
+    text-align: left;
+}
+
+/* ---------- the grey card everything lives in ---------- */
+
+.auth-card {
+    width: 100%;
+    /* Grows with the window up to this width, then stops. */
+    max-width: 410px;
+    background: var(--auth-card);
+    border: 1px solid var(--auth-line);
+    border-radius: 14px;
+    padding: 32px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- brand, the same mark as the dashboard sidebar ---------- */
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 26px;
+}
+
+.auth-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--auth-blue);
+    color: #fff;
+    font-weight: 700;
+    /* Centres the letter inside the square. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-brand-name {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* ---------- heading ---------- */
+
+/*
+ * index.css sets every h1 to 56px, which is far too big here. A class beats a
+ * plain element selector, so this wins without editing that shared file.
+ */
+.auth-title {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    margin: 0 0 4px;
+}
+
+.auth-sub {
+    font-size: 13px;
+    color: var(--auth-muted);
+    margin: 0 0 24px;
+}
+
+/* ---------- fields ---------- */
+
+.auth-field {
+    margin-bottom: 16px;
+}
+
+/*
+ * Login.css styles every <label> in the app: grey, tiny and SHOUTED in capitals.
+ * Each line here puts one of those back to something readable. A class beats a
+ * plain element selector, so this only changes the labels on these two pages.
+ */
+.auth-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-transform: none;
+    color: #c3ccd9;
+    margin: 0 0 6px;
+}
+
+/*
+ * Login.css also styles every <input> in the app. Same idea: each property it
+ * sets is named here so the field ends up looking the way we want.
+ */
+.auth-input {
+    width: 100%;
+    background: var(--auth-field);
+    border: 1px solid var(--auth-field-line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--auth-ink);
+    /* The browser's own blue glow, replaced by the border colour below. */
+    outline: none;
+}
+
+.auth-input::placeholder {
+    color: #6b7789;
+}
+
+/* Lights the border blue while the field is being typed in. */
+.auth-input:focus {
+    border-color: var(--auth-blue);
+    background: #26303f;
+}
+
+/* ---------- the light grey button ---------- */
+
+.auth-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+    background: var(--auth-btn);
+    color: #1b232f;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 0;
+    margin-top: 8px;
+    cursor: pointer;
+    /* Login.css puts every button in the app into capitals. Not this one. */
+    text-transform: none;
+    /* Fades between the two greys instead of snapping. */
+    transition: background 0.15s ease;
+}
+
+.auth-btn:hover {
+    background: var(--auth-btn-hover);
+}
+
+/* Faded and unclickable while the form is being submitted. */
+.auth-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ---------- link across to the other page ---------- */
+
+.auth-foot {
+    font-size: 12.5px;
+    color: var(--auth-muted);
+    text-align: center;
+    margin: 22px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--auth-line);
+}
+
+.auth-foot a {
+    color: var(--auth-blue);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-foot a:hover {
+    text-decoration: underline;
+}
