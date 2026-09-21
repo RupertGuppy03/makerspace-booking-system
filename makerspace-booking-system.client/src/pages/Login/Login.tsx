@@ -47,12 +47,27 @@ export default function Login() {
     }
 
     return (
-        <div className="row flex flex-center">
-            <div className="col-6 form-widget">
-                <h1 className="header">Login</h1>
-                <p className="description">Login with email and password</p>
-                <form className="form-widget" onSubmit={handleLogin}>
-                    <div>
+        // The dark full-height page. The card is centred inside it.
+        <div className="auth-shell">
+            <div className="auth-card">
+
+                {/* The same blue mark the dashboard sidebar uses. */}
+                <div className="auth-brand">
+                    <span className="auth-mark">M</span>
+                    <span className="auth-brand-name">Makerspace</span>
+                </div>
+
+                <h1 className="auth-title">Login</h1>
+                <p className="auth-sub">Login with email and password</p>
+
+                <form onSubmit={handleLogin}>
+                    <div className="auth-field">
+                        {/*
+                          * htmlFor matches the input's id, which is what lets you
+                          * click the word "Email" to jump into the field, and what
+                          * screen readers use to read the two out together.
+                          */}
+                        <label className="auth-label" htmlFor="email">Email</label>
                         <input
                             className="auth-input"
                             id="email"

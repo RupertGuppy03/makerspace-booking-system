@@ -50,12 +50,27 @@ function Signup() {
     }
 
     return (
-        <div className="row flex flex-center">
-            <div className="col-6 form-widget">
-                <h1 className="header">Sign Up</h1>
-                <p className="description">Create an account with email and password</p>
-                <form className="form-widget" onSubmit={handleSignup}>
-                    <div>
+        // The dark full-height page. The card is centred inside it.
+        <div className="auth-shell">
+            <div className="auth-card">
+
+                {/* The same blue mark the dashboard sidebar uses. */}
+                <div className="auth-brand">
+                    <span className="auth-mark">M</span>
+                    <span className="auth-brand-name">Makerspace</span>
+                </div>
+
+                <h1 className="auth-title">Sign Up</h1>
+                <p className="auth-sub">Create an account with email and password</p>
+
+                <form onSubmit={handleSignup}>
+                    <div className="auth-field">
+                        {/*
+                          * htmlFor matches the input's id, which is what lets you
+                          * click the word "Email" to jump into the field, and what
+                          * screen readers use to read the two out together.
+                          */}
+                        <label className="auth-label" htmlFor="email">Email</label>
                         <input
                             className="auth-input"
                             id="email"
