@@ -17,13 +17,17 @@ import ManagementUserSection from "./components/Management/ManagementUserSection
 import ManagementToolSection from "./components/Management/ManagementToolSection.tsx";
 import Signup from "./pages/Signup/Signup.tsx";
 import Login from "./pages/Login/Login.tsx";
-import { AuthProvider }  from "./lib/authProvider.tsx"
+import { AuthProvider } from "./lib/authProvider.tsx"
+import AccountBanner from './components/accountBanner';
+
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
         <AuthProvider>
             <StrictMode>
-              <Routes>
+
+                <AccountBanner />
+                <Routes>
                 <Route path="/" element={<App />} />
                 <Route path="/user" element={<UserPage />} />
                 <Route path="/user/reservations" element={<Reservations />} />
@@ -42,9 +46,10 @@ createRoot(document.getElementById('root')!).render(
                 </Route>
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
-              </Routes>
+                </Routes>
+
             </StrictMode>
         </AuthProvider>
-  </BrowserRouter>,
+    </BrowserRouter>,
 )
 

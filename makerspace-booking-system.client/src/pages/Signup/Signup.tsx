@@ -35,8 +35,8 @@ function Signup() {
     return (
         <div className="row flex flex-center">
             <div className="col-6 form-widget">
-                <h1 className="header">Supabase + React</h1>
-                <p className="description">Sign up with email and password</p>
+                <h1 className="header">Sign Up</h1>
+                <p className="description">Create an account with email and password</p>
                 <form className="form-widget" onSubmit={handleSignup}>
                     <div>
                         <input

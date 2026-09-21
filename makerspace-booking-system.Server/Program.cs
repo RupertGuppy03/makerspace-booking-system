@@ -134,6 +134,19 @@ app.MapGet("/api/tools/{id}/reservations", async (int id, SupabaseDbContext db) 
 // --- Create new reservation
 app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContext db) =>
 {
+    var reservedTool = await db.Tools.FirstAsync(t => t.Id == reservation.ToolId);
+
+    //validate that a tool is given
+    if (reservedTool == null)
+    {
+        return Results.Problem("Failed to created reservation. No tool is selected to be reserved");
+    }
+
+    //validate tool doesn't need maintenance
+    if (reservedTool.LastMaintained.AddDays(reservedTool.MaintenancePeriod) < DateTime.Now)
+    {
+        //return Results.Problem("Failed to create reservation. Reservations cannot currently be made for this tool as it is in need of maintenance.");
+    }
 
     //start and end date validations
     if (reservation.StartDay < DateTime.Now)

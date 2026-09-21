@@ -1,6 +1,6 @@
 import { useAuth } from '../lib/authProvider';
 import { supabase } from "../lib/supabaseClient";
-import { createSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 export default function AccountBanner() {
@@ -26,6 +26,7 @@ export default function AccountBanner() {
 
 
     function handleLogout() {
+        navigate("/")
         supabase.auth.signOut();
     }
 

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/authProvider';
-import AccountBanner from '../../../components/accountBanner';
 import { useSearchParams } from 'react-router-dom';
 import type { NewReservation } from '../../../types/newReservasion';
 import { DateRangePicker, type DateRange } from "rsuite";
@@ -13,6 +12,7 @@ export default function Reserve() {
     const navigate = useNavigate();
 
     const [searchParams] = useSearchParams();
+    const [loading, setLoading] = useState<boolean>(true)
     const [tool, setTool] = useState<Tool>();
     const [existingReservations, setExistingReservations] = useState<Reservation[]>([]);
     const [dateRange, setDateRange] = useState<DateRange | null>();
@@ -21,6 +21,7 @@ export default function Reserve() {
     useEffect(() => {
         populateToolName();
         getExistingReservations();
+        setLoading(false);
     }, [])
 
     const form =
@@ -37,9 +38,13 @@ export default function Reserve() {
 
     return (
         <div>
-            <AccountBanner />
             <h1 id="tableLabel">Reserve Tool</h1>
-            <h4>Making reservation for tool: {tool?.name ?? "Loading..."}</h4>
+            {loading
+                ? <h4>Loading tool name...</h4>
+                : <h4>Create a reservation for tool: {tool?.name ?? "No tool found"}</h4>
+            }
+            <p>Reservations may be at most 5 days long.</p>
+            <p>Reservations may not overlap with any existing reservations.</p>
             <br />
             <div>
                 {form}
@@ -66,9 +71,11 @@ export default function Reserve() {
     }
 
     function handleShouldDisableDate(date: Date) {
+        date = new Date(date) //Quick fix to change the time zone from DateRange picker to the correct one (from +13 to +12)
+
         //disable if date is today or in the past
         if (date < new Date()) return true;
-
+        new Date()
         //disable if the date overlaps with any existing reservations
         if (existingReservations?.some(r => new Date(r.startDay) <= date && date <= new Date(r.endDay))) {
             return true
@@ -128,7 +135,7 @@ export default function Reserve() {
             navigate("/user/reservations")
         } else {
             const errorData = await response.json();
-            alert(`Error Creating reservation: ${errorData.detail}`);
+            alert(`${errorData.detail}`);
         }
     };
    
