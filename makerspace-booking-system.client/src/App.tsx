@@ -1,6 +1,7 @@
 
 import './App.css';
 import { useNavigate } from "react-router-dom";
+import RoleGate from './components/RoleGate';
 
 
 
@@ -11,9 +12,15 @@ function App() {
         <div>
             <h1 id="tableLabel">Available Pages</h1>
             <button onClick={() => navigate("user")}>User Tool View</button>
-            <button onClick={() => navigate("user/reservations")}>Your Reservations</button>
-            <button onClick={() => navigate("admin")}>Admin</button>
-            <button onClick={() => navigate("management")}>Management</button>
+            <RoleGate requiredRole='user'>
+                <button onClick={() => navigate("user/reservations")}>Your Reservations</button>
+            </RoleGate>
+            <RoleGate requiredRole='admin'>
+                <button onClick={() => navigate("admin")}>Admin</button>
+            </RoleGate>
+            <RoleGate requiredRole='manager'>
+                <button onClick={() => navigate("management")}>Management</button>
+            </RoleGate>
         </div>
     );
 

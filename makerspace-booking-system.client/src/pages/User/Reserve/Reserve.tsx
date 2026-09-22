@@ -6,20 +6,28 @@ import { DateRangePicker, type DateRange } from "rsuite";
 import type { Reservation } from '../../../types/reservation';
 import type { Tool } from '../../../types/tool';
 import { useNavigate } from "react-router-dom";
+import AccessDenied from '../../AccessDenied/AccessDenied';
 
 
 export default function Reserve() {
     const navigate = useNavigate();
 
     const [searchParams] = useSearchParams();
+    const [loading, setLoading] = useState<boolean>(true)
     const [tool, setTool] = useState<Tool>();
     const [existingReservations, setExistingReservations] = useState<Reservation[]>([]);
     const [dateRange, setDateRange] = useState<DateRange | null>();
-    const { user } = useAuth();
+    const { user, role } = useAuth();
+
+    //Only allow access if logged in with user role or higher (deny if not logged in)
+    if (role != 'user' && role != 'admin' && role != 'manager') {
+        return <AccessDenied />;
+    }
 
     useEffect(() => {
         populateToolName();
         getExistingReservations();
+        setLoading(false);
     }, [])
 
     const form =
@@ -37,7 +45,12 @@ export default function Reserve() {
     return (
         <div>
             <h1 id="tableLabel">Reserve Tool</h1>
-            <h4>Making reservation for tool: {tool?.name ?? "Loading..."}</h4>
+            {loading
+                ? <h4>Loading tool name...</h4>
+                : <h4>Create a reservation for tool: {tool?.name ?? "No tool found"}</h4>
+            }
+            <p>Reservations may be at most 5 days long.</p>
+            <p>Reservations may not overlap with any existing reservations.</p>
             <br />
             <div>
                 {form}
@@ -64,9 +77,11 @@ export default function Reserve() {
     }
 
     function handleShouldDisableDate(date: Date) {
+        date = new Date(date) //Quick fix to change the time zone from DateRange picker to the correct one (from +13 to +12)
+
         //disable if date is today or in the past
         if (date < new Date()) return true;
-
+        new Date()
         //disable if the date overlaps with any existing reservations
         if (existingReservations?.some(r => new Date(r.startDay) <= date && date <= new Date(r.endDay))) {
             return true
@@ -126,7 +141,7 @@ export default function Reserve() {
             navigate("/user/reservations")
         } else {
             const errorData = await response.json();
-            alert(`Error Creating reservation: ${errorData.detail}`);
+            alert(`${errorData.detail}`);
         }
     };
    
