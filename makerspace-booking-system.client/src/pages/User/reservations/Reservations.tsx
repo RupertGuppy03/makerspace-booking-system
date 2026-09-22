@@ -4,9 +4,10 @@ import { useAuth } from '../../../lib/authProvider';
 import ReservationTable from '../../../components/ReservationTable'
 import AccessDenied from '../../AccessDenied/AccessDenied';
 
-type Tab = 'current' | 'past' | 'all';
+type Tab = 'upcoming' | 'current' | 'past' | 'all';
 
 const TABS: { id: Tab; label: string }[] = [
+    { id: 'upcoming', label: 'Upcoming' },
     { id: 'current', label: 'Current' },
     { id: 'past', label: 'Past' },
     { id: 'all', label: 'All' },
@@ -82,21 +83,30 @@ export default function Reservations() {
         const response = await fetch(`/api/user/${userId}/reservations`);
         if (response.ok) {
             const data = await response.json();
-            setReservations(data);
+
+            const reservationList = data.map((reservation: Reservation) => ({ //Convert Date type properties from string to Date, as Typescript does not auto convert it.
+                ...reservation,
+                startDay: new Date(reservation.startDay),
+                endDay: new Date(reservation.endDay),
+                collectedAt: reservation.collectedAt ? new Date(reservation.collectedAt) : null,
+                returnedAt: reservation.returnedAt ? new Date(reservation.returnedAt) : null,
+                cancelledAt: reservation.cancelledAt ? new Date(reservation.cancelledAt) : null,
+            }));
+            setReservations(reservationList);
         }
+
     }
 
     async function filterReservations() {
         if (reservations === undefined) return;
-        //const now = new Date()
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); //create date without a time-of-day so >= and > operators work correctly on the date 
+
         const filtered = reservations.filter(r => {
-            //Option here to filter by date instead of status. Doesn't work because startDay is actually in yyyy-mm-ddThh:mm:dd date format
-            // if (activeTab === 'current') return r.startDay >= now;
-            // if (activeTab === 'past') return r.startDay < now;
-            const status = r.status;
-            if (activeTab === 'current') return status == "booked"
-            if (activeTab === 'past') return status == "cancelled" || status == "returned" || status == "no_show"
-            return true; // 'all'
+            if (activeTab === 'upcoming') return r.startDay > today && r.status != 'cancelled'; // 'upcoming' if it hasnt started yet
+            if (activeTab === 'current') return r.startDay <= today && r.endDay >= today && r.status != 'cancelled'; // 'current' if it has started but not past the end day yet
+            if (activeTab === 'past') return r.endDay < today || r.status == 'cancelled'; // 'past' if the end day has passed
+            return true; // activeTab === 'all'
         })
         setFilteredReservations(filtered)
 
