@@ -1,89 +1,76 @@
 /**
- * 
- * 
- * this is the managment page, a read only view of how th emakerspace is running, whats being used
- * who returns late, what tools are being used the most, and what tools are being damaged the most
- * 
- * three tabs, one for revenue, one for user metrics, and one for tool metrics
- * 
- * access to this page is restricted to only users with the manager role
- * 
- * 
+ * The manager dashboard: a read-only view of how the makerspace is running —
+ * what is being used, who returns late, which tools are most in demand and
+ * which get damaged most often.
+ *
+ * This file is the frame, not the content. It draws the sidebar, the page
+ * heading and the breadcrumb, then leaves a hole where React Router drops in
+ * whichever section the address bar is pointing at (Revenue, User or Tool).
+ *
+ * Access is meant to be restricted to the manager role. That check does not
+ * exist yet.
  */
 
-import {useState} from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import './ManagementPage.css';
-import ManagementRevenueSection from '../../components/Management/ManagementRevenueSection';
-import ManagementUserSection from '../../components/Management/ManagementUserSection';
-import ManagementToolSection from '../../components/Management/ManagementToolSection';
+import ManagementSidebar from '../../components/Management/ManagementSidebar';
 import { useDashboardMetrics } from './useDashboardMetrics';
 import { useAuth } from '../../lib/authProvider';
 import AccessDenied from '../AccessDenied/AccessDenied';
 
-type Tab = 'revenue' | 'users' | 'tools';
-
-/**
- * 
- * this is the main management page, it will display the three tabs for revenue, user metrics, and tool metrics
- * 
- */
-
-const TABS: { id: Tab; label: string }[] = [
-    { id: 'revenue', label: 'Revenue' },
-    { id: 'users', label: 'User' },
-    { id: 'tools', label: 'Tool' },
-];
+// Turns the address into something readable for the breadcrumb.
+const SECTION_LABELS: Record<string, string> = {
+    revenue: 'Revenue',
+    users: 'User',
+    tools: 'Tool',
+};
 
 function ManagementPage() {
-    const [activeTab, setActiveTab] = useState<Tab>('revenue');
-    const { metrics, loading, error } = useDashboardMetrics();
-
     const { role } = useAuth()
 
     //Only allow access if logged in with manager role
     if (role != 'manager') {
         return <AccessDenied />;
     }
+    
+    /*
+     * Fetched once, here in the frame, rather than in each section. Whichever
+     * section is on screen receives it through the Outlet below, so switching
+     * between Revenue and Tool does not trigger another trip to the server.
+     */
+    const { metrics, loading, error } = useDashboardMetrics();
+    
+    
+    /*
+     * Tells us the current address, e.g. "/management/revenue". We take the
+     * last part of it to work out which section name to show in the breadcrumb.
+     */
+    const location = useLocation();
+    const lastSegment = location.pathname.split('/').filter(Boolean).pop() ?? 'revenue';
+    const sectionLabel = SECTION_LABELS[lastSegment] ?? 'Revenue';
+  
 
     return (
-        <div className="management-dashboard">
-            <header className="management-header">
-                <h1>Manager Dashboard</h1>
-                <p className="management-subtitle">
-                    An overview of how the makerspace is running. Figures cover the last 12 months.
-                </p>
-            </header>
+        <div className="management-shell">
+            <ManagementSidebar />
 
-            <nav className="management-tabs" role="tablist" aria-label="Management Dashboard Tabs">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={activeTab === tab.id}
-                        className={
-                            activeTab === tab.id
-                                ? 'management-tab management-tab--active'
-                                : 'management-tab'
-                        }
-                        onClick={() => setActiveTab(tab.id)}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </nav>
+            <div className="management-main">
+                <header>
+                    <h1 className="management-title">{sectionLabel}</h1>
+                    <p className="management-breadcrumb">
+                        Home / Dashboard / <span>{sectionLabel}</span>
+                    </p>
+                </header>
 
-            <main className="management-panel">
-                {activeTab === 'revenue' && (
-                        <ManagementRevenueSection metrics={metrics} loading={loading} error={error} />
-                    )}
-                    {activeTab === 'users' && (
-                        <ManagementUserSection metrics={metrics} loading={loading} error={error} />
-                    )}
-                    {activeTab === 'tools' && (
-                        <ManagementToolSection metrics={metrics} loading={loading} error={error} />
-                    )}
-            </main>
+                <main className="management-panel">
+                    {/*
+                      * Outlet is React Router's placeholder. Whichever child route
+                      * matches the address gets rendered right here. The context
+                      * prop is how we hand the fetched figures down to it.
+                      */}
+                    <Outlet context={{ metrics, loading, error }} />
+                </main>
+            </div>
         </div>
     );
 }
