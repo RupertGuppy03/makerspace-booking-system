@@ -60,7 +60,7 @@ function ManagementPage() {
     const sectionLabel = SECTION_LABELS[lastSegment] ?? 'Revenue';
 
     return (
-        <div className="management-shell management-surface">
+        <div className="management-shell">
             {/*
               * The rail is shared with the admin page, so it is told what to
               * show rather than deciding for itself. activeId reuses the

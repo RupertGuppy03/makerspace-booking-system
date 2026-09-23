@@ -17,7 +17,6 @@
 
 import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import './ManagementSidebar.css';
 
 /*
  * One entry in the rail.

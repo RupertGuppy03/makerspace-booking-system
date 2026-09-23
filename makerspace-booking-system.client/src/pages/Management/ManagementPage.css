@@ -16,30 +16,17 @@
  * to #root only when a .management-shell is somewhere inside it, so no other
  * page is affected and nobody else's stylesheet has to change.
  *
- * The background is set here rather than relying on Login.css's black body, so
- * the frame survives once that file is scoped to its own page.
+ * The background is set here so the frame does not depend on the body colour
+ * underneath it.
  */
 #root:has(.management-shell) {
     max-width: none;
     margin: 0;
     padding: 0;
-    background: #0f1319;
+    background: var(--ms-black);
 }
 
 .management-shell {
-    /*
-     * The --m-* colours now live on .management-surface, in
-     * components/Management/ManagementDashboard.css, so the admin page can use
-     * the same cards. This wrapper carries both classes, so var(--m-canvas)
-     * below still resolves.
-     *
-     * index.css colours p, h1-h4, td and th with var(--custom-color), and
-     * Login.css sets that to white for the whole app. Pointing it at our own
-     * ink fixes those elements here. It stays an element selector, so every
-     * class of ours still beats it - which a blanket rule could not promise.
-     */
-    --custom-color: #1b232f;
-
     display: flex;
     /* stretch, so the sidebar and the content column are always the same
        height and the card stays a clean rectangle. */
@@ -58,43 +45,11 @@
        min-width: 0 stops a wide chart from forcing the column to overflow. */
     flex: 1;
     min-width: 0;
-    background: var(--m-canvas);
-    color: var(--m-ink);
+    background: var(--ms-canvas);
+    color: var(--ms-ink);
     padding: 24px 28px 56px;
     /* The card's right-hand corners. The sidebar rounds the left-hand pair. */
     border-radius: 0 14px 14px 0;
-}
-
-/*
- * Login.css ships its own grid using Bootstrap's exact class names, and because
- * it loads last in the bundle it beats Bootstrap. Its `.row [class^='col']` rule
- * floats every column and adds a 2% side margin, so two 50% columns no longer
- * fit on a line and wrap instead.
- *
- * This puts Bootstrap's behaviour back, inside the dashboard only. Delete the
- * whole block once Login.css is scoped to its own page.
- */
-.management-shell .row {
-    position: static;
-}
-
-.management-shell .row::after {
-    /* Login.css adds a float clearfix here, which becomes a stray flex item. */
-    content: none;
-}
-
-.management-shell .row > [class^="col"],
-.management-shell .row > [class*=" col"] {
-    float: none;
-    /* Login.css adds a 2% side margin. Only that needs removing. */
-    margin-right: 0;
-    margin-left: 0;
-    /* Bootstrap splits its vertical gutter in two: the row is pulled up by one
-       gutter and each column pushed back down by the same amount. Clearing all
-       margin above removed the second half, so every row rode up and closed the
-       gap beneath the one before it. */
-    margin-top: var(--bs-gutter-y);
-    min-height: 0;
 }
 
 /* ---------- page heading ---------- */
@@ -110,12 +65,12 @@
 
 .management-breadcrumb {
     font-size: 12.5px;
-    color: var(--m-muted);
+    color: var(--ms-muted);
     margin: 0 0 20px;
 }
 
 .management-breadcrumb span {
-    color: var(--m-ink);
+    color: var(--ms-ink);
     font-weight: 500;
 }
 /* Below tablet width the sidebar stacks on top. */

@@ -3,9 +3,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'rsuite/dist/rsuite.min.css'
+// The palette, the reset and the Bootstrap bridge.
 import './index.css'
-// Points Bootstrap's colour variables at ours, so dark mode keeps working.
-import './theme.css'
+// The look shared by the manager dashboard and the admin page.
+import './dashboard.css'
 import App from './App.tsx'
 import UserPage from "./pages/User/UserPage.tsx";
 import Reservations from "./pages/User/reservations/Reservations.tsx";

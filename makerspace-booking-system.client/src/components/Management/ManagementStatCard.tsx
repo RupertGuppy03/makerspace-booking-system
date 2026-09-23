@@ -8,7 +8,6 @@
  */
 
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import './ManagementDashboard.css';
 
 type Props = {
     label: string;

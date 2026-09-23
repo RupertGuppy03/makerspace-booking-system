@@ -8,7 +8,6 @@
  */
 
 import { useState } from 'react'
-import './Signup.css'
 // The card styling, shared with the login page.
 import '../auth.css'
 import { supabase } from '../../lib/supabaseClient'

@@ -34,13 +34,15 @@ export default function AccountBanner() {
 
 
     return (
-        <div className="">
-            <p>Current email: {userEmail}</p>
-            {user 
-                ? <button onClick={handleLogout}>logout</button>
-                : <div>
-                    <button onClick={() => navigate("/signup")}>signup</button>
-                    <button onClick={() => navigate("/login")}>login</button>
+        <div className="account-banner">
+            <p className="account-banner-email">Current email: {userEmail}</p>
+            {user
+                ? <div className="account-banner-actions">
+                    <button className="account-banner-btn" onClick={handleLogout}>logout</button>
+                </div>
+                : <div className="account-banner-actions">
+                    <button className="account-banner-btn" onClick={() => navigate("/signup")}>signup</button>
+                    <button className="account-banner-btn" onClick={() => navigate("/login")}>login</button>
                 </div>
             }
         </div>

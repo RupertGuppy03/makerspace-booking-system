@@ -3,11 +3,6 @@
  * Removed - page width is Bootstrap's .container job now.
  */
 
-th, td {
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-
 /*
  * ---------------------------------------------------------------------------
  * The home page at "/" - the menu of links to the other pages.
@@ -37,17 +32,6 @@ th, td {
 /* ---------- the black page the card sits on ---------- */
 
 .home-shell {
-    /* One place to change a colour. Every rule below refers to these. */
-    --home-bg: #0f1319;          /* black, same as the login page */
-    --home-card: #1b232f;        /* bluey grey, same as the login card */
-    --home-line: rgba(255, 255, 255, 0.07);
-    --home-ink: #ffffff;
-    --home-muted: #8e99ab;
-    --home-blue: #4680ff;        /* brand mark and icons */
-    --home-tile: #e8edf3;        /* the light grey link cards */
-    --home-tile-hover: #ffffff;
-    --home-tile-ink: #1b232f;    /* dark text on a light card */
-    --home-tile-sub: #6b7789;
 
     /* Fill the window and put the card in the middle of it, both ways. */
     min-height: 50vh;
@@ -55,8 +39,8 @@ th, td {
     align-items: top;
     justify-content: center;
     padding: 24px;
-    background: var(--home-bg);
-    color: var(--home-ink);
+    background: var(--ms-black);
+    color: var(--ms-on-dark);
     /* UserPage.css centres all text through #root. The card reads better left. */
     text-align: left;
 }
@@ -68,8 +52,8 @@ th, td {
     /* Grows with the window up to this width, then stops. Wider than the login
        card because it holds four tiles side by side rather than a form. */
     max-width: 620px;
-    background: var(--home-card);
-    border: 1px solid var(--home-line);
+    background: var(--ms-panel);
+    border: 1px solid var(--ms-on-dark-line);
     border-radius: 14px;
     padding: 32px 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -88,7 +72,7 @@ th, td {
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    background: var(--home-blue);
+    background: var(--ms-blue);
     color: #fff;
     font-weight: 700;
     /* Centres the letter inside the square. */
@@ -117,7 +101,7 @@ th, td {
 
 .home-sub {
     font-size: 13px;
-    color: var(--home-muted);
+    color: var(--ms-on-dark-muted);
     margin: 0 0 24px;
 }
 
@@ -125,9 +109,8 @@ th, td {
 
 /*
  * Two equal columns with a gap between them, which wraps to one column on a
- * phone. Written as CSS Grid rather than Bootstrap's row/col classes because
- * Login.css defines its own grid using Bootstrap's exact class names and loads
- * after it, which would float these tiles and break the layout.
+ * phone. CSS Grid rather than Bootstrap's row/col, because four equal tiles is
+ * simpler to read this way.
  */
 .home-grid {
     display: grid;
@@ -142,9 +125,8 @@ th, td {
 }
 
 /*
- * Login.css styles every <button> in the app: dark, bordered and SHOUTED in
- * capitals. Each line here puts one of those back to what this tile needs. A
- * class beats a plain element selector, so this only affects the home page.
+ * A browser's own default button has a grey face, a bevelled border and centres
+ * its label, so the lines below strip those off and paint the tile instead.
  */
 .home-link {
     /* Icon on the left, the two lines of text beside it. */
@@ -157,17 +139,16 @@ th, td {
     text-align: left;
     border: 0;
     border-radius: 10px;
-    background: var(--home-tile);
-    color: var(--home-tile-ink);
+    background: var(--ms-tile);
+    color: var(--ms-ink);
     padding: 15px 16px;
     cursor: pointer;
-    text-transform: none;
     /* Fades and lifts on hover instead of snapping. */
     transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .home-link:hover {
-    background: var(--home-tile-hover);
+    background: var(--ms-card);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 }
@@ -187,7 +168,7 @@ th, td {
 .home-link-icon svg {
     width: 16px;
     height: 16px;
-    fill: var(--home-blue);
+    fill: var(--ms-blue);
 }
 
 .home-link-name {
@@ -200,7 +181,7 @@ th, td {
 .home-link-desc {
     display: block;
     font-size: 11.5px;
-    color: var(--home-tile-sub);
+    color: var(--ms-dim);
     line-height: 1.4;
     margin-top: 2px;
 }

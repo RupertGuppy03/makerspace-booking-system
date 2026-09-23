@@ -1,0 +1,370 @@
+/*
+ * The shared dashboard look: the dark navigation rail, the coloured stat
+ * cards, the white chart cards, the Week / Month toggle, the ranked list and
+ * the Recharts theming.
+ *
+ * This is a root-level stylesheet rather than a page one because BOTH the
+ * manager dashboard and the admin page render these components. Putting it in
+ * ManagementPage.css would mean /admin only looked right when the management
+ * page's stylesheet happened to be loaded - which is a bug we have already
+ * had once.
+ *
+ * Colours come from the --ms-* palette on :root in index.css. Nothing here
+ * declares a colour of its own.
+ *
+ * Loaded once from main.tsx.
+ */
+
+.management-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--ms-panel);
+    color: var(--ms-on-dark-soft);
+    padding: 24px 0;
+    /* A column so the user chip can be pushed to the bottom with margin-top. */
+    display: flex;
+    flex-direction: column;
+    /* The card's left-hand corners. The main column rounds the right-hand pair. */
+    border-radius: 14px 0 0 14px;
+}
+
+.management-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px 28px;
+}
+
+.management-sidebar-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ms-blue);
+    color: var(--ms-on-dark);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.management-sidebar-name {
+    color: var(--ms-on-dark);
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.management-sidebar-heading {
+    padding: 0 24px 10px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #6b7789;
+}
+
+.management-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- links to the admin and user pages ---------- */
+
+.management-sidebar-pages {
+    display: flex;
+    flex-direction: column;
+    margin-top: 18px;
+}
+
+/* Looks like the DASHBOARD heading, but can be clicked. */
+.management-sidebar-heading--link {
+    display: block;
+    padding-top: 10px;
+    text-decoration: none;
+}
+
+.management-sidebar-heading--link:hover {
+    color: var(--ms-on-dark);
+}
+
+/*
+ * One rule for both kinds of item. The manager dashboard renders these as
+ * links, the admin page as buttons, and they have to be indistinguishable.
+ *
+ * A browser's own default button has a grey face, a bevelled border, rounded
+ * corners and centres its label, so the lines marked below strip those off.
+ */
+.management-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 24px;
+    /* Strips the browser's grey button face. */
+    background: none;
+    /* Strips its bevelled border. */
+    border: 0;
+    /* Strips its rounded corners. */
+    border-radius: 0;
+    /* A button centres its label; the rail wants it left. */
+    text-align: left;
+    /* A button only takes the width of its text; the rail wants a full row. */
+    width: 100%;
+    color: var(--ms-on-dark-soft);
+    text-decoration: none;
+    font-size: 15px;
+    line-height: 1.4;
+    cursor: pointer;
+    /* Transparent bar now, coloured in when the link is active. Has to come
+       after `border: 0`, or the shorthand would wipe it out again. */
+    border-left: 3px solid transparent;
+}
+
+/*
+ * Keyboard focus. :focus-visible only fires for keyboard users, so a mouse
+ * click does not leave a ring behind. Without this the browser draws its own
+ * boxy outline, which looks wrong against the flat rail.
+ */
+.management-sidebar-link:focus-visible {
+    outline: none;
+    color: var(--ms-on-dark);
+    background: rgba(70, 128, 255, 0.18);
+    border-left-color: var(--ms-blue);
+}
+
+.management-sidebar-link:hover {
+    color: var(--ms-on-dark);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.management-sidebar-link--active {
+    color: var(--ms-on-dark);
+    border-left-color: var(--ms-blue);
+    background: rgba(70, 128, 255, 0.12);
+}
+
+.management-sidebar-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    opacity: 0.85;
+}
+
+/* Below tablet width the rail lies down across the top instead. */
+@media (max-width: 900px) {
+    .management-sidebar {
+        width: 100%;
+        padding-bottom: 8px;
+        /* Stacked, so the rail now holds the top two corners. */
+        border-radius: 14px 14px 0 0;
+    }
+
+    .management-sidebar-nav {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .management-sidebar-link {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+    }
+
+    .management-sidebar-link--active {
+        border-left-color: transparent;
+        border-bottom-color: var(--ms-blue);
+    }
+}
+
+/* ---------- KPI cards ---------- */
+
+.management-stat {
+    border-radius: 9px;
+    padding: 16px 18px;
+    height: 100%;
+    overflow: hidden;
+    color: var(--ms-on-dark);
+    /* A column so the note and sparkline row can be pushed to the bottom,
+       which keeps cards of different text lengths aligned with each other. */
+    display: flex;
+    flex-direction: column;
+}
+
+.management-stat--blue  { background: var(--ms-blue); }
+.management-stat--green { background: var(--ms-green); }
+.management-stat--amber { background: var(--ms-amber); }
+.management-stat--sky   { background: var(--ms-sky); }
+
+/*
+ * The four pieces stack down the card, each across its full width:
+ * label, value, note, sparkline.
+ *
+ * The label sits tight against the value so they read as one unit, then a
+ * clear gap separates that pair from the note underneath. The sparkline uses
+ * margin-top: auto, which in a flex column soaks up the leftover space and
+ * pins the line to the bottom — so the lines stay level across all four cards
+ * even when one label or note wraps onto an extra line.
+ */
+
+.management-stat-label {
+    font-size: 13px;
+    line-height: 1.3;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.management-stat-value {
+    font-size: 27px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin: 1px 0 0;
+}
+
+.management-stat-note {
+    font-size: 11.5px;
+    line-height: 1.4;
+    opacity: 0.92;
+    margin: 12px 0 0;
+}
+
+.management-stat-spark {
+    width: 100%;
+    height: 34px;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+/* ---------- chart cards ---------- */
+
+.management-card {
+    background: var(--ms-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    height: 100%;
+}
+
+.management-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--ms-line);
+}
+
+.management-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.management-card-body {
+    padding: 16px 18px;
+}
+
+.management-card-note {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--ms-muted);
+    margin: 12px 0 0;
+    padding-top: 11px;
+    border-top: 1px solid var(--ms-line);
+}
+
+/* ---------- time range toggle ---------- */
+
+.management-range {
+    display: inline-flex;
+    background: #eef2f7;
+    border-radius: 7px;
+    padding: 3px;
+}
+
+.management-range button {
+    border: 0;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 11px;
+    border-radius: 5px;
+    color: var(--ms-muted);
+    cursor: pointer;
+}
+
+.management-range button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.management-range button.management-range--on {
+    background: var(--ms-blue);
+    color: var(--ms-on-dark);
+}
+
+/* ---------- ranked list beside a donut ---------- */
+
+.management-rank-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin: 0 0 4px;
+}
+
+.management-rank-row b {
+    font-weight: 600;
+}
+
+.management-rank-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: #eef2f7;
+    margin-bottom: 13px;
+    overflow: hidden;
+}
+
+.management-rank-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+}
+
+/* ---------- empty / loading state ---------- */
+
+.management-chart-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--ms-muted);
+    font-size: 13px;
+    padding: 0 20px;
+    height: 100%;
+    min-height: 180px;
+}
+
+/* ---------- Recharts ---------- */
+
+.management-card .recharts-cartesian-axis-tick text {
+    fill: var(--ms-muted);
+    font-size: 11.5px;
+}
+
+.management-card .recharts-cartesian-grid line {
+    stroke: var(--ms-line);
+}
+
+.management-card .recharts-default-tooltip {
+    background: var(--ms-ink) !important;
+    border: 0 !important;
+    border-radius: 6px;
+    padding: 8px 11px !important;
+}
+
+.management-card .recharts-tooltip-label,
+.management-card .recharts-tooltip-item {
+    color: #fff !important;
+    font-size: 12px;
+}
+
+.management-card .recharts-legend-item-text {
+    color: var(--ms-muted) !important;
+    font-size: 12px;
+}

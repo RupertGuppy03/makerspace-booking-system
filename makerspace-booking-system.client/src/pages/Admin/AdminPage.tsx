@@ -56,12 +56,7 @@ function AdminPage() {
         ADMIN_SECTIONS.find((section) => section.id === activeSection)?.label ?? 'Dashboard';
 
     return (
-        /*
-         * Two classes: admin-shell is this page's own layout, and
-         * management-surface says "this page uses the shared dashboard
-         * components", which is what supplies their colours.
-         */
-        <div className="admin-shell management-surface">
+        <div className="admin-shell">
             {/*
               * The same rail the manager dashboard uses. It is told what to
               * show rather than deciding for itself, which is what lets one
