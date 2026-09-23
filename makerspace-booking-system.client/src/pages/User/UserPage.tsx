@@ -3,6 +3,7 @@ import './UserPage.css';
 import type { Tool } from "../../types/tool";
 import { createSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from '../../lib/authProvider';
+import RoleGate from '../../components/RoleGate';
 
 
 
@@ -30,7 +31,9 @@ function UserPage() {
                     <th>Is Taken Out</th>
                     <th>Maintenance Period (days)</th>
                     <th>Last Maintained</th>
-                    <th>Reserve Button</th>
+                    <RoleGate requiredRole='user'>
+                        <th>Reserve Button</th>
+                    </RoleGate>
                 </tr>
             </thead>
             <tbody>
@@ -41,7 +44,9 @@ function UserPage() {
                         <td>{tool.isTakenOut ? "true" : "false"}</td>
                         <td>{tool.maintenancePeriod}</td>
                         <td>{tool.lastMaintained ? new Date(tool.lastMaintained).toDateString() : ''}</td>
-                        <td><button type="button" onClick={() => handleNavigateReserve(tool.id)}> reserve </button></td>
+                        <RoleGate requiredRole='user'>
+                            <td><button type="button" onClick={() => handleNavigateReserve(tool.id)}> reserve </button></td>
+                        </RoleGate>
                     </tr>
                 )}
             </tbody>
@@ -51,7 +56,10 @@ function UserPage() {
     return (
         <div>
             <h1 id="tableLabel">User Tool View</h1>
-            <p>This page shows all tools from the database and allows you to reverse one if logged in</p>
+            <p>This page shows all tools from the database and allows you to make a reservations a tool.</p>
+            <RoleGate requiredRole='user' reverse>
+                <b>To make a reservation for a tool, you must create an account or log in.</b>
+            </RoleGate>
             <br />
             <div>
                 <input placeholder="Search by Name" value={searchName} onChange={handleSearchOnChange} />

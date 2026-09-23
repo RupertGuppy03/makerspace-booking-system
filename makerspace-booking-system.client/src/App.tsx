@@ -7,6 +7,7 @@
 
 import './App.css';
 import { useNavigate } from "react-router-dom";
+import RoleGate from './components/RoleGate';
 
 
 
@@ -49,7 +50,7 @@ function App() {
                             <span className="home-link-desc">Browse tools and reserve one</span>
                         </span>
                     </button>
-
+                    <RoleGate requiredRole='user'>
                     <button
                         className="home-link"
                         onClick={() => navigate("user/reservations")}
@@ -64,7 +65,8 @@ function App() {
                             <span className="home-link-desc">See and cancel your bookings</span>
                         </span>
                     </button>
-
+                    </RoleGate>
+                    <RoleGate requiredRole='admin'>
                     <button
                         className="home-link"
                         onClick={() => navigate("admin")}
@@ -79,7 +81,8 @@ function App() {
                             <span className="home-link-desc">Manage inventory and maintenance</span>
                         </span>
                     </button>
-
+                    </RoleGate>
+                    <RoleGate requiredRole='manager'>
                     <button
                         className="home-link"
                         onClick={() => navigate("management")}
@@ -96,6 +99,7 @@ function App() {
                             <span className="home-link-desc">Business metrics and reports</span>
                         </span>
                     </button>
+                    </RoleGate>
 
                 </div>
             </div>

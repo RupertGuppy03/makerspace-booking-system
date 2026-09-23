@@ -11,6 +11,7 @@
 
 import { useState } from 'react';
 import './AdminPage.css';
+import { useAuth } from '../../lib/authProvider';
 
 import ManagementSidebar from '../../components/Management/ManagementSidebar';
 import { ManagementGridIcon } from '../../components/Management/ManagementIcons';
@@ -19,6 +20,7 @@ import AdminInventorySection from '../../components/Admin/AdminInventorySection'
 import AdminAddToolSection from '../../components/Admin/AdminAddToolSection';
 import AdminReservationSection from '../../components/Admin/AdminReservationSection';
 import AdminMaintenanceSection from '../../components/Admin/AdminMaintenanceSection';
+import AccessDenied from '../AccessDenied/AccessDenied';
 
 // The five sections, and the only values activeSection is allowed to hold.
 export type AdminSection = 'dashboard' | 'inventory' | 'reservations' | 'addTool' | 'maintenance';
@@ -49,6 +51,14 @@ function AdminPage() {
      * different section inside.
      */
     const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
+    const { role } = useAuth();
+
+    //Only allow access if logged in with admin role or higher
+    if (role != 'admin' && role != 'manager') { 
+        return <AccessDenied />;
+    }
+
+
 
     // The heading and breadcrumb read the label out of the list above, so the
     // two can never drift apart from what the rail says.

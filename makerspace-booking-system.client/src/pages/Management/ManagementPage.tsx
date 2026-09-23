@@ -16,6 +16,8 @@ import './ManagementPage.css';
 import ManagementSidebar from '../../components/Management/ManagementSidebar';
 import { ManagementBarIcon } from '../../components/Management/ManagementIcons';
 import { useDashboardMetrics } from './useDashboardMetrics';
+import { useAuth } from '../../lib/authProvider';
+import AccessDenied from '../AccessDenied/AccessDenied';
 
 /*
  * The three sections of the dashboard, in the order they appear in the rail.
@@ -44,13 +46,21 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 function ManagementPage() {
+    const { role } = useAuth()
+
+    //Only allow access if logged in with manager role
+    if (role != 'manager') {
+        return <AccessDenied />;
+    }
+    
     /*
      * Fetched once, here in the frame, rather than in each section. Whichever
      * section is on screen receives it through the Outlet below, so switching
      * between Revenue and Tool does not trigger another trip to the server.
      */
     const { metrics, loading, error } = useDashboardMetrics();
-
+    
+    
     /*
      * Tells us the current address, e.g. "/management/revenue". We take the
      * last part of it to work out which section name to show in the breadcrumb.
@@ -58,6 +68,7 @@ function ManagementPage() {
     const location = useLocation();
     const lastSegment = location.pathname.split('/').filter(Boolean).pop() ?? 'revenue';
     const sectionLabel = SECTION_LABELS[lastSegment] ?? 'Revenue';
+  
 
     return (
         <div className="management-shell">
