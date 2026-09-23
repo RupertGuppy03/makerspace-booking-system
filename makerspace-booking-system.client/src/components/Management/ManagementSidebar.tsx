@@ -1,34 +1,53 @@
 /**
- * The dark navigation rail down the left of the manager dashboard.
+ * The dark navigation rail down the left of a dashboard.
  *
- * Takes no props — it reads the current address itself to decide which link to
- * highlight, so nothing needs to be passed in from the page.
+ * Shared by the manager dashboard and the admin page. It draws the rail and
+ * nothing else - it does not know which sections exist, which one is open or
+ * what happens when one is clicked. All of that is handed in as props, which
+ * is what lets one component serve two pages that navigate in different ways.
+ *
+ * Props:
+ * - heading    the small grey word above the links ("Dashboard" or "Admin")
+ * - items      the sections to list, in order
+ * - activeId   the id of the section currently on screen, so it can be highlighted
+ * - onSelect   called with an id when a button item is clicked
+ * - icon       the picture to draw beside every link
+ * - pageLinks  extra links out to other pages, drawn underneath
  */
 
+import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import ManagementUserChip from './ManagementUserChip';
-import './ManagementSidebar.css';
 
-// Each section of the dashboard, in the order they appear in the rail.
-const SECTIONS = [
-    { to: 'revenue', label: 'Revenue' },
-    { to: 'users', label: 'User' },
-    { to: 'tools', label: 'Tool' },
-];
+/*
+ * One entry in the rail.
+ *
+ * The optional `to` is what decides how it behaves. The manager dashboard
+ * changes the address bar, so its items carry a `to` and become real links.
+ * The admin page keeps its open section in a variable instead, so its items
+ * have no `to` and become buttons that call onSelect. Both look identical.
+ */
+export type SidebarItem = {
+    id: string;
+    label: string;
+    to?: string;
+};
 
-// Small icon drawn next to each link. Written out by hand so the sidebar does
-// not need an icon library installed.
-function SectionIcon() {
-    return (
-        <svg className="management-sidebar-icon" viewBox="0 0 16 16" aria-hidden="true">
-            <rect x="1" y="9" width="3.5" height="6" rx="1" />
-            <rect x="6.25" y="5" width="3.5" height="10" rx="1" />
-            <rect x="11.5" y="1" width="3.5" height="14" rx="1" />
-        </svg>
-    );
-}
+type Props = {
+    heading: string;
+    items: SidebarItem[];
+    activeId: string;
+    onSelect?: (id: string) => void;
+    icon: ReactNode;
+    pageLinks?: { label: string; to: string }[];
+};
 
-function ManagementSidebar() {
+function ManagementSidebar({ heading, items, activeId, onSelect, icon, pageLinks = [] }: Props) {
+    // Both kinds of item share the same classes, so the two pages look the same.
+    const classFor = (item: SidebarItem) =>
+        item.id === activeId
+            ? 'management-sidebar-link management-sidebar-link--active'
+            : 'management-sidebar-link';
+
     return (
         <aside className="management-sidebar">
             <div className="management-sidebar-brand">
@@ -36,45 +55,51 @@ function ManagementSidebar() {
                 <span className="management-sidebar-name">Makerspace</span>
             </div>
 
-            <p className="management-sidebar-heading">Dashboard</p>
+            <p className="management-sidebar-heading">{heading}</p>
 
-            <nav className="management-sidebar-nav" aria-label="Dashboard sections">
-                {SECTIONS.map((section) => (
-                    <NavLink
-                        key={section.to}
-                        to={section.to}
-                        /*
-                         * NavLink hands us an isActive flag telling us whether this
-                         * link matches the address bar. We use it to add the class
-                         * that draws the blue bar down the left of the active item.
-                         */
-                        className={({ isActive }) =>
-                            isActive
-                                ? 'management-sidebar-link management-sidebar-link--active'
-                                : 'management-sidebar-link'
-                        }
-                    >
-                        <SectionIcon />
-                        {section.label}
-                    </NavLink>
-                ))}
+            <nav className="management-sidebar-nav" aria-label={`${heading} sections`}>
+                {items.map((item) =>
+                    item.to === undefined ? (
+                        <button
+                            key={item.id}
+                            type="button"
+                            className={classFor(item)}
+                            /*
+                             * onSelect is optional, so the ?. guards against it
+                             * being missing. Without it, a page that forgot to
+                             * pass one would crash on the first click.
+                             */
+                            onClick={() => onSelect?.(item.id)}
+                        >
+                            {icon}
+                            {item.label}
+                        </button>
+                    ) : (
+                        <NavLink key={item.id} to={item.to} className={classFor(item)}>
+                            {icon}
+                            {item.label}
+                        </NavLink>
+                    )
+                )}
             </nav>
 
             {/*
-              * Headings that leave the dashboard for the other pages. They start
-              * with "/" so they go to /admin and /user, not /management/admin.
+              * Links that leave this dashboard for another page. They start with
+              * "/" so they go to /user, not /management/user.
               */}
-            <nav className="management-sidebar-pages" aria-label="Other pages">
-                <Link to="/admin" className="management-sidebar-heading management-sidebar-heading--link">
-                    Admin
-                </Link>
-                <Link to="/user" className="management-sidebar-heading management-sidebar-heading--link">
-                    User page
-                </Link>
-            </nav>
-
-            {/* Placeholder until this is wired to the signed-in user. */}
-            <ManagementUserChip name="Rupert Guppy" role="Manager" />
+            {pageLinks.length > 0 && (
+                <nav className="management-sidebar-pages" aria-label="Other pages">
+                    {pageLinks.map((page) => (
+                        <Link
+                            key={page.to}
+                            to={page.to}
+                            className="management-sidebar-heading management-sidebar-heading--link"
+                        >
+                            {page.label}
+                        </Link>
+                    ))}
+                </nav>
+            )}
         </aside>
     );
 }

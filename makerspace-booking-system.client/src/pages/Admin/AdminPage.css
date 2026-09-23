@@ -1,82 +1,363 @@
 /*
- * Scoped under .admin-dashboard, same reasoning as ManagementPage.css:
- * index.css pins #root width and centres text globally, which fights this
- * layout, so we override locally rather than editing the shared file.
+ * Styling for the admin page.
+ *
+ * Everything is scoped under .admin-shell so none of it can reach another
+ * person's page. It deliberately mirrors ManagementPage.css: a dark rail on a
+ * dark frame, with a pale canvas beside it that the tables and charts read
+ * against.
+ *
+ * The sidebar and the chart cards have no rules here at all - both are shared
+ * with the manager dashboard, so they live in src/dashboard.css.
  */
 
-.admin-dashboard {
-    display: flex;
-    align-items: stretch;
-    text-align: left;
-    min-height: 100vh;
-}
-
-.admin-panel {
-    flex: 1;
-    padding: 24px 32px;
-    box-sizing: border-box;
-}
-
-.admin-panel h2 {
-    margin-top: 0;
-}
-
-/* ---------- Dashboard summary cards ---------- */
-
-.admin-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
-    max-width: 700px;
-}
-
-.admin-summary-card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    text-align: center;
-}
-
-.admin-summary-value {
-    margin: 0 0 4px;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-h);
-}
-
-.admin-summary-label {
+/*
+ * The dark frame the page sits on.
+ *
+ * :has() reads as "only when" - this applies to #root only when an .admin-shell
+ * is somewhere inside it, so no other page is affected and nobody else's
+ * stylesheet has to change. ManagementPage.css and auth.css already do the same.
+ */
+#root:has(.admin-shell) {
+    /*
+     * UserPage.css, Reservations.css and Reserve.css each declare an unscoped
+     * `#root { max-width: 1280px; margin: 0 auto; padding: 2rem }`, which lands
+     * on every page in the app and was squeezing this one narrower than the
+     * manager dashboard. These three lines undo it, for this page only.
+     */
+    max-width: none;
     margin: 0;
+    padding: 0;
+    background: var(--ms-black);
+}
+
+.admin-shell {
+
+    display: flex;
+    /* stretch, so the rail and the content column are always the same height
+       and the card stays a clean rectangle. */
+    align-items: stretch;
+    /* An even 8px of the dark frame shows on all four sides. */
+    margin: 8px;
+    min-height: calc(100vh - 16px);
+    text-align: left;
+    color: var(--ms-ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.admin-main {
+    /* flex: 1 takes whatever width the rail leaves.
+       min-width: 0 stops a wide table forcing the column to overflow. */
+    flex: 1;
+    min-width: 0;
+    background: var(--ms-canvas);
+    color: var(--ms-ink);
+    padding: 24px 28px 56px;
+    /* The card's right-hand corners. The rail rounds the left-hand pair. */
+    border-radius: 0 14px 14px 0;
+}
+
+/* ---------- page heading ---------- */
+
+.admin-title {
+    /* index.css sets every h1 to 56px. A class beats a plain element
+       selector, so this wins without editing the shared file. */
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    margin: 0 0 3px;
+}
+
+.admin-breadcrumb {
+    font-size: 12.5px;
+    color: var(--ms-muted);
+    margin: 0 0 20px;
+}
+
+.admin-breadcrumb span {
+    color: var(--ms-ink);
+    font-weight: 500;
+}
+
+/* The sentence under a section heading explaining what the section is for. */
+.admin-lede {
     font-size: 13px;
-    color: var(--text);
+    color: var(--ms-muted);
+    margin: 0 0 18px;
 }
 
-/* ---------- Shared status notes ---------- */
+/* ---------- fields ---------- */
 
-.admin-loading-note {
-    margin-top: 16px;
-    font-size: 14px;
-    color: var(--text);
+.admin-field-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ms-muted);
+    margin: 0 0 5px;
 }
+
+.admin-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--ms-card);
+    border: 1px solid var(--ms-line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--ms-ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-input::placeholder {
+    color: var(--ms-dim);
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: var(--ms-blue);
+    box-shadow: 0 0 0 3px rgba(70, 128, 255, 0.14);
+}
+
+/* ---------- buttons ---------- */
+
+/* A browser's default button has a grey face and a bevel; these paint over it. */
+.admin-btn {
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-btn--ghost {
+    background: var(--ms-tile);
+    border: 1px solid transparent;
+    color: var(--ms-ink);
+}
+
+.admin-btn--ghost:hover {
+    background: var(--ms-card);
+    border-color: var(--ms-line);
+    box-shadow: 0 1px 4px rgba(16, 24, 40, 0.1);
+}
+
+.admin-btn--primary {
+    background: var(--ms-blue);
+    border: 1px solid var(--ms-blue);
+    color: #fff;
+}
+
+.admin-btn--primary:hover {
+    background: #3a70e8;
+    border-color: #3a70e8;
+    box-shadow: 0 2px 8px rgba(70, 128, 255, 0.3);
+}
+
+.admin-btn--danger {
+    background: var(--ms-card);
+    border: 1px solid #f3cdd4;
+    color: #b23b51;
+}
+
+.admin-btn--danger:hover {
+    background: #fdeaee;
+}
+
+.admin-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ---------- tables ---------- */
+
+/* The white card a table sits in. overflow: hidden clips the table's own
+   corners to the card's rounded ones. */
+.admin-table-card {
+    background: var(--ms-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ms-muted);
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--ms-line);
+    white-space: nowrap;
+}
+
+.admin-table td {
+    font-size: 13px;
+    color: var(--ms-ink);
+    padding: 13px 18px;
+    border-bottom: 1px solid #f2f5f9;
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.admin-table tbody tr:hover {
+    background: #fafbfd;
+}
+
+/* The single full-width cell used for "loading" and "nothing found". */
+.admin-table-empty {
+    text-align: center;
+    color: var(--ms-muted);
+    padding: 34px 18px;
+}
+
+/* Long ids read better in a monospaced font at a smaller size. */
+.admin-mono {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 12px;
+    color: var(--ms-muted);
+}
+
+/* Money and actions sit on the right-hand edge of their column. */
+.admin-num {
+    text-align: right;
+}
+
+/* ---------- status pills ---------- */
+
+/* Used instead of printing a raw status word or a true/false. */
+.admin-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.admin-pill--green { background: #e7f5ef; color: #1f7d5e; }
+.admin-pill--amber { background: #fdf0e0; color: #a8661d; }
+.admin-pill--blue  { background: #e9f0ff; color: #2f5fd0; }
+.admin-pill--grey  { background: #eef1f5; color: #6b7789; }
+.admin-pill--rose  { background: #fdeaee; color: #b23b51; }
+
+/* A tool can be both taken out and overdue, so pills come in a row. */
+.admin-pill-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* ---------- notes ---------- */
 
 .admin-error-note {
-    margin-top: 16px;
-    font-size: 14px;
-    color: var(--text);
-    border: 1px solid var(--accent-border);
-    background: var(--accent-bg);
-    border-radius: 4px;
-    padding: 8px 12px;
+    font-size: 12.5px;
+    color: #b23b51;
+    background: #fdeaee;
+    border-radius: 8px;
+    padding: 10px 13px;
+    margin: 0 0 14px;
 }
 
-/* ------------------ admin delete button ------------*/
-.admin-delete-button {
-    font-size: 12px !important;
-    padding: 2px 3px !important;
-    min-width: unset !important;
+.admin-success-note {
+    font-size: 12.5px;
+    color: #1f7d5e;
+    background: #e7f5ef;
+    border-radius: 8px;
+    padding: 10px 13px;
+    margin: 14px 0 0;
 }
 
-/* ------------------ admin search bar ------------*/
-.admin-search-bar {
-    margin-bottom: 16px 0;
+/* ---------- add tool form ---------- */
+
+.admin-form-card {
+    background: var(--ms-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    padding: 22px 24px;
+    max-width: 460px;
+}
+
+.admin-form-hint {
+    font-size: 11.5px;
+    color: var(--ms-muted);
+    margin: 5px 0 0;
+}
+
+/* ---------- edit tool dialog ---------- */
+
+/* The dimmed layer behind the dialog. inset: 0 pins it to all four edges of
+   the window, so it covers the page however far it is scrolled. */
+.admin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(15, 19, 25, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.admin-modal {
+    width: 100%;
+    max-width: 420px;
+    background: var(--ms-card);
+    color: var(--ms-ink);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    /* A tall dialog scrolls inside itself rather than off the screen. */
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.admin-modal-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--ms-line);
+}
+
+.admin-modal-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-modal-body {
+    padding: 20px 22px;
+    display: grid;
+    gap: 15px;
+}
+
+.admin-modal-foot {
+    padding: 14px 22px 18px;
+    border-top: 1px solid var(--ms-line);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.admin-modal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Below tablet width the rail stacks on top. */
+@media (max-width: 900px) {
+    .admin-shell {
+        flex-direction: column;
+    }
+
+    .admin-main {
+        padding: 18px 14px 40px;
+        width: 100%;
+        /* Stacked, so the main column now holds the bottom two corners. */
+        border-radius: 0 0 14px 14px;
+    }
 }

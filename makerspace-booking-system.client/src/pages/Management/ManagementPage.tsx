@@ -14,9 +14,29 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import './ManagementPage.css';
 import ManagementSidebar from '../../components/Management/ManagementSidebar';
+import { ManagementBarIcon } from '../../components/Management/ManagementIcons';
 import { useDashboardMetrics } from './useDashboardMetrics';
 import { useAuth } from '../../lib/authProvider';
 import AccessDenied from '../AccessDenied/AccessDenied';
+
+/*
+ * The three sections of the dashboard, in the order they appear in the rail.
+ *
+ * Each one carries a `to`, which tells the shared sidebar to draw it as a real
+ * link that changes the address bar - as opposed to the admin page, whose items
+ * have no `to` and become buttons instead.
+ */
+const SECTIONS = [
+    { id: 'revenue', label: 'Revenue', to: 'revenue' },
+    { id: 'users', label: 'User', to: 'users' },
+    { id: 'tools', label: 'Tool', to: 'tools' },
+];
+
+// Links out to the other two pages, drawn underneath the sections.
+const PAGE_LINKS = [
+    { label: 'Admin', to: '/admin' },
+    { label: 'User page', to: '/user' },
+];
 
 // Turns the address into something readable for the breadcrumb.
 const SECTION_LABELS: Record<string, string> = {
@@ -52,7 +72,18 @@ function ManagementPage() {
 
     return (
         <div className="management-shell">
-            <ManagementSidebar />
+            {/*
+              * The rail is shared with the admin page, so it is told what to
+              * show rather than deciding for itself. activeId reuses the
+              * lastSegment we already worked out for the breadcrumb.
+              */}
+            <ManagementSidebar
+                heading="Dashboard"
+                items={SECTIONS}
+                activeId={lastSegment}
+                icon={<ManagementBarIcon />}
+                pageLinks={PAGE_LINKS}
+            />
 
             <div className="management-main">
                 <header>

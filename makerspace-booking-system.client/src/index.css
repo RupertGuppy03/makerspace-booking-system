@@ -1,115 +1,208 @@
+/*
+ * The one global stylesheet.
+ *
+ * THE RULE: a global stylesheet may only REMOVE styling, never add it.
+ *
+ * A reset that strips a browser default is safe to apply everywhere, because
+ * every page wants it. A rule that paints something is not, because the page
+ * receiving it never asked for it - that is how a login stylesheet ended up
+ * deciding what the admin sidebar looked like.
+ *
+ * So this file holds four things and nothing else:
+ *   1. the colour palette, as variables the whole app can read
+ *   2. the Bootstrap bridge, so Bootstrap's components use our colours
+ *   3. the reset - the only element selectors in the project
+ *   4. the account banner, which is app chrome rather than a page
+ *
+ * Everything else belongs to one page, in that page's own stylesheet.
+ */
+
+/* ==========================================================================
+   1. The palette
+   ==========================================================================
+   Declared once, here, so a colour is never copy-pasted between pages.
+
+   Variables on :root are safe to make global: a variable does nothing at all
+   until some rule asks for it by name. It is RULES that must never be global.
+*/
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    --ms-black:  #0f1319;   /* the dark frame every page sits on */
+    --ms-panel:  #1b232f;   /* sidebar rail, login card, home card */
+    --ms-canvas: #f1f5f9;   /* the pale surface a dashboard is read against */
+    --ms-card:   #ffffff;   /* a card on the pale surface */
+    --ms-line:   #e8edf3;   /* borders and dividers on the pale surface */
+    --ms-ink:    #1b232f;   /* body text on the pale surface */
+    --ms-muted:  #7d8799;   /* sub-headings and small print */
+    --ms-dim:    #6b7789;   /* the dimmest grey: rail headings, placeholders */
+    --ms-tile:   #e8edf3;   /* a light grey clickable tile or button */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+    --ms-blue:   #4680ff;   /* brand mark, active nav, focus ring, links */
+    --ms-green:  #2fa47c;   /* positive */
+    --ms-amber:  #e8933a;   /* warning */
+    --ms-sky:    #4bb8f0;   /* the fourth stat card */
+    --ms-rose:   #e2596f;   /* negative, destructive */
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    /* Text on the dark rail and the dark cards. */
+    --ms-on-dark:       #ffffff;
+    --ms-on-dark-soft:  #c3ccd9;
+    --ms-on-dark-muted: #8e99ab;
+    --ms-on-dark-line:  rgba(255, 255, 255, 0.07);
 
-  @media (max-width: 1024px) {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 16px;
-  }
+    line-height: 1.45;
+
+    /*
+     * Tells the browser to draw its own widgets - scrollbars, date pickers,
+     * dropdown menus - in their dark form. The app is dark-framed whatever the
+     * computer is set to, so a light scrollbar would look out of place.
+     */
+    color-scheme: dark;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* ==========================================================================
+   2. The Bootstrap bridge
+   ==========================================================================
+   Bootstrap 5.3 builds its components out of variables named --bs-something.
+   Rather than pick new colours for it, we point its variables at ours, so
+   there is still only one palette to maintain.
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+   Bootstrap components are used in exactly two places - the tables on
+   UserPage.tsx and ReservationTable.tsx. Its grid and spacing classes
+   (row, col-*, g-4, mb-4) are used everywhere and need nothing from here.
+*/
+
+:root {
+    --bs-body-bg: var(--ms-black);
+    --bs-body-color: var(--ms-on-dark-soft);
+    --bs-emphasis-color: var(--ms-on-dark);
+    --bs-secondary-color: var(--ms-on-dark-muted);
+
+    --bs-border-color: var(--ms-on-dark-line);
+    --bs-border-radius: 8px;
+
+    --bs-primary: var(--ms-blue);
+    --bs-primary-rgb: 70, 128, 255;
+    --bs-link-color: var(--ms-blue);
+    --bs-link-hover-color: var(--ms-blue);
 }
+
+/* ==========================================================================
+   3. The reset
+   ==========================================================================
+   The only element selectors in the whole project. Every line either removes
+   a browser default or sets something the entire app genuinely shares.
+*/
 
 /*
- * Layout-neutral on purpose.
- * This used to pin a fixed 1126px width and centre all text, which every page
- * then had to fight. Bootstrap's .container now handles page width, so #root
- * just fills the screen and lets each page decide how it looks.
+ * border-box means an element's width includes its own padding and border.
+ * Without it, adding padding makes a box wider than you asked for, which is
+ * what causes a two-column layout to suddenly wrap.
  */
-#root {
-  min-height: 100svh;
-  box-sizing: border-box;
-}
-
-p, h1, h2, h3, h4, td, th {
-    color: var(--custom-color);
-    font-family: var(--custom-font-family);
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
 body {
-  margin: 0;
+    margin: 0;
+    background: var(--ms-black);
 }
 
+/*
+ * Form controls do not inherit the page font on their own - browsers give
+ * them their own small system font. This is the one thing every page wants.
+ * Note it sets no colours: what a button looks like is the page's business.
+ */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+#root {
+    min-height: 100svh;
+}
+
+/*
+ * Headings. Every restyled page overrides these with its own class, which is
+ * why they can stay this large - they are the size the not-yet-restyled user
+ * pages are built around.
+ */
 h1,
 h2 {
-  font-family: var(--heading);
-  font-weight: 500;
+    font-weight: 500;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+    font-size: 56px;
+    letter-spacing: -1.68px;
+    margin: 32px 0;
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+    font-size: 24px;
+    line-height: 1.18;
+    letter-spacing: -0.24px;
+    margin: 0 0 8px;
 }
+
+@media (max-width: 1024px) {
+    h1 { font-size: 36px; margin: 20px 0; }
+    h2 { font-size: 20px; }
+}
+
 p {
-  margin: 0;
+    margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* ==========================================================================
+   4. The account banner
+   ==========================================================================
+   Rendered by main.tsx above the router, so it appears on every page. It is
+   app chrome rather than a page of its own, which is why it lives here.
+
+   Every class is prefixed account-banner-, so none of it can reach anything
+   else - the prefix is doing the same job a page stylesheet does.
+*/
+
+.account-banner {
+    padding: 10px 16px;
+    text-align: center;
+    color: var(--ms-on-dark);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.account-banner-email {
+    font-size: 15px;
+}
+
+.account-banner-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.account-banner-btn {
+    padding: 8px 16px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background: none;
+    color: var(--ms-on-dark);
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.account-banner-btn:hover {
+    background: var(--ms-panel);
+    border-color: var(--ms-on-dark-muted);
 }

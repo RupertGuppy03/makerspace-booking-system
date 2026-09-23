@@ -5,13 +5,13 @@
  *
  * Figures arrive from /api/management/metrics. Where a metric has no data yet
  * the card says so rather than drawing a chart of zeroes.
+ *
+ * Three of the cards below are shared with the admin dashboard, so they live
+ * in their own files and are dropped in here as one line each.
  */
 
 import { useState } from 'react';
-import {
-    BarChart, Bar, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useOutletContext } from 'react-router-dom';
 import type { DashboardMetricsState } from '../../pages/Management/useDashboardMetrics';
 import ManagementMetricCard from './ManagementMetricCard';
@@ -19,10 +19,10 @@ import ManagementStatCard from './ManagementStatCard';
 import ManagementTimeRange from './ManagementTimeRange';
 import type { TimeRange } from './ManagementTimeRange';
 import ManagementRankedList from './ManagementRankedList';
-import {
-    CHART_COLOURS, CATEGORY_COLOURS, AXIS, CHART_MARGIN, BAR_CURSOR, utilisationColour,
-    formatPercent, utilisationTooltip, moneyTooltip,
-} from './managementChartTheme';
+import ManagementUtilisationCard from './ManagementUtilisationCard';
+import ManagementDemandCard from './ManagementDemandCard';
+import ManagementDamageCard from './ManagementDamageCard';
+import { CHART_COLOURS, CATEGORY_COLOURS, formatPercent, moneyTooltip } from './managementChartTheme';
 
 function ManagementToolSection() {
     /*
@@ -75,11 +75,6 @@ function ManagementToolSection() {
     const mostBooked = demandMetrics.reduce<typeof demandMetrics[number] | null>(
         (best, current) => (best === null || current.requestCount > best.requestCount ? current : best),
         null
-    );
-
-    // Biggest first, so the bars read as a ranking rather than a random order.
-    const utilisationRanked = [...utilisationMetrics].sort(
-        (a, b) => b.utilisationRate - a.utilisationRate
     );
 
     return (
@@ -162,87 +157,33 @@ function ManagementToolSection() {
                 </div>
 
                 <div className="col-lg-6">
-                    <ManagementMetricCard
-                        title="Utilisation"
-                        definition="Share of days in the period each tool was booked out. Red means booked more than 80% of the time, which suggests a second unit is worth buying. Green under 60% suggests one is sitting idle."
+                    <ManagementUtilisationCard
+                        metrics={metrics}
                         loading={loading}
                         error={error}
-                        isEmpty={utilisationRanked.length === 0}
                         height={280}
-                    >
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart layout="vertical" data={utilisationRanked} margin={CHART_MARGIN}>
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                                <XAxis type="number" domain={[0, 100]} unit="%" {...AXIS} />
-                                <YAxis type="category" dataKey="toolName" width={130} {...AXIS} />
-                                <Tooltip cursor={BAR_CURSOR} formatter={utilisationTooltip} />
-                                <Bar dataKey="utilisationRate" name="Utilisation" radius={4} barSize={20}>
-                                    {/*
-                                      * Cell colours each bar on its own, so the colour can
-                                      * carry the warning rather than just decorate.
-                                      */}
-                                    {utilisationRanked.map((tool) => (
-                                        <Cell key={tool.toolId} fill={utilisationColour(tool.utilisationRate)} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </ManagementMetricCard>
+                    />
                 </div>
             </div>
 
             {/* ---------- demand and damage ---------- */}
             <div className="row g-4">
                 <div className="col-lg-6">
-                    <ManagementMetricCard
-                        title="Most requested"
-                        definition="Number of bookings placed per tool, including bookings later cancelled."
+                    <ManagementDemandCard
+                        metrics={metrics}
                         loading={loading}
                         error={error}
-                        isEmpty={demandMetrics.length === 0}
                         height={220}
-                    >
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={demandMetrics} margin={CHART_MARGIN}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="toolName" {...AXIS} angle={-35} textAnchor="end" height={70} />
-                                <YAxis allowDecimals={false} {...AXIS} />
-                                <Tooltip cursor={BAR_CURSOR} />
-                                <Bar
-                                    dataKey="requestCount"
-                                    name="Bookings"
-                                    fill={CHART_COLOURS.blue}
-                                    radius={4}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </ManagementMetricCard>
+                    />
                 </div>
 
                 <div className="col-lg-6">
-                    <ManagementMetricCard
-                        title="Damage incidents"
-                        definition="Logged damage reports per tool. A tool appearing repeatedly may need its induction reviewed."
+                    <ManagementDamageCard
+                        metrics={metrics}
                         loading={loading}
                         error={error}
-                        isEmpty={damageMetrics.length === 0}
                         height={220}
-                    >
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={damageMetrics} margin={CHART_MARGIN}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="toolName" {...AXIS} angle={-35} textAnchor="end" height={70} />
-                                <YAxis allowDecimals={false} {...AXIS} />
-                                <Tooltip cursor={BAR_CURSOR} />
-                                <Bar
-                                    dataKey="damageCount"
-                                    name="Incidents"
-                                    fill={CHART_COLOURS.rose}
-                                    radius={4}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </ManagementMetricCard>
+                    />
                 </div>
             </div>
         </div>

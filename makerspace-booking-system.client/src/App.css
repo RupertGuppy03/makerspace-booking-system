@@ -1,9 +1,187 @@
-/*
+﻿/*
  * #root was declared here a second time, fighting the one in index.css.
  * Removed - page width is Bootstrap's .container job now.
  */
 
-th, td {
-    padding-left: 1rem;
-    padding-right: 1rem;
+/*
+ * ---------------------------------------------------------------------------
+ * The home page at "/" - the menu of links to the other pages.
+ *
+ * Every rule below is scoped under a class starting with .home- so none of it
+ * can reach another person's page. The colours are the same ones the login
+ * page and the manager dashboard use, so the app looks like one app.
+ * ---------------------------------------------------------------------------
+ */
+
+/*
+ * UserPage.css sets #root to a 1280px box with 2rem of padding, and that
+ * applies to every page in the app, not just the user page. Here it would stop
+ * the card sitting dead centre of the window.
+ *
+ * :has() means "only when". This rule applies to #root only when there is a
+ * .home-shell somewhere inside it, so the home page gets a plain full-size
+ * area and no other page is affected. auth.css and ManagementPage.css already
+ * do the same thing, so this is a trick the project uses elsewhere.
+ */
+#root:has(.home-shell) {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- the black page the card sits on ---------- */
+
+.home-shell {
+
+    /* Fill the window and put the card in the middle of it, both ways. */
+    min-height: 50vh;
+    display: flex;
+    align-items: top;
+    justify-content: center;
+    padding: 24px;
+    background: var(--ms-black);
+    color: var(--ms-on-dark);
+    /* UserPage.css centres all text through #root. The card reads better left. */
+    text-align: left;
+}
+
+/* ---------- the bluey grey card everything lives in ---------- */
+
+.home-card {
+    width: 100%;
+    /* Grows with the window up to this width, then stops. Wider than the login
+       card because it holds four tiles side by side rather than a form. */
+    max-width: 620px;
+    background: var(--ms-panel);
+    border: 1px solid var(--ms-on-dark-line);
+    border-radius: 14px;
+    padding: 32px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- brand, the same mark as the login page ---------- */
+
+.home-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 26px;
+}
+
+.home-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--ms-blue);
+    color: #fff;
+    font-weight: 700;
+    /* Centres the letter inside the square. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-brand-name {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* ---------- heading ---------- */
+
+/*
+ * index.css sets every h1 to 56px, which is far too big here. A class beats a
+ * plain element selector, so this wins without editing that shared file.
+ */
+.home-title {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    margin: 0 0 4px;
+}
+
+.home-sub {
+    font-size: 13px;
+    color: var(--ms-on-dark-muted);
+    margin: 0 0 24px;
+}
+
+/* ---------- the four tiles ---------- */
+
+/*
+ * Two equal columns with a gap between them, which wraps to one column on a
+ * phone. CSS Grid rather than Bootstrap's row/col, because four equal tiles is
+ * simpler to read this way.
+ */
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 575px) {
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/*
+ * A browser's own default button has a grey face, a bevelled border and centres
+ * its label, so the lines below strip those off and paint the tile instead.
+ */
+.home-link {
+    /* Icon on the left, the two lines of text beside it. */
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    /* Fills its grid cell, so all four tiles stay the same height. */
+    height: 100%;
+    text-align: left;
+    border: 0;
+    border-radius: 10px;
+    background: var(--ms-tile);
+    color: var(--ms-ink);
+    padding: 15px 16px;
+    cursor: pointer;
+    /* Fades and lifts on hover instead of snapping. */
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-link:hover {
+    background: var(--ms-card);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+}
+
+.home-link-icon {
+    /* Stops the square being squashed when the text beside it is long. */
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(70, 128, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-link-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--ms-blue);
+}
+
+.home-link-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.home-link-desc {
+    display: block;
+    font-size: 11.5px;
+    color: var(--ms-dim);
+    line-height: 1.4;
+    margin-top: 2px;
 }
