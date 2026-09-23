@@ -1,11 +1,20 @@
-import { useEffect, useState } from "react";
-import {
-    Dialog, DialogTitle, DialogContent, DialogActions,
-    Button, Stack, TextField, FormControl, InputLabel, Select, MenuItem
-} from '@mui/material';
+/**
+ * The dialog that opens when Edit is clicked on a row in the inventory.
+ *
+ * Takes a tool, lets its five fields be changed, and hands the changes back to
+ * whoever opened it. It does not save anything itself.
+ *
+ * Props:
+ * - tool      the tool being edited, or null when nothing is
+ * - open      whether the dialog should be on screen
+ * - onClose   called when Cancel, the backdrop or a finished save closes it
+ * - onSave    called with the tool's id and the changed fields
+ * - onDelete  called with the tool's id, after the user confirms
+ */
+
+import { useEffect, useState, useRef } from 'react';
 import type { Tool } from '../../types/tool';
 import type { ToolUpdate } from '../../pages/Admin/useAdminTools';
-import { useRef } from 'react';
 
 type Props = {
     tool: Tool | null;
@@ -29,6 +38,8 @@ function AdminEditToolModal({ tool, open, onClose, onSave, onDelete }: Props) {
     const [saving, setSaving] = useState<boolean>(false);
     const dateInputRef = useRef<HTMLInputElement>(null);
 
+    // Runs whenever a different tool is handed in, and copies its values into
+    // the boxes so the dialog opens showing what is already there.
     useEffect(() => {
         if (tool) {
             setName(tool.name);
@@ -39,7 +50,11 @@ function AdminEditToolModal({ tool, open, onClose, onSave, onDelete }: Props) {
         }
     }, [tool]);
 
+    // Returning null is React for "draw nothing at all here". Both checks sit
+    // below the hooks above, because React needs every hook to run in the same
+    // order on every redraw.
     if (!tool) return null;
+    if (!open) return null;
 
     async function handleSave() {
         if (!tool) return;
@@ -64,72 +79,104 @@ function AdminEditToolModal({ tool, open, onClose, onSave, onDelete }: Props) {
     }
 
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-            <DialogTitle>Edit tool</DialogTitle>
-            <DialogContent>
-                <Stack spacing={2} sx={{ mt: 1 }}>
-                    <TextField
-                        label="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        fullWidth
-                    />
+        <div
+            className="admin-modal-backdrop"
+            /*
+             * Closes when the dark area around the dialog is clicked, which is
+             * what the old MUI dialog did. The check makes sure a click inside
+             * the dialog does not count - without it, clicking any field would
+             * close the whole thing.
+             */
+            onClick={(e) => {
+                if (e.target === e.currentTarget) onClose();
+            }}
+        >
+            <div className="admin-modal" role="dialog" aria-modal="true" aria-label="Edit tool">
+                <div className="admin-modal-head">
+                    <h2 className="admin-modal-title">Edit tool</h2>
+                </div>
 
-                    <FormControl fullWidth>
-                        <InputLabel id="status-label">Status</InputLabel>
-                        <Select
-                            labelId="status-label"
-                            label="Status"
+                <div className="admin-modal-body">
+                    <div>
+                        <label className="admin-field-label" htmlFor="edit-name">Name</label>
+                        <input
+                            id="edit-name"
+                            className="admin-input"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="admin-field-label" htmlFor="edit-status">Status</label>
+                        <select
+                            id="edit-status"
+                            className="admin-input"
                             value={isTakenOut ? 'true' : 'false'}
                             onChange={(e) => setIsTakenOut(e.target.value === 'true')}
                         >
-                            <MenuItem value="false">Available</MenuItem>
-                            <MenuItem value="true">Taken out</MenuItem>
-                        </Select>
-                    </FormControl>
+                            <option value="false">Available</option>
+                            <option value="true">Taken out</option>
+                        </select>
+                    </div>
 
-                    <TextField
-                        label="Maintenance period (days)"
-                        type="number"
-                        value={maintenancePeriod}
-                        onChange={(e) => setMaintenancePeriod(Number(e.target.value))}
-                        fullWidth
-                    />
+                    <div>
+                        <label className="admin-field-label" htmlFor="edit-period">
+                            Maintenance period (days)
+                        </label>
+                        <input
+                            id="edit-period"
+                            className="admin-input"
+                            type="number"
+                            value={maintenancePeriod}
+                            onChange={(e) => setMaintenancePeriod(Number(e.target.value))}
+                        />
+                    </div>
 
-                    <TextField
-                        label="Last maintained"
-                        type="date"
-                        value={lastMaintained}
-                        onChange={(e) => setLastMaintained(e.target.value)}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                        fullWidth
-                        inputRef={dateInputRef}
-                        onClick={() => dateInputRef.current}
+                    <div>
+                        <label className="admin-field-label" htmlFor="edit-maintained">Last maintained</label>
+                        <input
+                            id="edit-maintained"
+                            className="admin-input"
+                            type="date"
+                            ref={dateInputRef}
+                            value={lastMaintained}
+                            onChange={(e) => setLastMaintained(e.target.value)}
+                        />
+                    </div>
 
-                    />
+                    <div>
+                        <label className="admin-field-label" htmlFor="edit-rate">Daily rate</label>
+                        <input
+                            id="edit-rate"
+                            className="admin-input"
+                            type="number"
+                            value={dailyRate}
+                            onChange={(e) => setDailyRate(Number(e.target.value))}
+                        />
+                    </div>
+                </div>
 
-                    <TextField
-                        label="Daily rate"
-                        type="number"
-                        value={dailyRate}
-                        onChange={(e) => setDailyRate(Number(e.target.value))}
-                        fullWidth
-                    />
-                </Stack>
-            </DialogContent>
-
-            <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
-                <Button color="error" onClick={handleDelete}>
-                    Delete tool
-                </Button>
-                <Stack direction="row" spacing={1}>
-                    <Button onClick={onClose}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSave} disabled={saving}>
-                        {saving ? 'Saving…' : 'Save'}
-                    </Button>
-                </Stack>
-            </DialogActions>
-        </Dialog>
+                <div className="admin-modal-foot">
+                    <button type="button" className="admin-btn admin-btn--danger" onClick={handleDelete}>
+                        Delete tool
+                    </button>
+                    <div className="admin-modal-actions">
+                        <button type="button" className="admin-btn admin-btn--ghost" onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            className="admin-btn admin-btn--primary"
+                            onClick={handleSave}
+                            disabled={saving}
+                        >
+                            {saving ? 'Saving...' : 'Save'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 

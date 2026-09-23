@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import ManagementChartPlaceholder from './ManagementChartPlaceholder';
+import './ManagementDashboard.css';
 
 type Props = {
     title: string;

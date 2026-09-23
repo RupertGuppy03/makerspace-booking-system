@@ -1,115 +1,112 @@
-import {
-    Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, Button,
-    TextField
-} from '@mui/material';
-import { useAdminTools } from "../../pages/Admin/useAdminTools";
-import { isOverdue } from './adminToolUtils';
-import { useState } from 'react';
-import type { Tool } from "../../../src/types/tool";
-import AdminEditToolModal from './AdminEditToolModal';
+/**
+ * Inventory: every tool in the makerspace, with a search box and an Edit
+ * button on each row that opens the edit dialog.
+ *
+ * Same columns, same search, same buttons as before - this is the plain HTML
+ * version of what used to be a MUI table.
+ */
 
+import { useState } from 'react';
+import { useAdminTools } from '../../pages/Admin/useAdminTools';
+import { isOverdue } from './adminToolUtils';
+import type { Tool } from '../../types/tool';
+import AdminEditToolModal from './AdminEditToolModal';
 
 function AdminInventorySection() {
     const { tools, loading, error, removeTool, updateTool } = useAdminTools();
+
+    // Which tool the dialog is editing. null means the dialog is closed.
     const [editingTool, setEditingTool] = useState<Tool | null>(null);
+
+    // What has been typed in the search box.
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Both sides are lowercased so searching is not fussy about capitals.
     const filteredTools = (tools ?? []).filter((tool) =>
         tool.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <section>
-            <h2>Inventory</h2>
-            <p>Every tool currently in the makerspace.</p>
+            <p className="admin-lede">Every tool currently in the makerspace.</p>
 
             {error && <p className="admin-error-note">{error}</p>}
 
-            <TextField 
-                size="small"
-                placeholder="Search tools by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="admin-search-bar"
-                fullWidth
+            <div className="row g-3 mb-3">
+                <div className="col-12">
+                    <input
+                        type="search"
+                        className="admin-input"
+                        placeholder="Search tools by name..."
+                        aria-label="Search tools by name"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </div>
 
-                // -------- Can remove this block when styling is finalized --------
-                 sx={{
-                    '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                        },
-                        '&:hover fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.8)',
-                        },
-                        '&.Mui-focused fieldset': {
-                            borderColor: '#fff',
-                        },
-                    },
-                    '& .MuiInputBase-input': {
-                        color: '#fff',
-                    },
-                    '& .MuiInputBase-input::placeholder': {
-                        color: '#fff',
-                        opacity: 1,
-                    },
-                 }}
-                 // --------------------------------------------------------------------
-
-            />
-
-            <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Maintenance period</TableCell>
-                            <TableCell>Last maintained</TableCell>
-                            <TableCell>Daily Rate</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
+            <div className="admin-table-card">
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Maintenance period</th>
+                            <th>Last maintained</th>
+                            <th className="admin-num">Daily rate</th>
+                            {/* The Edit button's column. No heading to give it. */}
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {loading && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
+                            <tr>
+                                <td colSpan={6} className="admin-table-empty">
                                     {searchQuery ? `No Tools Match "${searchQuery}"` : 'No tools found.'}
-                                </TableCell>
-                            </TableRow>
+                                </td>
+                            </tr>
                         )}
 
                         {!loading && filteredTools.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={4}>No tools found.</TableCell>
-                            </TableRow>
+                            <tr>
+                                <td colSpan={6} className="admin-table-empty">No tools found.</td>
+                            </tr>
                         )}
 
                         {filteredTools.map((tool) => (
-                            <TableRow key={tool.id}>
-                                <TableCell>{tool.name}</TableCell>
-                                <TableCell>
-                                    {tool.isTakenOut ? 'Taken out' : 'Available'}
-                                    {isOverdue(tool) && ' · Overdue'}
-                                </TableCell>
-                                <TableCell>{tool.maintenancePeriod} days</TableCell>
-                                <TableCell>
-                                    {new Date(tool.lastMaintained).toDateString()}
-                                </TableCell>
-                                <TableCell>${tool.dailyRate.toFixed(2)}</TableCell>
-                                <TableCell>
-                                    <Button
-                                        variant="outlined"
-                                        className="admin-edit-button"
+                            <tr key={tool.id}>
+                                <td>{tool.name}</td>
+                                <td>
+                                    {/* Pills instead of plain words, so the state
+                                        of a tool reads at a glance. */}
+                                    <span className="admin-pill-group">
+                                        {tool.isTakenOut ? (
+                                            <span className="admin-pill admin-pill--blue">Taken out</span>
+                                        ) : (
+                                            <span className="admin-pill admin-pill--green">Available</span>
+                                        )}
+                                        {isOverdue(tool) && (
+                                            <span className="admin-pill admin-pill--amber">Overdue</span>
+                                        )}
+                                    </span>
+                                </td>
+                                <td>{tool.maintenancePeriod} days</td>
+                                <td>{new Date(tool.lastMaintained).toDateString()}</td>
+                                <td className="admin-num">${tool.dailyRate.toFixed(2)}</td>
+                                <td className="admin-num">
+                                    <button
+                                        type="button"
+                                        className="admin-btn admin-btn--ghost"
                                         onClick={() => setEditingTool(tool)}
                                     >
                                         Edit
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
+                                    </button>
+                                </td>
+                            </tr>
                         ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                    </tbody>
+                </table>
+            </div>
 
             <AdminEditToolModal
                 open={editingTool !== null}
@@ -118,7 +115,6 @@ function AdminInventorySection() {
                 onDelete={removeTool}
                 onSave={updateTool}
             />
-
         </section>
     );
 }

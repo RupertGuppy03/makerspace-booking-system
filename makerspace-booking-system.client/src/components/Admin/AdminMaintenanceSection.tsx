@@ -1,10 +1,14 @@
-import {
-    Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, Button,
-    TextField,
-} from '@mui/material';
-import { useAdminTools } from "../../pages/Admin/useAdminTools";
-import { isOverdue } from "./adminToolUtils";
+/**
+ * Maintenance: the tools that have passed their maintenance period, with a
+ * button on each row to mark it serviced.
+ *
+ * Same search, same columns, same button as before - this is the plain HTML
+ * version of what used to be a MUI table.
+ */
+
 import { useState } from 'react';
+import { useAdminTools } from '../../pages/Admin/useAdminTools';
+import { isOverdue } from './adminToolUtils';
 
 function AdminMaintenanceSection() {
     const { tools, loading, markMaintained } = useAdminTools();
@@ -17,87 +21,67 @@ function AdminMaintenanceSection() {
 
     return (
         <section>
-            <h2>Maintenance</h2>
-            <p>Tools that have passed their maintenance period and need servicing.</p>
+            <p className="admin-lede">
+                Tools that have passed their maintenance period and need servicing.
+            </p>
 
-            <TextField 
-                size="small"
-                placeholder="Search tools by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="admin-search-bar"
-                fullWidth
-                   
+            <div className="row g-3 mb-3">
+                <div className="col-12">
+                    <input
+                        type="search"
+                        className="admin-input"
+                        placeholder="Search tools by name..."
+                        aria-label="Search tools by name"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </div>
 
-                // -------- Can remove this block when styling is finalized --------
-                 sx={{
-                    '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                        },
-                        '&:hover fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.8)',
-                        },
-                        '&.Mui-focused fieldset': {
-                            borderColor: '#fff',
-                        },
-                    },
-                    '& .MuiInputBase-input': {
-                        color: '#fff',
-                    },
-                    '& .MuiInputBase-input::placeholder': {
-                        color: '#fff',
-                        opacity: 1,
-                    },
-                 }}
-
-                //--------------------------------------------------------------------
-            />
-
-            <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Last maintained</TableCell>
-                            <TableCell>Maintenance period</TableCell>
-                            <TableCell>Action</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
+            <div className="admin-table-card">
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Last maintained</th>
+                            <th>Maintenance period</th>
+                            <th className="admin-num">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {loading && (
-                            <TableRow>
-                                <TableCell colSpan={4}>Loading tools…</TableCell>
-                            </TableRow>
+                            <tr>
+                                <td colSpan={4} className="admin-table-empty">Loading tools...</td>
+                            </tr>
                         )}
 
                         {!loading && filteredTools.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={4}>
+                            <tr>
+                                <td colSpan={4} className="admin-table-empty">
                                     {searchQuery ? `No tools match "${searchQuery}"` : 'No tools found.'}
-                                </TableCell>
-                            </TableRow>
+                                </td>
+                            </tr>
                         )}
 
                         {filteredTools.map((tool) => (
-                            <TableRow key={tool.id}>
-                                <TableCell>{tool.name}</TableCell>
-                                <TableCell>{new Date(tool.lastMaintained).toDateString()}</TableCell>
-                                <TableCell>{tool.maintenancePeriod} days</TableCell>
-                                <TableCell>
-                                    <Button
-                                        size="small"
-                                        variant="outlined"
+                            <tr key={tool.id}>
+                                <td>{tool.name}</td>
+                                <td>{new Date(tool.lastMaintained).toDateString()}</td>
+                                <td>{tool.maintenancePeriod} days</td>
+                                <td className="admin-num">
+                                    <button
+                                        type="button"
+                                        className="admin-btn admin-btn--ghost"
                                         onClick={() => markMaintained(tool.id)}
                                     >
                                         Mark maintained
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
+                                    </button>
+                                </td>
+                            </tr>
                         ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                    </tbody>
+                </table>
+            </div>
         </section>
     );
 }
