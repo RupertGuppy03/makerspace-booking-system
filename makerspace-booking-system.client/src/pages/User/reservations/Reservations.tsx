@@ -3,6 +3,7 @@ import type { Reservation } from "../../../types/reservation";
 import { useAuth } from '../../../lib/authProvider';
 import ReservationTable from '../../../components/ReservationTable'
 import AccessDenied from '../../AccessDenied/AccessDenied';
+import UserSidebar from '../../../components/User/UserSidebar';
 
 type Tab = 'upcoming' | 'current' | 'past' | 'all';
 
@@ -38,7 +39,9 @@ export default function Reservations() {
 
     const table =
         <div>
-            <nav className="management-tabs" role="tablist" aria-label="Reservation Table Tabs">
+            {/* The Upcoming / Current / Past / All tabs. The blue one is the
+                tab that is currently selected. */}
+            <nav className="user-tabs" role="tablist" aria-label="Reservation Table Tabs">
                 {TABS.map((tab) => (
                     <button
                         key={tab.id}
@@ -47,8 +50,8 @@ export default function Reservations() {
                         aria-selected={activeTab === tab.id}
                         className={
                             activeTab === tab.id
-                                ? 'management-tab management-tab--active'
-                                : 'management-tab'
+                                ? 'user-tab user-tab--active'
+                                : 'user-tab'
                         }
                         onClick={() => setActiveTab(tab.id)}
                     >
@@ -61,15 +64,28 @@ export default function Reservations() {
 
 
     return (
-        <div>
-            <h1 id="tableLabel">Your Reservations</h1>
-            <p>This page shows all the reservations you have made and their status</p>
-            <br />
-            <div>
-                {user === null
-                    ? < p > <em>You must be logged in to see your reservations</em></p>
-                    : table}
+        /*
+         * The same frame as User Tool View: the dark rail on the left, the
+         * pale area on the right. Everything in user.css only works inside
+         * .user-shell, so this outer div must stay.
+         */
+        <div className="user-shell">
+            <UserSidebar activeId="reservations" />
 
+            <div className="user-main">
+                <header>
+                    <h1 id="tableLabel" className="user-title">My reservations</h1>
+                    <p className="user-breadcrumb">
+                        Home / <span>My reservations</span>
+                    </p>
+                </header>
+
+                <main>
+                    <p className="user-lede">Every reservation you have made, and where it is up to.</p>
+                    {user === null
+                        ? <p className="user-info-note">You must be logged in to see your reservations.</p>
+                        : table}
+                </main>
             </div>
         </div>
     );

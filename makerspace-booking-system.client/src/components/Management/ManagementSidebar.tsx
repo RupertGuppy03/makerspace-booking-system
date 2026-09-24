@@ -11,7 +11,7 @@
  * - items      the sections to list, in order
  * - activeId   the id of the section currently on screen, so it can be highlighted
  * - onSelect   called with an id when a button item is clicked
- * - icon       the picture to draw beside every link
+ * - icon       the picture to draw beside any link that has no icon of its own
  * - pageLinks  extra links out to other pages, drawn underneath
  */
 
@@ -25,11 +25,16 @@ import { Link, NavLink } from 'react-router-dom';
  * changes the address bar, so its items carry a `to` and become real links.
  * The admin page keeps its open section in a variable instead, so its items
  * have no `to` and become buttons that call onSelect. Both look identical.
+ *
+ * The optional `icon` lets one item have its own picture. The user pages use
+ * this so each link has a different icon. If an item has no icon, the rail's
+ * shared `icon` prop is used instead, so the manager and admin rails are unchanged.
  */
 export type SidebarItem = {
     id: string;
     label: string;
     to?: string;
+    icon?: ReactNode;
 };
 
 type Props = {
@@ -50,10 +55,11 @@ function ManagementSidebar({ heading, items, activeId, onSelect, icon, pageLinks
 
     return (
         <aside className="management-sidebar">
-            <div className="management-sidebar-brand">
+            {/* The logo is a link back to the home page, on every page that uses this rail. */}
+            <Link to="/" className="management-sidebar-brand" aria-label="Makerspace home">
                 <span className="management-sidebar-mark">M</span>
                 <span className="management-sidebar-name">Makerspace</span>
-            </div>
+            </Link>
 
             <p className="management-sidebar-heading">{heading}</p>
 
@@ -71,12 +77,12 @@ function ManagementSidebar({ heading, items, activeId, onSelect, icon, pageLinks
                              */
                             onClick={() => onSelect?.(item.id)}
                         >
-                            {icon}
+                            {item.icon ?? icon}
                             {item.label}
                         </button>
                     ) : (
                         <NavLink key={item.id} to={item.to} className={classFor(item)}>
-                            {icon}
+                            {item.icon ?? icon}
                             {item.label}
                         </NavLink>
                     )

@@ -14,7 +14,7 @@ import './AdminPage.css';
 import { useAuth } from '../../lib/authProvider';
 
 import ManagementSidebar from '../../components/Management/ManagementSidebar';
-import { ManagementGridIcon } from '../../components/Management/ManagementIcons';
+import { ManagementGridIcon } from '../../assets/Icons';
 import AdminDashboardSection from '../../components/Admin/AdminDashboardSection';
 import AdminInventorySection from '../../components/Admin/AdminInventorySection';
 import AdminAddToolSection from '../../components/Admin/AdminAddToolSection';
