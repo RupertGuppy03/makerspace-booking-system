@@ -7,6 +7,8 @@ import 'rsuite/dist/rsuite.min.css'
 import './index.css'
 // The look shared by the manager dashboard and the admin page.
 import './dashboard.css'
+// The look shared by the three user pages (tool view, reservations, reserve).
+import './user.css'
 import App from './App.tsx'
 import UserPage from "./pages/User/UserPage.tsx";
 import Reservations from "./pages/User/reservations/Reservations.tsx";

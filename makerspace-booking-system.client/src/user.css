@@ -1,0 +1,354 @@
+/*
+ * The shared look of the user pages: User Tool View (/user), My reservations
+ * (/user/reservations) and Reserve (/user/reserve).
+ *
+ * This is a root-level stylesheet because all three pages use it, the same
+ * reason dashboard.css lives here. It mirrors AdminPage.css: a dark rail on a
+ * dark frame, with a pale area beside it that the tables are read against.
+ *
+ * Every class starts with user- so none of it can reach anyone else's page.
+ * The sidebar has no rules here - it is the shared one from dashboard.css.
+ *
+ * Colours come from the --ms-* palette on :root in index.css.
+ *
+ * Loaded once from main.tsx.
+ */
+
+/*
+ * The dark frame the page sits on.
+ *
+ * :has() reads as "only when" - this applies to #root only when a .user-shell
+ * is somewhere inside it, so no other page is affected.
+ */
+#root:has(.user-shell) {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: var(--ms-black);
+}
+
+.user-shell {
+    display: flex;
+    /* stretch, so the rail and the content column are always the same height. */
+    align-items: stretch;
+    margin: 8px;
+    min-height: calc(100vh - 16px);
+    text-align: left;
+    color: var(--ms-ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.user-main {
+    /* flex: 1 takes whatever width the rail leaves.
+       min-width: 0 stops a wide table forcing the column to overflow. */
+    flex: 1;
+    min-width: 0;
+    background: var(--ms-canvas);
+    color: var(--ms-ink);
+    padding: 24px 28px 56px;
+    /* The card's right-hand corners. The rail rounds the left-hand pair. */
+    border-radius: 0 14px 14px 0;
+}
+
+/* ---------- page heading ---------- */
+
+.user-title {
+    /* index.css sets every h1 to a large size. A class beats a plain element
+       selector, so this wins without editing the shared file. */
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    color: var(--ms-ink);
+    margin: 0 0 3px;
+}
+
+.user-breadcrumb {
+    font-size: 12.5px;
+    color: var(--ms-muted);
+    margin: 0 0 20px;
+}
+
+.user-breadcrumb span {
+    color: var(--ms-ink);
+    font-weight: 500;
+}
+
+/* The sentence under a heading explaining what the page is for. */
+.user-lede {
+    font-size: 13px;
+    color: var(--ms-muted);
+    margin: 0 0 18px;
+}
+
+/* ---------- notes ---------- */
+
+/* The blue "you must log in to reserve" message shown to signed-out visitors. */
+.user-info-note {
+    font-size: 12.5px;
+    color: #2f5fd0;
+    background: #e9f0ff;
+    border-radius: 8px;
+    padding: 10px 13px;
+    margin: 0 0 14px;
+}
+
+/* ---------- fields ---------- */
+
+.user-field-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ms-muted);
+    margin: 0 0 5px;
+}
+
+.user-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--ms-card);
+    border: 1px solid var(--ms-line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    margin: 0 0 16px;
+    font-size: 13.5px;
+    color: var(--ms-ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.user-input::placeholder {
+    color: var(--ms-dim);
+}
+
+.user-input:focus {
+    outline: none;
+    border-color: var(--ms-blue);
+    box-shadow: 0 0 0 3px rgba(70, 128, 255, 0.14);
+}
+
+/* ---------- buttons ---------- */
+
+/* A browser's default button has a grey face and a bevel; these paint over it. */
+.user-btn {
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-transform: none;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.user-btn--primary {
+    background: var(--ms-blue);
+    border: 1px solid var(--ms-blue);
+    color: #fff;
+}
+
+.user-btn--primary:hover {
+    background: #3a70e8;
+    border-color: #3a70e8;
+    box-shadow: 0 2px 8px rgba(70, 128, 255, 0.3);
+}
+
+.user-btn--danger {
+    background: var(--ms-card);
+    border: 1px solid #f3cdd4;
+    color: #b23b51;
+}
+
+.user-btn--danger:hover {
+    background: #fdeaee;
+}
+
+/* Greyed out, e.g. Cancel on a booking that has already been collected. The
+   :hover part stops a disabled button lighting up when the mouse is over it. */
+.user-btn:disabled,
+.user-btn:disabled:hover {
+    opacity: 0.55;
+    background: var(--ms-card);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* ---------- tables ---------- */
+
+/* The white card a table sits in. overflow-x: auto lets a wide table scroll
+   sideways inside the card on a narrow screen instead of breaking the page. */
+.user-table-card {
+    background: var(--ms-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    overflow-x: auto;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ms-muted);
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--ms-line);
+    white-space: nowrap;
+}
+
+.user-table td {
+    font-size: 13px;
+    color: var(--ms-ink);
+    padding: 13px 18px;
+    border-bottom: 1px solid #f2f5f9;
+}
+
+.user-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.user-table tbody tr:hover {
+    background: #fafbfd;
+}
+
+/* The single full-width cell used for "loading" and "nothing found". */
+.user-table .user-table-empty {
+    text-align: center;
+    color: var(--ms-muted);
+    padding: 34px 18px;
+}
+
+/* Ids read better in a monospaced font at a smaller size. */
+.user-mono {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 12px;
+    color: var(--ms-muted);
+}
+
+/* Money and buttons sit on the right-hand edge of their column. */
+.user-table .user-num {
+    text-align: right;
+}
+
+/* ---------- status pills ---------- */
+
+/* Used instead of printing a raw status word or a true/false. */
+.user-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.user-pill--green { background: #e7f5ef; color: #1f7d5e; }
+.user-pill--amber { background: #fdf0e0; color: #a8661d; }
+.user-pill--blue  { background: #e9f0ff; color: #2f5fd0; }
+.user-pill--grey  { background: #eef1f5; color: #6b7789; }
+.user-pill--rose  { background: #fdeaee; color: #b23b51; }
+
+/* ---------- Upcoming / Current / Past / All tabs ---------- */
+
+/* The grey track the tab buttons sit in. */
+.user-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    background: #e4e9f0;
+    border-radius: 8px;
+    padding: 3px;
+    margin: 0 0 14px;
+}
+
+.user-tab {
+    border: 0;
+    background: transparent;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-transform: none;
+    padding: 5px 14px;
+    border-radius: 6px;
+    color: var(--ms-muted);
+    cursor: pointer;
+}
+
+.user-tab:hover {
+    color: var(--ms-ink);
+}
+
+/* The tab that is currently selected. */
+.user-tab--active,
+.user-tab--active:hover {
+    background: var(--ms-blue);
+    color: #fff;
+}
+
+/* ---------- reserve form ---------- */
+
+.user-form-card {
+    background: var(--ms-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+    padding: 22px 24px;
+    max-width: 460px;
+}
+
+/* The name of the tool being booked. */
+.user-form-tool {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ms-ink);
+    margin: 0 0 4px;
+}
+
+/* The booking rules, each with a small blue dot instead of a bullet. */
+.user-rules {
+    list-style: none;
+    margin: 14px 0 18px;
+    padding: 0;
+    font-size: 12.5px;
+    color: var(--ms-muted);
+}
+
+.user-rules li {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 6px;
+}
+
+.user-rules li::before {
+    content: "";
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: var(--ms-blue);
+}
+
+/* The date picker takes the full width of the card. */
+.user-form-card .rs-picker {
+    width: 100%;
+    margin: 0 0 16px;
+}
+
+.user-form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Below tablet width the rail stacks on top. */
+@media (max-width: 900px) {
+    .user-shell {
+        flex-direction: column;
+    }
+
+    .user-main {
+        padding: 18px 14px 40px;
+        width: 100%;
+        /* Stacked, so the main column now holds the bottom two corners. */
+        border-radius: 0 0 14px 14px;
+    }
+}

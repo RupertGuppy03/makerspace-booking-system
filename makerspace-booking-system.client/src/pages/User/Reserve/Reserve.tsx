@@ -7,6 +7,7 @@ import type { Reservation } from '../../../types/reservation';
 import type { Tool } from '../../../types/tool';
 import { useNavigate } from "react-router-dom";
 import AccessDenied from '../../AccessDenied/AccessDenied';
+import UserSidebar from '../../../components/User/UserSidebar';
 
 
 export default function Reserve() {
@@ -32,28 +33,52 @@ export default function Reserve() {
 
     const form =
         <form onSubmit={handleSubmitReservation}>
-            <label>
-                Start and End Dates:
+            <label className="user-field-label">
+                Start and end dates
                 <DateRangePicker value={dateRange} onChange={setDateRange}
                     shouldDisableDate={handleShouldDisableDate}
                 />
             </label>
-            <button type="submit">Create Reservation</button>
+            <div className="user-form-actions">
+                <button type="submit" className="user-btn user-btn--primary">Create reservation</button>
+            </div>
         </form>
 
 
     return (
-        <div>
-            <h1 id="tableLabel">Reserve Tool</h1>
-            {loading
-                ? <h4>Loading tool name...</h4>
-                : <h4>Create a reservation for tool: {tool?.name ?? "No tool found"}</h4>
-            }
-            <p>Reservations may be at most 5 days long.</p>
-            <p>Reservations may not overlap with any existing reservations.</p>
-            <br />
-            <div>
-                {form}
+        /*
+         * The same frame as User Tool View. Reserving belongs to the tools
+         * list, so that is the link lit up in the rail. Everything in user.css
+         * only works inside .user-shell, so this outer div must stay.
+         */
+        <div className="user-shell">
+            <UserSidebar activeId="tools" />
+
+            <div className="user-main">
+                <header>
+                    <h1 id="tableLabel" className="user-title">Reserve tool</h1>
+                    <p className="user-breadcrumb">
+                        Home / User Tool View / <span>Reserve</span>
+                    </p>
+                </header>
+
+                <main>
+                    <p className="user-lede">Pick the days you want the tool for.</p>
+
+                    {/* The white card holding the tool's name, the rules and the form. */}
+                    <div className="user-form-card">
+                        <p className="user-field-label">Tool</p>
+                        {loading
+                            ? <p className="user-form-tool">Loading tool name...</p>
+                            : <p className="user-form-tool">{tool?.name ?? "No tool found"}</p>
+                        }
+                        <ul className="user-rules">
+                            <li>Reservations may be at most 5 days long.</li>
+                            <li>Reservations may not overlap with any existing reservations.</li>
+                        </ul>
+                        {form}
+                    </div>
+                </main>
             </div>
         </div>
     );

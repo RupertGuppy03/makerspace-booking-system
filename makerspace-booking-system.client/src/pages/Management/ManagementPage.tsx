@@ -14,7 +14,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import './ManagementPage.css';
 import ManagementSidebar from '../../components/Management/ManagementSidebar';
-import { ManagementBarIcon } from '../../components/Management/ManagementIcons';
+import { ManagementBarIcon } from '../../assets/Icons';
 import { useDashboardMetrics } from './useDashboardMetrics';
 import { useAuth } from '../../lib/authProvider';
 import AccessDenied from '../AccessDenied/AccessDenied';

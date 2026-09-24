@@ -42,7 +42,12 @@ function App() {
                           */}
                         <span className="home-link-icon">
                             <svg viewBox="0 0 16 16" aria-hidden="true">
-                                <path d="M11 1a4 4 0 0 0-3.6 5.7L1.6 12.5a1.4 1.4 0 0 0 2 2l5.8-5.8A4 4 0 1 0 11 1Z" />
+                                {/* A hammer drawn upright, then tilted 45 degrees
+                                    around the middle of the square (8, 8). */}
+                                <g transform="rotate(45 8 8)">
+                                    <rect x="6.9" y="5.5" width="2.2" height="10.5" rx="1.1" />
+                                    <rect x="2.75" y="2" width="10.5" height="4.25" rx="1.1" />
+                                </g>
                             </svg>
                         </span>
                         <span>
