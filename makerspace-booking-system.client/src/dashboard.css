@@ -28,11 +28,31 @@
     border-radius: 14px 0 0 14px;
 }
 
+/* The logo is a link home. A link is blue and underlined by default, so
+   text-decoration: none takes the underline off. */
 .management-sidebar-brand {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 0 24px 28px;
+    text-decoration: none;
+}
+
+/*
+ * The rsuite date picker's stylesheet underlines every link in the app when
+ * it is hovered or clicked. Its rule is `a:hover`; this one is two classes'
+ * worth of specific, so it wins and the logo stays exactly as it is.
+ */
+.management-sidebar-brand:hover,
+.management-sidebar-brand:focus,
+.management-sidebar-brand:active {
+    text-decoration: none;
+}
+
+/* Keyboard focus: a blue ring round the logo, only for keyboard users. */
+.management-sidebar-brand:focus-visible {
+    outline: 2px solid var(--ms-blue);
+    outline-offset: -2px;
 }
 
 .management-sidebar-mark {
@@ -132,6 +152,19 @@
 .management-sidebar-link:hover {
     color: var(--ms-on-dark);
     background: rgba(255, 255, 255, 0.04);
+}
+
+/*
+ * The rsuite date picker's stylesheet underlines every link in the app when
+ * it is hovered or clicked. The admin rail uses buttons so it never showed,
+ * but the manager and user rails use links. Two classes' worth of specific
+ * beats rsuite's `a:hover`, so every rail item now just highlights, like admin.
+ * The "Admin page" / "User page" links underneath keep their underline.
+ */
+.management-sidebar-link:hover,
+.management-sidebar-link:focus,
+.management-sidebar-link:active {
+    text-decoration: none;
 }
 
 .management-sidebar-link--active {

@@ -55,10 +55,11 @@ function ManagementSidebar({ heading, items, activeId, onSelect, icon, pageLinks
 
     return (
         <aside className="management-sidebar">
-            <div className="management-sidebar-brand">
+            {/* The logo is a link back to the home page, on every page that uses this rail. */}
+            <Link to="/" className="management-sidebar-brand" aria-label="Makerspace home">
                 <span className="management-sidebar-mark">M</span>
                 <span className="management-sidebar-name">Makerspace</span>
-            </div>
+            </Link>
 
             <p className="management-sidebar-heading">{heading}</p>
 
