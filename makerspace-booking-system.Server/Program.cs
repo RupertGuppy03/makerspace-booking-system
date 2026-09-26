@@ -228,14 +228,71 @@ app.MapPatch("/api/reservation/{id}/cancel", async (int id, SupabaseDbContext db
     if (reservation is null) return Results.NotFound();
 
     reservation.Status = "cancelled";
-    //TODO have error happen if reservation is already cancelled, or in a state which it shouldnt be cancelled
-    
+
+    if (reservation.Status != "booked" && reservation.Status != "ready")
+    {
+        return Results.Problem($"Failed to mark reservation as cancelled. Cannot change status from {reservation.Status} to cancelled.");
+    }
+
     await db.SaveChangesAsync();
 
-    return Results.Ok("cancelled");
+    return Results.Ok("successfully set reservation to cancelled");
 
 
 });
+
+// --- Set reservation as "collected" when it is "ready"
+app.MapPatch("/api/reservation/{id}/collect", async (int id, SupabaseDbContext db) =>
+{
+    var reservation = await db.Reservations.FindAsync(id);
+    if (reservation is null) return Results.NotFound();
+
+    if (reservation.Status != "ready" && reservation.Status != "booked")
+    {
+        return Results.Problem($"Failed to mark reservation as collected. Cannot change status from {reservation.Status} to collected.");
+    }
+
+    reservation.Status = "collected";
+
+    var tool = await db.Tools.FindAsync(reservation.ToolId);
+    if (tool != null)
+    {
+        tool.IsTakenOut = true;
+    }
+
+    await db.SaveChangesAsync();
+
+    return Results.Ok("successfully set reservation to collected");
+});
+
+// --- Set reservation as "returned" when it is "collected" or "overdue"
+app.MapPatch("/api/reservation/{id}/return", async (int id, SupabaseDbContext db) =>
+{
+    var reservation = await db.Reservations.FindAsync(id);
+    if (reservation is null) return Results.NotFound();
+
+    if (reservation.Status != "collected" && reservation.Status != "overdue")
+    {
+        return Results.Problem($"Failed to mark reservation as returned. Cannot change status from {reservation.Status} to returned.");
+    }
+
+    reservation.Status = "returned";
+
+    var tool = await db.Tools.FindAsync(reservation.ToolId);
+    if (tool != null)
+    {
+        tool.IsTakenOut = false;
+    }
+
+    await db.SaveChangesAsync();
+
+    return Results.Ok("successfully set reservation to returned");
+});
+
+
+// ### management APIs ###
+
+
 
 app.MapGet("api/management/metrics", async (SupabaseDbContext db) =>
 {

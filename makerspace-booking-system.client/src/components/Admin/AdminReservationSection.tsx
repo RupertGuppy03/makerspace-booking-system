@@ -39,6 +39,24 @@ function AdminReservationSection() {
         endDate: endDate || undefined,
     });
 
+    async function handleCollectReservation(reservationId: number) {
+        const response = await fetch(`/api/reservation/${reservationId}/collect`, {
+            method: "Patch",
+        });
+
+        const data = await response.json()
+        alert(`reservation collected: ${data}`)
+    }
+
+    async function handleReturnReservation(reservationId: number) {
+        const response = await fetch(`/api/reservation/${reservationId}/return`, {
+            method: "Patch",
+        });
+
+        const data = await response.json()
+        alert(`reservation returned: ${data}`)
+    }
+
     return (
         <section>
             <p className="admin-lede">
@@ -105,6 +123,7 @@ function AdminReservationSection() {
                             <th>Tool</th>
                             <th>User id</th>
                             <th>Status</th>
+                            <th></th>
                             <th>Start date</th>
                             <th>End date</th>
                             <th className="admin-num">Amount charged</th>
@@ -139,6 +158,15 @@ function AdminReservationSection() {
                                         <span className={`admin-pill admin-pill--${status.colour}`}>
                                             {status.label}
                                         </span>
+                                    </td>
+                                    <td className="user-num">
+
+                                        {r.status == "ready" && 
+                                            <button type="button" className="user-btn user-btn--primary" onClick={() => handleCollectReservation(r.id)}>Mark as Collected</button>
+                                        }
+                                        {(r.status == "collected" || r.status == "overdue") &&
+                                            <button type="button" className="user-btn user-btn--primary" onClick={() => handleReturnReservation(r.id)}>Mark as Returned</button>
+                                        }
                                     </td>
                                     <td>{new Date(r.startDay).toDateString()}</td>
                                     <td>{new Date(r.endDay).toDateString()}</td>
