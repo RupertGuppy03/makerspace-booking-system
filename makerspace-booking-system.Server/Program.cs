@@ -17,6 +17,10 @@ builder.Services.AddDbContext<SupabaseDbContext>(opt =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add the service (job) and background service (runner) for updating reservation status
+builder.Services.AddScoped<IReservationStatusService, ReservationStatusService>();
+builder.Services.AddHostedService<ReservationStatusBackgroundService>();
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
@@ -27,6 +31,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
 }
 
 app.UseHttpsRedirection();

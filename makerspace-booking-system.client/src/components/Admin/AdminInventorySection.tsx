@@ -86,7 +86,7 @@ function AdminInventorySection() {
                                             <span className="admin-pill admin-pill--green">Available</span>
                                         )}
                                         {isOverdue(tool) && (
-                                            <span className="admin-pill admin-pill--amber">Overdue</span>
+                                            <span className="admin-pill admin-pill--amber">Needs Maintenance</span>
                                         )}
                                     </span>
                                 </td>

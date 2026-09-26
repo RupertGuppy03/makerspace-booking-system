@@ -7,11 +7,12 @@ import type { Reservation } from "../types/reservation";
  */
 const STATUS_STYLES: Record<string, { label: string; colour: string }> = {
     booked: { label: 'Booked', colour: 'blue' },
-    ready: { label: 'Ready', colour: 'blue' },
+    ready: { label: 'Ready for Pickup', colour: 'green' },
     collected: { label: 'Collected', colour: 'amber' },
-    returned: { label: 'Returned', colour: 'green' },
+    returned: { label: 'Returned', colour: 'grey' },
     cancelled: { label: 'Cancelled', colour: 'grey' },
-    no_show: { label: 'No show', colour: 'rose' },
+    no_show: { label: 'No Show', colour: 'grey' },
+    overdue: { label: 'Overdue', colour: 'rose' }
 };
 
 interface ToolTableProps {

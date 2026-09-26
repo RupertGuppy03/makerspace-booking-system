@@ -119,9 +119,9 @@ export default function Reservations() {
         today.setHours(0, 0, 0, 0); //create date without a time-of-day so >= and > operators work correctly on the date 
 
         const filtered = reservations.filter(r => {
-            if (activeTab === 'upcoming') return r.startDay > today && r.status != 'cancelled'; // 'upcoming' if it hasnt started yet
-            if (activeTab === 'current') return r.startDay <= today && r.endDay >= today && r.status != 'cancelled'; // 'current' if it has started but not past the end day yet
-            if (activeTab === 'past') return r.endDay < today || r.status == 'cancelled'; // 'past' if the end day has passed
+            if (activeTab === 'upcoming') return r.status == "booked"; // 'upcoming' if it hasnt started yet
+            if (activeTab === 'current') return r.status == "ready" || r.status == "collected" || r.status == "overdue"; // 'current' if it is ready to be interacted with
+            if (activeTab === 'past') return r.status == "cancelled" || r.status == "no_show" || r.status == "returned"; // 'past' if it is no longer interactable
             return true; // activeTab === 'all'
         })
         setFilteredReservations(filtered)
