@@ -7,6 +7,8 @@ using Supabase.Gotrue;
 using System.Text.Json;
 using makerspace_booking_system.Server.Services; // added this to get access to the DashboardMetrics class
 
+// testing the CI workflow of the backend
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<SupabaseDbContext>(opt => 
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Supabase"))
