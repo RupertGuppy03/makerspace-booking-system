@@ -23,6 +23,8 @@ import Login from "./pages/Login/Login.tsx";
 import { AuthProvider } from "./lib/authProvider.tsx"
 import AccountBanner from './components/accountBanner';
 
+// testing the CI workflow of the frontend by making this comment change to the frontend code, which should trigger a build of the frontend
+
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
