@@ -7,7 +7,7 @@ using Supabase.Gotrue;
 using System.Text.Json;
 using makerspace_booking_system.Server.Services; // added this to get access to the DashboardMetrics class
 
-// testing the CI workflow of the backend
+// testing the CI workflow of the frontend by making this comment change to the backend code, which should trigger a build of the frontend as well
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<SupabaseDbContext>(opt => 
