@@ -31,6 +31,9 @@ namespace makerspace_booking_system.tests
             _factory = new WebApplicationFactory<Program>();
             _client = _factory.CreateClient();
 
+
+            //_dbContext is used to create or read from the database during Arrange.
+            //During Assert, the WithNewDbContextAsync should be used so it doesn't use local cached data from the exisitng dbContext
             var scope = _factory.Services.CreateScope();
             _dbContext = scope.ServiceProvider.GetRequiredService<SupabaseDbContext>();
 
@@ -100,7 +103,9 @@ namespace makerspace_booking_system.tests
             Assert.IsTrue(res.IsSuccessStatusCode, $"Response was not successful: {json}");
 
             // Get reservation which was just added to database
-            var createdReservation = await _dbContext.Reservations.FirstOrDefaultAsync(r => r.ToolId == testTool.Id && r.StartDay == startDay); 
+            var createdReservation = await WithNewDbContextAsync(async db =>
+                await db.Reservations.FirstOrDefaultAsync(r => r.ToolId == testTool.Id && r.StartDay == startDay)
+            ); 
             // Check reservation is present and correct
             Assert.IsNotNull(createdReservation, "Reservation was not found in the database");
         }
@@ -135,7 +140,11 @@ namespace makerspace_booking_system.tests
 
             //Assert - Check response failure
             //Check the reservation which was attempted to be made does not exist
-            var newReservation = await _dbContext.Reservations.FirstOrDefaultAsync(r => r.ToolId == testTool.Id && r.StartDay == existingEndDay.AddDays(startDayOffset) && r.EndDay == existingEndDay.AddDays(endDayOffset));
+            var newReservation = await WithNewDbContextAsync(async db => 
+            await db.Reservations.FirstOrDefaultAsync(
+                r => r.ToolId == testTool.Id && r.StartDay == existingEndDay.AddDays(startDayOffset) && r.EndDay == existingEndDay.AddDays(endDayOffset)
+                )
+            );
 
             if (shouldFail)
             {
@@ -288,11 +297,234 @@ namespace makerspace_booking_system.tests
 
 
         [TestMethod]
-        public async Task DoNothing()
+        public async Task CreateReservation_ToolNeedsMaintenance_FailsCreation()
         {
-            var n = 2;
-            Assert.AreEqual(2, n);
+            //Arrange - Create a tool that needs maintenance
+            var toolNeedsMaintenance = new Tool
+            {
+                Name = "test_tool_needs_maintenance",
+                CreatedAt = DateTime.UtcNow,
+                IsTakenOut = false,
+                MaintenancePeriod = 30,
+                LastMaintained = DateTime.UtcNow.AddDays(-31), // Overdue for maintenance
+                DailyRate = 25.00m
+            };
+
+            //add tool to database
+            _dbContext.Add(toolNeedsMaintenance);
+            _dbContext.SaveChanges();
+
+            //Create reservation to attempt to add
+            var startDay = DateTime.UtcNow.Date.AddDays(8);
+            var endDay = DateTime.UtcNow.Date.AddDays(10);
+
+            var reservation = new Reservation
+            {
+                StartDay = startDay,
+                EndDay = endDay,
+                AmountCharged = toolNeedsMaintenance.DailyRate * 3,
+                Status = "booked",
+                ToolId = toolNeedsMaintenance.Id,
+                UserId = Guid.Parse(TestAccountId)
+            };
+
+            //Act - Try to create reservation for tool that needs maintenance
+            var res = await _client.PostAsJsonAsync("/api/reservation", reservation);
+            var json = await res.Content.ReadAsStringAsync();
+
+            //Assert - Check response failed for the correct reason
+            Assert.IsFalse(res.IsSuccessStatusCode, $"Response did not fail: {json}");
+            Assert.Contains("maintenance", json, "Error message should mention the 5 day limit");
+
+            //Check reservation was not created
+            var createdReservation = await WithNewDbContextAsync(async db =>
+                await db.Reservations.FirstOrDefaultAsync(r => r.ToolId == toolNeedsMaintenance.Id && r.StartDay == startDay)
+            );
+            Assert.IsNull(createdReservation);
+
         }
+
+        [TestMethod]
+        [DataRow(8, 12, false)]
+        [DataRow(8, 13, true)]
+        [DataRow(8, 14, true)]
+        //Creation should fail if the reservation covers a total of more than 5 days, i.e. EndDay is more than 4 days after StartDay  
+        public async Task CreateReservation_GreaterThan5Days_FailsCreation(int startDays, int endDays, bool shouldFail)
+        {
+            //Arrange - Get the test tool from Init()
+            var testTool = await _dbContext.Tools.FirstAsync(t => t.Name == "test_tool_1");
+
+            var startDay = DateTime.UtcNow.Date.AddDays(startDays);
+            var endDay = DateTime.UtcNow.Date.AddDays(endDays); 
+
+            Reservation reservation = new()
+            {
+                StartDay = startDay,
+                EndDay = endDay,
+                AmountCharged = testTool.DailyRate * 6,
+                Status = "booked",
+                ToolId = testTool.Id,
+                UserId = Guid.Parse(TestAccountId)
+            };
+
+            //Act - Try to create reservation with duration greater than 5 days
+            var res = await _client.PostAsJsonAsync("/api/reservation", reservation);
+            var json = await res.Content.ReadAsStringAsync();
+
+            //Assert - Check response failed for the correct reason
+            //Check whether or not reservation was created
+            var createdReservation = await WithNewDbContextAsync(async db =>
+                await db.Reservations.FirstOrDefaultAsync(r => r.ToolId == testTool.Id && r.StartDay == startDay)
+            );
+
+            if (shouldFail)
+            {
+                Assert.IsFalse(res.IsSuccessStatusCode, $"Response should have failed but succeeded: {json}");
+                Assert.Contains("5 days", json, "Error message should mention the 5 day limit");
+                Assert.IsNull(createdReservation);
+            }
+            else
+            {
+                Assert.IsTrue(res.IsSuccessStatusCode, $"Response was not successful: {json}");
+                Assert.IsNotNull(createdReservation);
+            }
+        }
+
+        [TestMethod]
+        public async Task DeleteTool_HasActiveReservation_FailsDeletion()
+        {
+            //Arrange - Get the test tool from Init()
+            var testTool = await _dbContext.Tools.FirstAsync(t => t.Name == "test_tool_1");
+
+            //Act - Try to delete tool that has an active reservation
+            var res = await _client.DeleteAsync($"/api/tool/{testTool.Id}");
+            var json = await res.Content.ReadAsStringAsync();
+
+            //Assert - Check response failed for the correct reason
+            Assert.IsFalse(res.IsSuccessStatusCode, $"Response should have failed but succeeded: {json}");
+            Assert.Contains( "active or future reservations", json, "Error message should mention active or future reservations");
+            var toolStillExists = await WithNewDbContextAsync(async db => 
+                await db.Tools.FirstOrDefaultAsync(t => t.Id == testTool.Id)
+            );
+
+            //Check tool was not deleted
+            Assert.IsNotNull(toolStillExists);
+        }
+
+        [TestMethod]
+        public async Task ChangeReservationStatus_ReadyToCollected_Succeeds()
+        {
+            //Arrange - Create reservation with 'ready' status
+            var testTool = await _dbContext.Tools.FirstAsync(t => t.Name == "test_tool_1");
+
+            var reservation = new Reservation
+            {
+                Tool = testTool,
+                UserId = Guid.Parse(TestAccountId),
+                StartDay = DateTime.UtcNow.Date.AddDays(15),
+                EndDay = DateTime.UtcNow.Date.AddDays(17),
+                Status = "ready",
+                AmountCharged = testTool.DailyRate * 3
+            };
+
+            _dbContext.Add(reservation);
+            _dbContext.SaveChanges();
+
+            var reservationId = reservation.Id;
+
+            //Act - Change reservation status from ready to collected
+            var res = await _client.PatchAsync($"/api/reservation/{reservationId}/collect", null);
+            var json = await res.Content.ReadAsStringAsync();
+
+            //Assert - Check response success
+            Assert.IsTrue(res.IsSuccessStatusCode, $"Response was not successful: {json}");
+
+            //Check reservation status was updated
+            var updatedReservation = await WithNewDbContextAsync(async db => 
+                await db.Reservations.FirstOrDefaultAsync(r => r.Id == reservationId)
+            );
+            Assert.IsNotNull(updatedReservation, "Reservation should still exist");
+            Assert.AreEqual("collected", updatedReservation.Status, "Reservation status should be 'collected'");
+
+        }
+
+        [TestMethod]
+        public async Task ChangeReservationStatus_CollectedToReturned_Succeeds()
+        {
+            //Arrange - Create a reservation with 'collected' status
+            var testTool = await _dbContext.Tools.FirstAsync(t => t.Name == "test_tool_1");
+
+            var reservation = new Reservation
+            {
+                Tool = testTool,
+                UserId = Guid.Parse(TestAccountId),
+                StartDay = DateTime.UtcNow.Date.AddDays(20),
+                EndDay = DateTime.UtcNow.Date.AddDays(22),
+                Status = "collected",
+                AmountCharged = testTool.DailyRate * 2
+            };
+
+            _dbContext.Add(reservation);
+            _dbContext.SaveChanges();
+
+            var reservationId = reservation.Id;
+
+            //Act - Change reservation status from collected to returned
+            var res = await _client.PatchAsync($"/api/reservation/{reservationId}/return", null);
+            var json = await res.Content.ReadAsStringAsync();
+
+            //Assert - Check response success
+            Assert.IsTrue(res.IsSuccessStatusCode, $"Response was not successful: {json}");
+
+            // Verify reservation status was updated
+            var updatedReservation = await WithNewDbContextAsync(async db =>
+                await db.Reservations.FirstOrDefaultAsync(r => r.Id == reservationId)
+            );
+            Assert.IsNotNull(updatedReservation, "Reservation should still exist");
+            Assert.AreEqual("returned", updatedReservation.Status, "Reservation status should be 'returned'");
+
+        }
+
+        [TestMethod]
+        public async Task SimultaneousReservationCreation_SameDateAndTool_ExactlyOneSucceeds()
+        {
+            //Arrange - Create a reservation to be sent to database
+            var testTool = await _dbContext.Tools.FirstAsync(t => t.Name == "test_tool_1");
+
+            var startDay = DateTime.UtcNow.Date.AddDays(2);
+
+            var reservation = new Reservation
+            {
+                UserId = Guid.Parse(TestAccountId),
+                StartDay = startDay,
+                EndDay = DateTime.UtcNow.Date.AddDays(4),
+                Status = "booked",
+                ToolId = testTool.Id,
+                AmountCharged = testTool.DailyRate * 3
+            };
+
+            //Act - Create reservation in database two times asynchronously
+            var resTask1 = _client.PostAsJsonAsync("/api/reservation", reservation);
+            var resTask2 = _client.PostAsJsonAsync("/api/reservation", reservation);
+
+            var res1 = await resTask1;
+            var res2 = await resTask2;
+
+            var json1 = await res1.Content.ReadAsStringAsync();
+            var json2 = await res2.Content.ReadAsStringAsync();
+
+            //Assert - Exactly one of the requests was successful.
+            Assert.IsTrue(res1.IsSuccessStatusCode ^ res2.IsSuccessStatusCode, $"Neither or both requests were successful: {json1}, {json2}");
+
+            //Check exactly one reservtion exists
+            var createdReservations = await WithNewDbContextAsync(async db =>
+                await db.Reservations.Where(r => r.ToolId == testTool.Id && r.StartDay == startDay).ToListAsync()
+            );
+            Assert.HasCount(1, createdReservations, $"{createdReservations.Count} reservations were made instead of 1.");
+
+        }
+
+
 
         //Cleanup after each test
         [TestCleanup]
@@ -314,7 +546,7 @@ namespace makerspace_booking_system.tests
 
         //Helper function to reduce repeated code when reading the database with dbcontext
         //dbcontext instances beyond the one made during test initialization is necessary so that getting a tool from the db a 2nd time actually reads from the db instead of using the locally cached object
-        //Only use for reading the database, not making changes
+        //Always use this helper function during Assert (read only). The dbcontext made during init can be used during Arrange. (only API calls are tested during Act)
         private async Task<T> WithNewDbContextAsync<T>(Func<SupabaseDbContext, Task<T>> action)
         {
             using var scope = _factory.Services.CreateScope();

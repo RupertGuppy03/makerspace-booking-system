@@ -90,10 +90,6 @@ app.MapDelete("/api/tool/{id}", async (int id, SupabaseDbContext db) =>
     var tool = await db.Tools.FindAsync(id);
     if (tool is null) return Results.NotFound();
 
-    if (tool.IsTakenOut) {//prevents deletion of a tool that is currently taken out
-        return Results.Problem("Cannot delete tool that is currently taken out.");
-    }
-
     var hasActiveOrFutureReservations = await db.Reservations.AnyAsync(r => 
         r.ToolId == id && 
         r.Status != "cancelled" && 
@@ -110,7 +106,7 @@ app.MapDelete("/api/tool/{id}", async (int id, SupabaseDbContext db) =>
 });
 
 
-//TODO Apparently it would be better to use a DTO to pass information through the JSON body than to use [FromBody], so multiple variables could be passed (e.g. a ToolDto with all attributes nullable)
+//It would be better to use a DTO to pass information through the JSON body than to use [FromBody], so multiple variables could be passed (e.g. a ToolDto with all attributes nullable)
 //But this works for now since its just one variable
 // --- update LastMaintained on a tool 
 app.MapPatch("/api/tool/{id}/maintain", async (int id, [FromBody] DateTime date, SupabaseDbContext db) =>
@@ -160,9 +156,9 @@ app.MapPost("/api/reservation", async (Reservation reservation, SupabaseDbContex
     }
 
     //validate tool doesn't need maintenance
-    if (reservedTool.LastMaintained.AddDays(reservedTool.MaintenancePeriod) < DateTime.Now)
+    if (ToolNeedsMaintenance(reservedTool))
     {
-        //return Results.Problem("Failed to create reservation. Reservations cannot currently be made for this tool as it is in need of maintenance.");
+        return Results.Problem("Failed to create reservation. Reservations cannot currently be made for this tool as it is in need of maintenance.");
     }
 
     //start and end date validations
@@ -345,7 +341,8 @@ app.MapFallbackToFile("/index.html");
 app.Run();
 
 
-//This is to allow the testing to access this file
+//These are helper functions used in the API.
+//They are put in the Program class so they can be accessed by the testing project
 public partial class Program 
 { 
     public static bool DateRangesOverlap(DateTime startDay1, DateTime endDay1, DateTime startDay2, DateTime endDay2) {
@@ -356,6 +353,11 @@ public partial class Program
             return true;
         }
         return false;
+    }
+
+    public static bool ToolNeedsMaintenance(Tool tool)
+    {
+        return tool.LastMaintained.AddDays(tool.MaintenancePeriod) < DateTime.Now;
     }
 }
 
