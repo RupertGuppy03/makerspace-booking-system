@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using makerspace_booking_system.Server;
+using makerspace_booking_system.Server.Models;
 
 
 namespace makerspace_booking_system.tests
@@ -30,6 +31,26 @@ namespace makerspace_booking_system.tests
 
             //Assert
             Assert.AreEqual(overlaps, shouldOverlap);
+        }
+
+        [TestMethod]
+        [DataRow(30, 29, false)]
+        [DataRow(30, 30, true)]
+        [DataRow(30, 31, true)]
+        public async Task ToolNeedsMaintenance_BoundaryCases_ReturnsCorrectly(int maintenancePeriod, int daysAgoMaintained, bool shouldNeedMaintenance)
+        {
+            //Arrange
+            var tool = new Tool
+            {
+                MaintenancePeriod = maintenancePeriod,
+                LastMaintained = DateTime.UtcNow.Date.AddDays(-daysAgoMaintained)
+            };
+
+            //Act
+            bool needsMaintenance = Program.ToolNeedsMaintenance(tool);
+
+            //Assert
+            Assert.AreEqual(needsMaintenance, shouldNeedMaintenance);
         }
 
 
