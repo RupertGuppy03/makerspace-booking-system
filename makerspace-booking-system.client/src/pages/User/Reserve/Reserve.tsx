@@ -150,7 +150,7 @@ export default function Reserve() {
             userId: uuid,
             toolId: toolId,
             status: "booked",
-            amountCharged: 12
+            amountCharged: tool?.dailyRate || 12
         };
 
         const response = await fetch("/api/reservation", {
