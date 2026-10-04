@@ -359,7 +359,9 @@ public partial class Program
 
     public static bool ToolNeedsMaintenance(Tool tool)
     {
-        return tool.LastMaintained.AddDays(tool.MaintenancePeriod) < DateTime.Now;
+        // Compare in UTC because LastMaintained is stored in UTC. Using local time
+        // here made tools look overdue a day early in time zones ahead of UTC (e.g. NZ).
+        return tool.LastMaintained.AddDays(tool.MaintenancePeriod) < DateTime.UtcNow;
     }
 }
 
