@@ -20,16 +20,19 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+      # The test project references the Server project, so restoring and
+      # building the tests also restores and builds the Server.
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: makerspace-booking-system.Server
+      working-directory: makerspace-booking-system.tests
     - name: Build
       run: dotnet build --no-restore
-      working-directory: makerspace-booking-system.Server
-      # need to fill in tests later, so commenting out the test step for now
-    # - name: Test
-    #   run: dotnet test --no-build --verbosity normal
-    #   working-directory: makerspace-booking-system.Server
+      working-directory: makerspace-booking-system.tests
+      # Runs the unit and integration tests. Any failing test fails the job,
+      # which blocks the merge through the ruleset.
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      working-directory: makerspace-booking-system.tests
   frontend:
 
     runs-on: ubuntu-latest
