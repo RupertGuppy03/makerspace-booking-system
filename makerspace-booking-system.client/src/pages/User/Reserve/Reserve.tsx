@@ -20,16 +20,17 @@ export default function Reserve() {
     const [dateRange, setDateRange] = useState<DateRange | null>();
     const { user, role } = useAuth();
 
-    //Only allow access if logged in with user role or higher (deny if not logged in)
-    if (role != 'user' && role != 'admin' && role != 'manager') {
-        return <AccessDenied />;
-    }
-
     useEffect(() => {
         populateToolName();
         getExistingReservations();
         setLoading(false);
     }, [])
+
+    //Only allow access if logged in with user role or higher (deny if not logged in)
+    //This sits below the hooks so React sees the same hooks on every render.
+    if (role != 'user' && role != 'admin' && role != 'manager') {
+        return <AccessDenied />;
+    }
 
     const form =
         <form onSubmit={handleSubmitReservation}>

@@ -48,11 +48,6 @@ const SECTION_LABELS: Record<string, string> = {
 function ManagementPage() {
     const { role } = useAuth()
 
-    //Only allow access if logged in with manager role
-    if (role != 'manager') {
-        return <AccessDenied />;
-    }
-    
     /*
      * Fetched once, here in the frame, rather than in each section. Whichever
      * section is on screen receives it through the Outlet below, so switching
@@ -68,6 +63,12 @@ function ManagementPage() {
     const location = useLocation();
     const lastSegment = location.pathname.split('/').filter(Boolean).pop() ?? 'revenue';
     const sectionLabel = SECTION_LABELS[lastSegment] ?? 'Revenue';
+
+    //Only allow access if logged in with manager role.
+    //This sits below the hooks so React sees the same hooks on every render.
+    if (role != 'manager') {
+        return <AccessDenied />;
+    }
   
 
     return (

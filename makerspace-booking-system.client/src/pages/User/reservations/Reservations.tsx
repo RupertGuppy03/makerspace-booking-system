@@ -23,12 +23,6 @@ export default function Reservations() {
     const { user, role } = useAuth();
 
 
-    //Only allow access if logged in with user role or higher (deny if not logged in)
-    if (role != 'user' && role != 'admin' && role != 'manager') {
-        return <AccessDenied />;
-    }
-    
-
     useEffect(() => {
         populateReservationData();
     }, [user]); //TODO depending on user here causes a 2nd api call. should JWT in api fetch instead
@@ -36,6 +30,12 @@ export default function Reservations() {
     useEffect(() => {
         filterReservations();
     }, [activeTab, reservations])
+
+    //Only allow access if logged in with user role or higher (deny if not logged in)
+    //This sits below the hooks so React sees the same hooks on every render.
+    if (role != 'user' && role != 'admin' && role != 'manager') {
+        return <AccessDenied />;
+    }
 
     const table =
         <div>
