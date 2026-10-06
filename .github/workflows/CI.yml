@@ -37,7 +37,7 @@ jobs:
       # adding a smoke test to ensure the backend starts and responds to requests
     - name: Smoke test - backend starts and responds
       run: |
-        dotnet run --no-build --project ../makerspace-bookingsystem.Server --urls http://localhost:5000 &
+        dotnet run --no-build --project ../makerspace-booking-system.Server --urls http://localhost:5000 &
         for i in $(seq 1 30); do
           if curl -sf http://localhost:5000/api/tools > /dev/null; then
             echo "Smoke test passed: backend is up and responding"
