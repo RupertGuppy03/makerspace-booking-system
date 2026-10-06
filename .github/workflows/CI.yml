@@ -34,6 +34,20 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
       working-directory: makerspace-booking-system.tests
+      # adding a smoke test to ensure the backend starts and responds to requests
+    - name: Smoke test - backend starts and responds
+      run: |
+        dotnet run --no-build --project ../makerspace-booking-system.Server --urls http://localhost:5000 &
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:5000/api/tools > /dev/null; then
+            echo "Smoke test passed: backend is up and responding"
+            exit 0
+          fi
+          sleep 1
+        done
+        echo "Smoke test failed: backend did not respond within 30 seconds"
+        exit 1
+      working-directory: makerspace-booking-system.tests
 
 # frontend job
   frontend:
